@@ -4,6 +4,12 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+// El propio schema.prisma resuelve `env("DATABASE_URL")` leyendo
+// process.env directamente (independiente de datasource.url de abajo),
+// así que sin esto la validación del schema revienta el build apenas
+// falta la variable, aunque `generate` no necesite una conexión real.
+process.env.DATABASE_URL ??= "file:./prisma/dev.db";
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -11,8 +17,6 @@ export default defineConfig({
   },
   engine: "classic",
   datasource: {
-    // `prisma generate` no necesita una conexión real: no usar env() acá,
-    // que revienta el build si DATABASE_URL todavía no está seteada.
-    url: process.env.DATABASE_URL ?? "file:./prisma/dev.db",
+    url: process.env.DATABASE_URL,
   },
 });
