@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Producto {
+  id          String    @id @default(cuid())
+  temporada   Temporada
+  genero      Genero
+  nombre      String
+  talle       String
+  costoActual Int?
+  precioVenta Int       @default(0)
+  stockMinimo Int?
+  archivado   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  stock            Stock?
+  movimientos      MovimientoStock[]
+  pedidos          Pedido[]
+  historialPrecios HistorialPrecios[]
+
+  @@unique([temporada, genero, nombre, talle])
+}
+
+model Stock {
+  id           String   @id @default(cuid())
+  productoId   String   @unique
+  stockInicial Int      @default(0)
+  alertaMinimo Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  producto Producto @relation(fields: [productoId], references: [id])
+}
+
+// stockActual se calcula: stockInicial + sum(INGRESO) - sum(EGRESO) de MovimientoStock con stockProcesado=true
+// mas egresos de Pedido con stockDescontado=true
+
+model MovimientoStock {
+  id                  String         @id @default(cuid())
+  fecha               DateTime
+  periodo             String
+  productoId          String
+  temporada           Temporada
+  genero              Genero
+  productoNombre      String
+  talle               String
+  tipo                TipoMovimiento
+  cantidad            Int
+  motivo              String
+  notas               String?
+  compraId            String?
+  costoUnitarioCompra Int?
+  totalLineaCompra    Int?
+  subtotalLinea       Int?
+  envioTotalCompra    Int?
+  costoEnvioUnitario  Int?
+  costoUnitarioReal   Int?
+  stockProcesado      Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+
+  producto Producto @relation(fields: [productoId], references: [id])
+}
+
+model Pedido {
+  id             String       @id @default(cuid())
+  fecha          DateTime
+  periodo        String
+  cliente        String
+  productoId     String
+  temporada      Temporada
+  genero         Genero
+  productoNombre String
+  talle          String
+  cantidad       Int
+  costoUnitario  Int
+  costoTotal     Int
+  metodoPago     MetodoPago
+  precioUnitario Int
+  precioTotal    Int
+  ganancia       Int
+  sena           Int          @default(0)
+  saldoRestante  Int
+  estadoPedido   EstadoPedido @default(POR_PEDIR)
+  estadoPago     EstadoPago   @default(PENDIENTE)
+  stockDescontado Boolean     @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  producto Producto @relation(fields: [productoId], references: [id])
+}
+
+model HistorialPrecios {
+  id             String    @id @default(cuid())
+  fecha          DateTime  @default(now())
+  productoId     String
+  temporada      Temporada
+  genero         Genero
+  productoNombre String
+  talle          String
+  costoAnterior  Int
+  costoNuevo     Int
+  precioAnterior Int
+  precioNuevo    Int
+  motivo         String
+
+  producto Producto @relation(fields: [productoId], references: [id])
+}
+
+enum Temporada {
+  VERANO
+  INVIERNO
+}
+
+enum Genero {
+  MASCULINO
+  FEMENINO
+}
+
+enum TipoMovimiento {
+  INGRESO
+  EGRESO
+}
+
+enum MetodoPago {
+  EFECTIVO
+  TRANSFERENCIA
+}
+
+enum EstadoPedido {
+  POR_PEDIR
+  ENCARGADO
+  ENTREGADO
+}
+
+enum EstadoPago {
+  PENDIENTE
+  SENA
+  PAGO
+}
