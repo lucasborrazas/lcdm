@@ -17,4 +17,6 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 // WAL permite lecturas concurrentes mientras hay una escritura en curso.
 // Es una propiedad del archivo .db, pero conviene reafirmarla en cada arranque
 // por si el volumen se recrea desde cero.
-prisma.$queryRawUnsafe("PRAGMA journal_mode=WAL;").catch(() => {});
+if (process.env.DATABASE_URL) {
+  prisma.$queryRawUnsafe("PRAGMA journal_mode=WAL;").catch(() => {});
+}
