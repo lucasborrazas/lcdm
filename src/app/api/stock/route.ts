@@ -36,6 +36,7 @@ export async function GET() {
       genero: p.genero,
       nombre: p.nombre,
       talle: p.talle,
+      archivado: p.archivado,
       stockInicial,
       ingresos,
       egresos: egresosMovimientos + egresosPedidos,

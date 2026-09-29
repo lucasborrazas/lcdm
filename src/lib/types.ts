@@ -52,6 +52,7 @@ export type StockResumen = {
   genero: string;
   nombre: string;
   talle: string;
+  archivado: boolean;
   stockInicial: number;
   ingresos: number;
   egresos: number;
