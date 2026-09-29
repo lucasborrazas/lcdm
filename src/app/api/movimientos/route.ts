@@ -25,6 +25,10 @@ const movimientoSchema = z.object({
   envioTotalCompra: z.number().int().nonnegative().optional(),
 });
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export async function GET() {
   const movimientos = await prisma.movimientoStock.findMany({
     include: { producto: true },

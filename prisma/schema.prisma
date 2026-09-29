@@ -98,6 +98,33 @@ model Pedido {
   producto Producto @relation(fields: [productoId], references: [id])
 }
 
+// Foto del pedido justo antes de borrarlo (sin relacion a Producto/Pedido:
+// tiene que sobrevivir aunque el producto se borre despues).
+model PedidoEliminado {
+  id               String       @id @default(cuid())
+  pedidoIdOriginal String
+  fecha            DateTime
+  periodo          String
+  cliente          String
+  temporada        Temporada
+  genero           Genero
+  productoNombre   String
+  talle            String
+  cantidad         Int
+  costoUnitario    Int
+  costoTotal       Int
+  metodoPago       MetodoPago
+  precioUnitario   Int
+  precioTotal      Int
+  ganancia         Int
+  sena             Int
+  saldoRestante    Int
+  estadoPedido     EstadoPedido
+  estadoPago       EstadoPago
+  stockDescontado  Boolean
+  eliminadoEn      DateTime     @default(now())
+}
+
 model HistorialPrecios {
   id             String    @id @default(cuid())
   fecha          DateTime  @default(now())

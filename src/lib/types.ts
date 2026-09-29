@@ -1,4 +1,4 @@
-import type { Producto, Stock, Pedido, MovimientoStock, HistorialPrecios } from "@/generated/prisma/client";
+import type { Producto, Stock, Pedido, MovimientoStock, HistorialPrecios, PedidoEliminado } from "@/generated/prisma/client";
 
 export type ProductoConStock = Producto & {
   stock: Stock | null;
@@ -17,6 +17,8 @@ export type MovimientoConProducto = MovimientoStock & {
 export type HistorialConProducto = HistorialPrecios & {
   producto: Producto;
 };
+
+export type { PedidoEliminado };
 
 export type DashboardMetricas = {
   totalVendido: number;

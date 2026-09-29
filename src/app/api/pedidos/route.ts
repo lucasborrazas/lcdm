@@ -17,10 +17,15 @@ const pedidoSchema = z.object({
   productoId: z.string(),
   cantidad: z.number().int().positive(),
   metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]),
+  precioUnitario: z.number().int().nonnegative().optional(),
   sena: z.number().int().nonnegative().default(0),
   estadoPedido: z.enum(["POR_PEDIR", "ENCARGADO", "ENTREGADO"]).default("POR_PEDIR"),
   estadoPago: z.enum(["PENDIENTE", "SENA", "PAGO"]).default("PENDIENTE"),
 });
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -60,7 +65,8 @@ export async function POST(req: NextRequest) {
 
   const fecha = new Date(data.fecha);
   const periodo = fechaAPeriodo(fecha);
-  const precioUnitario = calcularPrecioUnitario(producto.precioVenta, data.metodoPago);
+  const precioUnitario =
+    data.precioUnitario ?? calcularPrecioUnitario(producto.precioVenta, data.metodoPago);
   const costoUnitario = producto.costoActual ?? 0;
   const costoTotal = calcularCostoTotal(data.cantidad, costoUnitario);
   const precioTotal = calcularPrecioTotal(data.cantidad, precioUnitario);

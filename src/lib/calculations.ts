@@ -15,6 +15,13 @@ export function calcularPrecioUnitario(
     : precioVenta;
 }
 
+export function calcularPrecioConDescuento(
+  precioBase: number,
+  descuentoPct: number
+): number {
+  return Math.round(precioBase * (1 - descuentoPct / 100));
+}
+
 // ── Pedidos ───────────────────────────────────────────────────────────────────
 
 export function calcularCostoTotal(

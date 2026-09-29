@@ -16,9 +16,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Trash2 } from "lucide-react";
 import {
-  calcularPrecioUnitario, calcularCostoTotal, calcularPrecioTotal,
-  calcularGanancia, calcularSaldoRestante, formatearMoneda,
+  calcularPrecioUnitario, calcularPrecioConDescuento, calcularCostoTotal,
+  calcularPrecioTotal, calcularGanancia, calcularSaldoRestante, formatearMoneda,
 } from "@/lib/calculations";
 import type { PedidoConProducto } from "@/lib/types";
 
@@ -26,6 +27,8 @@ const schema = z.object({
   cliente: z.string().min(1),
   metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]),
   cantidad: z.string().min(1),
+  precioUnitario: z.string(),
+  descuentoPct: z.string(),
   sena: z.string(),
   estadoPedido: z.enum(["POR_PEDIR", "ENCARGADO", "ENTREGADO"]),
   estadoPago: z.enum(["PENDIENTE", "SENA", "PAGO"]),
@@ -50,6 +53,8 @@ export function PedidoEditDialog({
       cliente: "",
       metodoPago: "TRANSFERENCIA",
       cantidad: "1",
+      precioUnitario: "0",
+      descuentoPct: "0",
       sena: "0",
       estadoPedido: "POR_PEDIR",
       estadoPago: "PENDIENTE",
@@ -62,6 +67,8 @@ export function PedidoEditDialog({
         cliente: pedido.cliente,
         metodoPago: pedido.metodoPago,
         cantidad: pedido.cantidad.toString(),
+        precioUnitario: pedido.precioUnitario.toString(),
+        descuentoPct: "0",
         sena: pedido.sena.toString(),
         estadoPedido: pedido.estadoPedido,
         estadoPago: pedido.estadoPago,
@@ -71,9 +78,10 @@ export function PedidoEditDialog({
 
   const metodoPago = form.watch("metodoPago");
   const cantidad = parseInt(form.watch("cantidad") || "1") || 1;
+  const precioUnitario = parseInt(form.watch("precioUnitario") || "0") || 0;
   const sena = parseInt(form.watch("sena") || "0") || 0;
 
-  const precioUnitario = pedido
+  const precioBase = pedido
     ? calcularPrecioUnitario(pedido.producto.precioVenta, metodoPago as any)
     : 0;
   const costoUnitario = pedido?.producto.costoActual ?? 0;
@@ -91,11 +99,19 @@ export function PedidoEditDialog({
         cliente: values.cliente,
         metodoPago: values.metodoPago,
         cantidad: parseInt(values.cantidad),
+        precioUnitario: parseInt(values.precioUnitario || "0") || 0,
         sena: parseInt(values.sena || "0"),
         estadoPedido: values.estadoPedido,
         estadoPago: values.estadoPago,
       }),
     });
+    if (res.ok) onSuccess();
+  };
+
+  const onDelete = async () => {
+    if (!pedido) return;
+    if (!confirm(`¿Eliminar el pedido de ${pedido.cliente}? Esta acción no se puede deshacer.`)) return;
+    const res = await fetch(`/api/pedidos/${pedido.id}`, { method: "DELETE" });
     if (res.ok) onSuccess();
   };
 
@@ -172,6 +188,50 @@ export function PedidoEditDialog({
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
+                name="precioUnitario"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Precio unitario ($)</FormLabel>
+                    <FormControl><Input type="number" min="0" {...field} /></FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Calculado: {formatearMoneda(precioBase)}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="descuentoPct"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descuento (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.5"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          const pct = parseFloat(e.target.value) || 0;
+                          form.setValue(
+                            "precioUnitario",
+                            calcularPrecioConDescuento(precioBase, pct).toString()
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="estadoPedido"
                 render={({ field }) => (
                   <FormItem>
@@ -215,10 +275,6 @@ export function PedidoEditDialog({
             <Separator />
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
               <div>
-                <p className="text-xs text-muted-foreground">Precio unit.</p>
-                <p className="font-medium">{formatearMoneda(precioUnitario)}</p>
-              </div>
-              <div>
                 <p className="text-xs text-muted-foreground">Total</p>
                 <p className="font-semibold">{formatearMoneda(precioTotal)}</p>
               </div>
@@ -242,13 +298,19 @@ export function PedidoEditDialog({
               </p>
             )}
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
+            <div className="flex justify-between gap-2">
+              <Button type="button" variant="ghost" className="text-red-500 hover:text-red-600" onClick={onDelete}>
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Eliminar
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Guardando..." : "Guardar"}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? "Guardando..." : "Guardar"}
+                </Button>
+              </div>
             </div>
           </form>
         </Form>

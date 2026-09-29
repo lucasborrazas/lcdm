@@ -1,6 +1,7 @@
 import {
   calcularPrecioEfectivo,
   calcularPrecioUnitario,
+  calcularPrecioConDescuento,
   calcularCostoTotal,
   calcularPrecioTotal,
   calcularGanancia,
@@ -46,6 +47,23 @@ describe("calcularPrecioUnitario", () => {
 
   it("usa precio normal cuando el método de pago es TRANSFERENCIA", () => {
     expect(calcularPrecioUnitario(10000, "TRANSFERENCIA")).toBe(10000);
+  });
+});
+
+// ── calcularPrecioConDescuento ────────────────────────────────────────────────
+
+describe("calcularPrecioConDescuento", () => {
+  it("aplica el porcentaje de descuento sobre el precio base", () => {
+    expect(calcularPrecioConDescuento(10000, 10)).toBe(9000);
+  });
+
+  it("sin descuento devuelve el precio base", () => {
+    expect(calcularPrecioConDescuento(10000, 0)).toBe(10000);
+  });
+
+  it("redondea al entero más cercano", () => {
+    // 10000 * 0.925 = 9250
+    expect(calcularPrecioConDescuento(10000, 7.5)).toBe(9250);
   });
 });
 

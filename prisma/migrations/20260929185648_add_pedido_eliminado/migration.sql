@@ -1,0 +1,25 @@
+-- CreateTable
+CREATE TABLE "PedidoEliminado" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "pedidoIdOriginal" TEXT NOT NULL,
+    "fecha" DATETIME NOT NULL,
+    "periodo" TEXT NOT NULL,
+    "cliente" TEXT NOT NULL,
+    "temporada" TEXT NOT NULL,
+    "genero" TEXT NOT NULL,
+    "productoNombre" TEXT NOT NULL,
+    "talle" TEXT NOT NULL,
+    "cantidad" INTEGER NOT NULL,
+    "costoUnitario" INTEGER NOT NULL,
+    "costoTotal" INTEGER NOT NULL,
+    "metodoPago" TEXT NOT NULL,
+    "precioUnitario" INTEGER NOT NULL,
+    "precioTotal" INTEGER NOT NULL,
+    "ganancia" INTEGER NOT NULL,
+    "sena" INTEGER NOT NULL,
+    "saldoRestante" INTEGER NOT NULL,
+    "estadoPedido" TEXT NOT NULL,
+    "estadoPago" TEXT NOT NULL,
+    "stockDescontado" BOOLEAN NOT NULL,
+    "eliminadoEn" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

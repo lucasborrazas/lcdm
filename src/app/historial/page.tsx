@@ -8,10 +8,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { MonedaCell } from "@/components/shared/MonedaCell";
 import { formatearFecha } from "@/lib/calculations";
-import type { HistorialConProducto } from "@/lib/types";
+import type { HistorialConProducto, PedidoEliminado } from "@/lib/types";
 
 export default function HistorialPage() {
   const [historial, setHistorial] = useState<HistorialConProducto[]>([]);
+  const [pedidosEliminados, setPedidosEliminados] = useState<PedidoEliminado[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState("");
 
@@ -19,6 +20,9 @@ export default function HistorialPage() {
     fetch("/api/historial")
       .then((r) => r.json())
       .then((d) => { setHistorial(d); setLoading(false); });
+    fetch("/api/pedidos-eliminados")
+      .then((r) => r.json())
+      .then(setPedidosEliminados);
   }, []);
 
   const items = historial.filter((h) => {
@@ -30,6 +34,15 @@ export default function HistorialPage() {
     );
   });
 
+  const eliminados = pedidosEliminados.filter((p) => {
+    const q = filtro.toLowerCase();
+    return (
+      p.productoNombre.toLowerCase().includes(q) ||
+      p.cliente.toLowerCase().includes(q) ||
+      p.talle.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <>
       <PageHeader
@@ -38,7 +51,7 @@ export default function HistorialPage() {
       />
 
       <Input
-        placeholder="Filtrar por producto, motivo..."
+        placeholder="Filtrar por producto, cliente, motivo..."
         value={filtro}
         onChange={(e) => setFiltro(e.target.value)}
         className="max-w-sm mb-4"
@@ -90,6 +103,50 @@ export default function HistorialPage() {
                     <MonedaCell valor={h.precioNuevo} />
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{h.motivo}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <h2 className="text-base font-semibold mt-8 mb-3">Pedidos eliminados</h2>
+      <div className="rounded-md border overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Eliminado el</TableHead>
+              <TableHead>Fecha pedido</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Producto</TableHead>
+              <TableHead>Talle</TableHead>
+              <TableHead className="text-right">Cant.</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead>Estado pedido</TableHead>
+              <TableHead>Estado pago</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {eliminados.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  Sin pedidos eliminados
+                </TableCell>
+              </TableRow>
+            ) : (
+              eliminados.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell className="text-sm whitespace-nowrap">{formatearFecha(p.eliminadoEn)}</TableCell>
+                  <TableCell className="text-sm whitespace-nowrap text-muted-foreground">{formatearFecha(p.fecha)}</TableCell>
+                  <TableCell className="text-sm font-medium">{p.cliente}</TableCell>
+                  <TableCell className="text-sm">{p.productoNombre}</TableCell>
+                  <TableCell className="text-sm">{p.talle}</TableCell>
+                  <TableCell className="text-right text-sm">{p.cantidad}</TableCell>
+                  <TableCell className="text-right text-sm font-medium">
+                    <MonedaCell valor={p.precioTotal} />
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{p.estadoPedido}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{p.estadoPago}</TableCell>
                 </TableRow>
               ))
             )}

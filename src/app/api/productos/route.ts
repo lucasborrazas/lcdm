@@ -13,6 +13,10 @@ const productoSchema = z.object({
   stockMinimo: z.number().int().nonnegative().nullable().optional(),
 });
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export async function GET() {
   const productos = await prisma.producto.findMany({
     include: {

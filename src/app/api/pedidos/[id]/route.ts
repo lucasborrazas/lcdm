@@ -14,6 +14,7 @@ const updateSchema = z.object({
   cliente: z.string().min(1).optional(),
   metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]).optional(),
   cantidad: z.number().int().positive().optional(),
+  precioUnitario: z.number().int().nonnegative().optional(),
   sena: z.number().int().nonnegative().optional(),
   estadoPedido: z.enum(["POR_PEDIR", "ENCARGADO", "ENTREGADO"]).optional(),
   estadoPago: z.enum(["PENDIENTE", "SENA", "PAGO"]).optional(),
@@ -54,7 +55,8 @@ export async function PUT(
   const cantidad = data.cantidad ?? pedidoActual.cantidad;
   const sena = data.sena ?? pedidoActual.sena;
 
-  const precioUnitario = calcularPrecioUnitario(pedidoActual.producto.precioVenta, metodoPago);
+  const precioUnitario =
+    data.precioUnitario ?? calcularPrecioUnitario(pedidoActual.producto.precioVenta, metodoPago);
   const costoUnitario = pedidoActual.producto.costoActual ?? 0;
   const costoTotal = calcularCostoTotal(cantidad, costoUnitario);
   const precioTotal = calcularPrecioTotal(cantidad, precioUnitario);
@@ -95,6 +97,36 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await prisma.pedido.delete({ where: { id: params.id } });
+  const pedido = await prisma.pedido.findUnique({ where: { id: params.id } });
+  if (!pedido) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  await prisma.$transaction([
+    prisma.pedidoEliminado.create({
+      data: {
+        pedidoIdOriginal: pedido.id,
+        fecha: pedido.fecha,
+        periodo: pedido.periodo,
+        cliente: pedido.cliente,
+        temporada: pedido.temporada,
+        genero: pedido.genero,
+        productoNombre: pedido.productoNombre,
+        talle: pedido.talle,
+        cantidad: pedido.cantidad,
+        costoUnitario: pedido.costoUnitario,
+        costoTotal: pedido.costoTotal,
+        metodoPago: pedido.metodoPago,
+        precioUnitario: pedido.precioUnitario,
+        precioTotal: pedido.precioTotal,
+        ganancia: pedido.ganancia,
+        sena: pedido.sena,
+        saldoRestante: pedido.saldoRestante,
+        estadoPedido: pedido.estadoPedido,
+        estadoPago: pedido.estadoPago,
+        stockDescontado: pedido.stockDescontado,
+      },
+    }),
+    prisma.pedido.delete({ where: { id: params.id } }),
+  ]);
+
   return new NextResponse(null, { status: 204 });
 }
