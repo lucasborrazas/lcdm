@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       ...(temporada ? { temporada: temporada as any } : {}),
       ...(genero ? { genero: genero as any } : {}),
     },
-    include: { producto: true },
+    include: { producto: true, pedidoGrupo: true },
     orderBy: { fecha: "desc" },
   });
 

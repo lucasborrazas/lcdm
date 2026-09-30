@@ -90,6 +90,8 @@ export function PedidoEditDialog({
   const ganancia = calcularGanancia(precioTotal, costoTotal);
   const saldoRestante = calcularSaldoRestante(precioTotal, sena);
 
+  const enGrupo = !!pedido?.pedidoGrupoId;
+
   const onSubmit = async (values: FormValues) => {
     if (!pedido) return;
     const res = await fetch(`/api/pedidos/${pedido.id}`, {
@@ -100,9 +102,8 @@ export function PedidoEditDialog({
         metodoPago: values.metodoPago,
         cantidad: parseInt(values.cantidad),
         precioUnitario: parseInt(values.precioUnitario || "0") || 0,
-        sena: parseInt(values.sena || "0"),
         estadoPedido: values.estadoPedido,
-        estadoPago: values.estadoPago,
+        ...(enGrupo ? {} : { sena: parseInt(values.sena || "0"), estadoPago: values.estadoPago }),
       }),
     });
     if (res.ok) onSuccess();
@@ -126,6 +127,12 @@ export function PedidoEditDialog({
         <p className="text-sm text-muted-foreground -mt-2">
           {pedido.productoNombre} — Talle {pedido.talle}
         </p>
+        {enGrupo && (
+          <p className="text-xs text-muted-foreground bg-muted px-3 py-2 rounded-md -mt-2">
+            Este producto es parte de un pedido con varios productos. La seña y el estado de
+            pago se manejan desde la fila resumen del pedido en la tabla.
+          </p>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -173,17 +180,19 @@ export function PedidoEditDialog({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="sena"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Seña ($)</FormLabel>
-                  <FormControl><Input type="number" min="0" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!enGrupo && (
+              <FormField
+                control={form.control}
+                name="sena"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Seña ($)</FormLabel>
+                    <FormControl><Input type="number" min="0" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -229,7 +238,7 @@ export function PedidoEditDialog({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className={enGrupo ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"}>
               <FormField
                 control={form.control}
                 name="estadoPedido"
@@ -250,26 +259,28 @@ export function PedidoEditDialog({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="estadoPago"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado pago</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="PENDIENTE">Pendiente</SelectItem>
-                        <SelectItem value="SENA">Seña</SelectItem>
-                        <SelectItem value="PAGO">Pagado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!enGrupo && (
+                <FormField
+                  control={form.control}
+                  name="estadoPago"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado pago</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="PENDIENTE">Pendiente</SelectItem>
+                          <SelectItem value="SENA">Seña</SelectItem>
+                          <SelectItem value="PAGO">Pagado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <Separator />
@@ -284,12 +295,14 @@ export function PedidoEditDialog({
                   {formatearMoneda(ganancia)}
                 </p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Saldo restante</p>
-                <p className={saldoRestante > 0 ? "text-amber-600 font-medium" : "text-green-600 font-medium"}>
-                  {formatearMoneda(saldoRestante)}
-                </p>
-              </div>
+              {!enGrupo && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Saldo restante</p>
+                  <p className={saldoRestante > 0 ? "text-amber-600 font-medium" : "text-green-600 font-medium"}>
+                    {formatearMoneda(saldoRestante)}
+                  </p>
+                </div>
+              )}
             </div>
 
             {pedido.stockDescontado && (

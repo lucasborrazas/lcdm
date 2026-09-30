@@ -92,10 +92,33 @@ model Pedido {
   estadoPedido   EstadoPedido @default(POR_PEDIR)
   estadoPago     EstadoPago   @default(PENDIENTE)
   stockDescontado Boolean     @default(false)
+  pedidoGrupoId  String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  producto Producto @relation(fields: [productoId], references: [id])
+  producto    Producto     @relation(fields: [productoId], references: [id])
+  pedidoGrupo PedidoGrupo? @relation(fields: [pedidoGrupoId], references: [id])
+}
+
+// Agrupa varias lineas de Pedido cuando un mismo pedido tiene varios
+// productos. La sena, el saldo y el estado de pago son del pedido
+// completo (no tiene sentido repartirlos por linea); el estado de
+// entrega si queda por linea, porque puede entregarse un producto
+// antes que otro dentro del mismo pedido.
+model PedidoGrupo {
+  id            String     @id @default(cuid())
+  fecha         DateTime
+  periodo       String
+  cliente       String
+  metodoPago    MetodoPago
+  precioTotal   Int
+  sena          Int        @default(0)
+  saldoRestante Int
+  estadoPago    EstadoPago @default(PENDIENTE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  lineas Pedido[]
 }
 
 // Foto del pedido justo antes de borrarlo (sin relacion a Producto/Pedido:
