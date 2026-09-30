@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { PedidoForm } from "@/components/pedidos/PedidoForm";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { PedidoCreateDialog } from "@/components/pedidos/PedidoCreateDialog";
 import { PedidosTable } from "@/components/pedidos/PedidosTable";
 import type { PedidoConProducto } from "@/lib/types";
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<PedidoConProducto[]>([]);
+  const [crearOpen, setCrearOpen] = useState(false);
 
   const cargar = () => {
     fetch("/api/pedidos")
@@ -22,11 +25,21 @@ export default function PedidosPage() {
       <PageHeader
         title="Pedidos"
         description="Registrá y gestioná pedidos de clientes"
+        action={
+          <Button onClick={() => setCrearOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo pedido
+          </Button>
+        }
       />
-      <div className="space-y-6">
-        <PedidoForm onSuccess={cargar} />
-        <PedidosTable pedidos={pedidos} onUpdate={cargar} />
-      </div>
+
+      <PedidosTable pedidos={pedidos} onUpdate={cargar} />
+
+      <PedidoCreateDialog
+        open={crearOpen}
+        onOpenChange={setCrearOpen}
+        onSuccess={cargar}
+      />
     </>
   );
 }

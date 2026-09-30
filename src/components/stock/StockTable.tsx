@@ -4,12 +4,10 @@ import { useState, useEffect, useMemo } from "react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Pencil, ChevronDown, ChevronRight } from "lucide-react";
+import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { StockEditDialog } from "./StockEditDialog";
 import type { StockResumen } from "@/lib/types";
 
@@ -46,11 +44,11 @@ export function StockTable() {
   const [loading, setLoading] = useState(true);
   const [editando, setEditando] = useState<StockResumen | null>(null);
 
-  const [filtroEstado, setFiltroEstado] = useState("activos");
-  const [filtroTemporada, setFiltroTemporada] = useState("todas");
-  const [filtroGenero, setFiltroGenero] = useState("todos");
-  const [filtroNombre, setFiltroNombre] = useState("todos");
-  const [filtroTalle, setFiltroTalle] = useState("todos");
+  const [filtroEstado, setFiltroEstado] = useState<string[]>(["activos"]);
+  const [filtroTemporada, setFiltroTemporada] = useState<string[]>([]);
+  const [filtroGenero, setFiltroGenero] = useState<string[]>([]);
+  const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
+  const [filtroTalle, setFiltroTalle] = useState<string[]>([]);
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set());
 
   const cargar = () => {
@@ -72,14 +70,12 @@ export function StockTable() {
   );
 
   const items = stock.filter((s) => {
-    const matchEstado =
-      filtroEstado === "todos" ||
-      (filtroEstado === "activos" && !s.archivado) ||
-      (filtroEstado === "archivados" && s.archivado);
-    const matchTemporada = filtroTemporada === "todas" || s.temporada === filtroTemporada;
-    const matchGenero = filtroGenero === "todos" || s.genero === filtroGenero;
-    const matchNombre = filtroNombre === "todos" || s.nombre === filtroNombre;
-    const matchTalle = filtroTalle === "todos" || s.talle === filtroTalle;
+    const estadoS = s.archivado ? "archivados" : "activos";
+    const matchEstado = filtroEstado.length === 0 || filtroEstado.includes(estadoS);
+    const matchTemporada = filtroTemporada.length === 0 || filtroTemporada.includes(s.temporada);
+    const matchGenero = filtroGenero.length === 0 || filtroGenero.includes(s.genero);
+    const matchNombre = filtroNombre.length === 0 || filtroNombre.includes(s.nombre);
+    const matchTalle = filtroTalle.length === 0 || filtroTalle.includes(s.talle);
     return matchEstado && matchTemporada && matchGenero && matchNombre && matchTalle;
   });
 
@@ -139,59 +135,56 @@ export function StockTable() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3 mb-4">
-        <Select value={filtroEstado} onValueChange={setFiltroEstado}>
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder="Estado" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="activos">Activos</SelectItem>
-            <SelectItem value="archivados">Archivados</SelectItem>
-            <SelectItem value="todos">Todos</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filtroTemporada} onValueChange={setFiltroTemporada}>
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder="Temporada" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todas">Toda temporada</SelectItem>
-            <SelectItem value="VERANO">Verano</SelectItem>
-            <SelectItem value="INVIERNO">Invierno</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filtroGenero} onValueChange={setFiltroGenero}>
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder="Género" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todo género</SelectItem>
-            <SelectItem value="MASCULINO">Masculino</SelectItem>
-            <SelectItem value="FEMENINO">Femenino</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filtroNombre} onValueChange={setFiltroNombre}>
-          <SelectTrigger className="w-44">
-            <SelectValue placeholder="Producto" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todo producto</SelectItem>
-            {nombres.map((n) => (
-              <SelectItem key={n} value={n}>{n}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={filtroTalle} onValueChange={setFiltroTalle}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Talle" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todo talle</SelectItem>
-            {talles.map((t) => (
-              <SelectItem key={t} value={t}>{t}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-wrap items-end gap-3 mb-4">
+        <MultiSelectFilter
+          label="Estado"
+          placeholderTodos="Todos"
+          className="w-36"
+          options={[
+            { value: "activos", label: "Activos" },
+            { value: "archivados", label: "Archivados" },
+          ]}
+          selected={filtroEstado}
+          onChange={setFiltroEstado}
+        />
+        <MultiSelectFilter
+          label="Temporada"
+          placeholderTodos="Todas"
+          className="w-36"
+          options={[
+            { value: "VERANO", label: "Verano" },
+            { value: "INVIERNO", label: "Invierno" },
+          ]}
+          selected={filtroTemporada}
+          onChange={setFiltroTemporada}
+        />
+        <MultiSelectFilter
+          label="Género"
+          placeholderTodos="Todos"
+          className="w-36"
+          options={[
+            { value: "MASCULINO", label: "Masculino" },
+            { value: "FEMENINO", label: "Femenino" },
+          ]}
+          selected={filtroGenero}
+          onChange={setFiltroGenero}
+        />
+        <MultiSelectFilter
+          label="Producto"
+          placeholderTodos="Todos"
+          className="w-44"
+          options={nombres.map((n) => ({ value: n, label: n }))}
+          selected={filtroNombre}
+          onChange={setFiltroNombre}
+        />
+        <MultiSelectFilter
+          label="Talle"
+          placeholderTodos="Todos"
+          className="w-32"
+          options={talles.map((t) => ({ value: t, label: t }))}
+          selected={filtroTalle}
+          onChange={setFiltroTalle}
+        />
       </div>
 
       <div className="rounded-md border overflow-x-auto">

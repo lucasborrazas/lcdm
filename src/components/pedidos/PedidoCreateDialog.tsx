@@ -5,6 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
 import {
@@ -12,7 +15,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   calcularPrecioUnitario, calcularPrecioConDescuento, calcularCostoTotal,
@@ -35,14 +37,24 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function PedidoForm({ onSuccess }: { onSuccess: () => void }) {
+export function PedidoCreateDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onSuccess: () => void;
+}) {
   const [productos, setProductos] = useState<ProductoConStock[]>([]);
   const [selNombre, setSelNombre] = useState("");
   const [selGenero, setSelGenero] = useState("");
 
   useEffect(() => {
-    fetch("/api/productos").then((r) => r.json()).then(setProductos);
-  }, []);
+    if (open) {
+      fetch("/api/productos").then((r) => r.json()).then(setProductos);
+    }
+  }, [open]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -61,6 +73,15 @@ export function PedidoForm({ onSuccess }: { onSuccess: () => void }) {
       estadoPago: "PENDIENTE",
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({ fecha: today, cliente: "", productoId: "", cantidad: "1", metodoPago: "TRANSFERENCIA", precioUnitario: "0", descuentoPct: "0", sena: "0", estadoPedido: "POR_PEDIR", estadoPago: "PENDIENTE" });
+      setSelNombre("");
+      setSelGenero("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const productoId = form.watch("productoId");
   const metodoPago = form.watch("metodoPago");
@@ -114,19 +135,17 @@ export function PedidoForm({ onSuccess }: { onSuccess: () => void }) {
       }),
     });
     if (res.ok) {
-      form.reset({ fecha: today, cliente: "", productoId: "", cantidad: "1", metodoPago: "TRANSFERENCIA", precioUnitario: "0", descuentoPct: "0", sena: "0", estadoPedido: "POR_PEDIR", estadoPago: "PENDIENTE" });
-      setSelNombre("");
-      setSelGenero("");
       onSuccess();
+      onOpenChange(false);
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Nuevo pedido</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Nuevo pedido</DialogTitle>
+        </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -401,14 +420,17 @@ export function PedidoForm({ onSuccess }: { onSuccess: () => void }) {
               </>
             )}
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Guardando..." : "Registrar pedido"}
               </Button>
             </div>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -1,20 +1,71 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuRadioGroup, DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+import { Pencil, ChevronDown } from "lucide-react";
 import { MonedaCell } from "@/components/shared/MonedaCell";
+import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { BadgeEstadoPedido, BadgeEstadoPago } from "@/components/shared/BadgeEstado";
 import { formatearFecha } from "@/lib/calculations";
 import { PedidoEditDialog } from "./PedidoEditDialog";
 import type { PedidoConProducto } from "@/lib/types";
+
+const ESTADOS_PEDIDO = [
+  { value: "POR_PEDIR", label: "Por pedir" },
+  { value: "ENCARGADO", label: "Encargado" },
+  { value: "ENTREGADO", label: "Entregado" },
+] as const;
+
+const ESTADOS_PAGO = [
+  { value: "PENDIENTE", label: "Pendiente" },
+  { value: "SENA", label: "Seña" },
+  { value: "PAGO", label: "Pagado" },
+] as const;
+
+function EstadoDropdown({
+  badge,
+  opciones,
+  valorActual,
+  onSelect,
+}: {
+  badge: ReactNode;
+  opciones: readonly { value: string; label: string }[];
+  valorActual: string;
+  onSelect: (valor: string) => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 rounded -mx-1 px-1 py-0.5 hover:bg-muted"
+          >
+            {badge}
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>
+        }
+      />
+      <DropdownMenuContent align="start">
+        <DropdownMenuRadioGroup value={valorActual} onValueChange={onSelect}>
+          {opciones.map((o) => (
+            <DropdownMenuRadioItem key={o.value} value={o.value} closeOnClick>
+              {o.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export function PedidosTable({
   pedidos,
@@ -24,48 +75,57 @@ export function PedidosTable({
   onUpdate: () => void;
 }) {
   const [filtroCliente, setFiltroCliente] = useState("");
-  const [filtroEstadoPedido, setFiltroEstadoPedido] = useState("todos");
-  const [filtroEstadoPago, setFiltroEstadoPago] = useState("todos");
+  const [filtroEstadoPedido, setFiltroEstadoPedido] = useState<string[]>([]);
+  const [filtroEstadoPago, setFiltroEstadoPago] = useState<string[]>([]);
   const [editando, setEditando] = useState<PedidoConProducto | null>(null);
+
+  const cambiarEstado = async (
+    id: string,
+    campo: "estadoPedido" | "estadoPago",
+    valor: string
+  ) => {
+    await fetch(`/api/pedidos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [campo]: valor }),
+    });
+    onUpdate();
+  };
 
   const filtrados = pedidos.filter((p) => {
     const matchCliente = p.cliente.toLowerCase().includes(filtroCliente.toLowerCase());
-    const matchEstadoPedido = filtroEstadoPedido === "todos" || p.estadoPedido === filtroEstadoPedido;
-    const matchEstadoPago = filtroEstadoPago === "todos" || p.estadoPago === filtroEstadoPago;
+    const matchEstadoPedido = filtroEstadoPedido.length === 0 || filtroEstadoPedido.includes(p.estadoPedido);
+    const matchEstadoPago = filtroEstadoPago.length === 0 || filtroEstadoPago.includes(p.estadoPago);
     return matchCliente && matchEstadoPedido && matchEstadoPago;
   });
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-3">
-        <Input
-          placeholder="Filtrar por cliente..."
-          value={filtroCliente}
-          onChange={(e) => setFiltroCliente(e.target.value)}
-          className="max-w-xs"
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="w-56">
+          <label className="text-xs text-muted-foreground mb-1 block">Cliente</label>
+          <Input
+            placeholder="Filtrar por cliente..."
+            value={filtroCliente}
+            onChange={(e) => setFiltroCliente(e.target.value)}
+          />
+        </div>
+        <MultiSelectFilter
+          label="Estado pedido"
+          placeholderTodos="Todos"
+          className="w-40"
+          options={ESTADOS_PEDIDO.map((e) => ({ value: e.value, label: e.label }))}
+          selected={filtroEstadoPedido}
+          onChange={setFiltroEstadoPedido}
         />
-        <Select value={filtroEstadoPedido} onValueChange={setFiltroEstadoPedido}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Estado pedido" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos los estados</SelectItem>
-            <SelectItem value="POR_PEDIR">Por pedir</SelectItem>
-            <SelectItem value="ENCARGADO">Encargado</SelectItem>
-            <SelectItem value="ENTREGADO">Entregado</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filtroEstadoPago} onValueChange={setFiltroEstadoPago}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Estado pago" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos los pagos</SelectItem>
-            <SelectItem value="PENDIENTE">Pendiente</SelectItem>
-            <SelectItem value="SENA">Seña</SelectItem>
-            <SelectItem value="PAGO">Pagado</SelectItem>
-          </SelectContent>
-        </Select>
+        <MultiSelectFilter
+          label="Estado pago"
+          placeholderTodos="Todos"
+          className="w-40"
+          options={ESTADOS_PAGO.map((e) => ({ value: e.value, label: e.label }))}
+          selected={filtroEstadoPago}
+          onChange={setFiltroEstadoPago}
+        />
       </div>
 
       <div className="rounded-md border overflow-x-auto">
@@ -111,14 +171,29 @@ export function PedidosTable({
                       <MonedaCell valor={p.saldoRestante} />
                     </span>
                   </TableCell>
-                  <TableCell><BadgeEstadoPedido estado={p.estadoPedido} /></TableCell>
-                  <TableCell><BadgeEstadoPago estado={p.estadoPago} /></TableCell>
+                  <TableCell>
+                    <EstadoDropdown
+                      badge={<BadgeEstadoPedido estado={p.estadoPedido} />}
+                      opciones={ESTADOS_PEDIDO}
+                      valorActual={p.estadoPedido}
+                      onSelect={(v) => cambiarEstado(p.id, "estadoPedido", v)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <EstadoDropdown
+                      badge={<BadgeEstadoPago estado={p.estadoPago} />}
+                      opciones={ESTADOS_PAGO}
+                      valorActual={p.estadoPago}
+                      onSelect={(v) => cambiarEstado(p.id, "estadoPago", v)}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => setEditando(p)}
+                      title="Editar"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>

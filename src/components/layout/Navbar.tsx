@@ -15,10 +15,10 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/pedidos", label: "Pedidos", icon: ShoppingCart },
   { href: "/productos", label: "Productos", icon: Package },
   { href: "/stock", label: "Stock", icon: Boxes },
   { href: "/movimientos", label: "Movimientos", icon: ArrowLeftRight },
-  { href: "/pedidos", label: "Pedidos", icon: ShoppingCart },
   { href: "/historial", label: "Historial", icon: History },
 ];
 

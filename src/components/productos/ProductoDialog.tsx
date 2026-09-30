@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { InfoTip } from "@/components/shared/InfoTip";
 import type { ProductoConStock } from "@/lib/types";
 
 const schema = z.object({
@@ -45,13 +46,28 @@ export function ProductoDialog({
   open,
   onOpenChange,
   producto,
+  productosExistentes = [],
   onSuccess,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   producto: ProductoConStock | null;
+  productosExistentes?: ProductoConStock[];
   onSuccess: () => void;
 }) {
+  const [productoBaseKey, setProductoBaseKey] = useState("");
+
+  const combosExistentes = useMemo(() => {
+    const map = new Map<string, ProductoConStock>();
+    for (const p of productosExistentes) {
+      const key = `${p.temporada}|${p.genero}|${p.nombre}`;
+      if (!map.has(key)) map.set(key, p);
+    }
+    return Array.from(map.entries())
+      .map(([key, p]) => ({ key, p }))
+      .sort((a, b) => a.p.nombre.localeCompare(b.p.nombre));
+  }, [productosExistentes]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -66,6 +82,7 @@ export function ProductoDialog({
   });
 
   useEffect(() => {
+    setProductoBaseKey("");
     if (producto) {
       form.reset({
         temporada: producto.temporada,
@@ -88,6 +105,22 @@ export function ProductoDialog({
       });
     }
   }, [producto, open]);
+
+  const handleElegirBase = (key: string) => {
+    setProductoBaseKey(key);
+    const base = combosExistentes.find((c) => c.key === key)?.p;
+    if (base) {
+      form.reset({
+        temporada: base.temporada,
+        genero: base.genero,
+        nombre: base.nombre,
+        talle: "",
+        costoActual: base.costoActual?.toString() ?? "",
+        precioVenta: base.precioVenta.toString(),
+        stockMinimo: base.stockMinimo?.toString() ?? "",
+      });
+    }
+  };
 
   const onSubmit = async (values: FormValues) => {
     const body = {
@@ -116,12 +149,33 @@ export function ProductoDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{producto ? "Editar producto" : "Nuevo producto"}</DialogTitle>
+          <DialogTitle>{producto ? "Editar producto" : "Agregar producto"}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {!producto && combosExistentes.length > 0 && (
+              <div>
+                <FormLabel>Producto existente (opcional)</FormLabel>
+                <Select value={productoBaseKey} onValueChange={handleElegirBase}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Elegir producto ya cargado..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {combosExistentes.map(({ key, p }) => (
+                      <SelectItem key={key} value={key}>
+                        {p.nombre} — {p.temporada === "VERANO" ? "Verano" : "Invierno"}, {p.genero === "MASCULINO" ? "Masc." : "Fem."}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Completa temporada, género, costo y precio. Solo falta el talle nuevo.
+                </p>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -201,7 +255,19 @@ export function ProductoDialog({
                 name="costoActual"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Costo ($)</FormLabel>
+                    <div className="flex items-center gap-1">
+                      <FormLabel>Costo ($)</FormLabel>
+                      <InfoTip>
+                        <p>
+                          <strong>Dejalo vacío</strong> si es una compra nueva con envío u otros
+                          costos a prorratear — se completa solo al cargar el ingreso en Movimientos.
+                        </p>
+                        <p className="mt-2">
+                          <strong>Completalo</strong> solo si ya sabés el costo final (por ejemplo,
+                          stock que ya tenías antes de usar el sistema).
+                        </p>
+                      </InfoTip>
+                    </div>
                     <FormControl>
                       <Input type="number" placeholder="0" {...field} />
                     </FormControl>
