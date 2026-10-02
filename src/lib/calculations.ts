@@ -1,5 +1,30 @@
 import { MetodoPago } from "@/generated/prisma/client";
 
+// ── Talles ─────────────────────────────────────────────────────────────────────
+
+const ORDEN_TALLES_LETRA = ["XS", "S", "M", "L", "XL", "XXL"];
+
+/**
+ * Compara dos talles: primero los numéricos (de menor a mayor), después los
+ * de letra en su orden natural (XS, S, M, L...). Cualquier otra cosa queda
+ * al final, ordenada alfabéticamente.
+ */
+export function compararTalles(a: string, b: string): number {
+  const numA = /^\d+$/.test(a.trim());
+  const numB = /^\d+$/.test(b.trim());
+
+  if (numA && numB) return parseInt(a) - parseInt(b);
+  if (numA && !numB) return -1;
+  if (!numA && numB) return 1;
+
+  const idxA = ORDEN_TALLES_LETRA.indexOf(a.trim().toUpperCase());
+  const idxB = ORDEN_TALLES_LETRA.indexOf(b.trim().toUpperCase());
+  if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+  if (idxA !== -1) return -1;
+  if (idxB !== -1) return 1;
+  return a.localeCompare(b);
+}
+
 // ── Precios ────────────────────────────────────────────────────────────────────
 
 export function calcularPrecioEfectivo(precioVenta: number): number {
@@ -109,6 +134,74 @@ export function calcularCostoUnitarioReal(
   costoEnvioUnitario: number
 ): number {
   return costoUnitarioCompra + costoEnvioUnitario;
+}
+
+export type LineaCompraEntrada = {
+  productoId: string;
+  cantidad: number;
+  costoUnitarioCompra?: number;
+  totalLineaCompra?: number;
+};
+
+export type LineaCompraCalculada = {
+  productoId: string;
+  cantidad: number;
+  totalLineaCompra?: number;
+  costoUnitarioCompra: number | null;
+  subtotalLinea: number;
+  costoEnvioUnitario: number;
+  costoUnitarioReal: number;
+};
+
+/**
+ * Toma las líneas de una compra (tal como las manda el formulario) y
+ * devuelve, por línea, el costo unitario real final — contemplando el modo
+ * "valor general de la compra" (mismo costo por unidad en toda la compra,
+ * en vez de uno por línea) y el prorrateo de envío. La usan tanto crear
+ * como editar una compra, para no duplicar esta cuenta en dos lugares.
+ */
+export function calcularLineasCompra(
+  lineas: LineaCompraEntrada[],
+  envioTotalCompra: number | null | undefined,
+  valorGeneralCompra: number | null | undefined
+): LineaCompraCalculada[] {
+  let lineasEntrada = lineas;
+  if (valorGeneralCompra != null) {
+    const totalUnidades = lineas.reduce((sum, l) => sum + l.cantidad, 0);
+    const costoUnitarioParejo = totalUnidades > 0 ? Math.round(valorGeneralCompra / totalUnidades) : 0;
+    lineasEntrada = lineas.map((l) => ({
+      ...l,
+      costoUnitarioCompra: costoUnitarioParejo,
+      totalLineaCompra: undefined,
+    }));
+  }
+
+  const lineasCalculadas = lineasEntrada.map((linea) => {
+    let costoUnitarioCompra = linea.costoUnitarioCompra ?? null;
+    if (linea.totalLineaCompra != null) {
+      costoUnitarioCompra = calcularCostoUnitarioCompra(linea.totalLineaCompra, linea.cantidad);
+    }
+    const subtotalLinea = calcularSubtotalLinea(
+      linea.totalLineaCompra ?? null,
+      linea.cantidad,
+      costoUnitarioCompra ?? 0
+    );
+    return { ...linea, costoUnitarioCompra, subtotalLinea };
+  });
+
+  const costosEnvio =
+    envioTotalCompra != null
+      ? distribuirEnvioProporcional(lineasCalculadas, envioTotalCompra)
+      : lineasCalculadas.map(() => 0);
+
+  return lineasCalculadas.map((linea, i) => {
+    const costoEnvioUnitario = costosEnvio[i];
+    return {
+      ...linea,
+      costoEnvioUnitario,
+      costoUnitarioReal: calcularCostoUnitarioReal(linea.costoUnitarioCompra ?? 0, costoEnvioUnitario),
+    };
+  });
 }
 
 /**

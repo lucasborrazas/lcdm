@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2 } from "lucide-react";
 import {
   calcularPrecioUnitario, calcularPrecioConDescuento, calcularCostoTotal,
-  calcularPrecioTotal, calcularGanancia, formatearMoneda,
+  calcularPrecioTotal, calcularGanancia, formatearMoneda, compararTalles,
 } from "@/lib/calculations";
 import type { ProductoConStock } from "@/lib/types";
 
@@ -72,7 +72,7 @@ function LineaPedido({
   ).sort();
   const tallesDisponibles = productosDisponibles
     .filter((p) => p.nombre === selNombre && p.genero === selGenero)
-    .sort((a, b) => a.talle.localeCompare(b.talle));
+    .sort((a, b) => compararTalles(a.talle, b.talle));
 
   const productoSel = productos.find((p) => p.id === productoId);
   const precioBase = productoSel

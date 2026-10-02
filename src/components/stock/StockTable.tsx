@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, Pencil, ChevronDown, ChevronRight } from "lucide-react";
 import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { StockEditDialog } from "./StockEditDialog";
+import { compararTalles } from "@/lib/calculations";
 import type { StockResumen } from "@/lib/types";
 
 type Grupo = {
@@ -35,6 +36,9 @@ function agruparPorTipo(items: StockResumen[]): Grupo[] {
         lineas: [s],
       });
     }
+  }
+  for (const g of grupos.values()) {
+    g.lineas.sort((a, b) => compararTalles(a.talle, b.talle));
   }
   return Array.from(grupos.values());
 }
@@ -65,7 +69,7 @@ export function StockTable() {
     [stock]
   );
   const talles = useMemo(
-    () => Array.from(new Set(stock.map((s) => s.talle))).sort(),
+    () => Array.from(new Set(stock.map((s) => s.talle))).sort(compararTalles),
     [stock]
   );
 

@@ -70,6 +70,30 @@ model MovimientoStock {
   producto Producto @relation(fields: [productoId], references: [id])
 }
 
+model MovimientoEliminado {
+  id                      String         @id @default(cuid())
+  movimientoIdOriginal    String
+  fecha                   DateTime
+  periodo                 String
+  productoId              String
+  temporada               Temporada
+  genero                  Genero
+  productoNombre          String
+  talle                   String
+  tipo                    TipoMovimiento
+  cantidad                Int
+  motivo                  String
+  notas                   String?
+  compraId                String?
+  costoUnitarioCompra     Int?
+  totalLineaCompra        Int?
+  subtotalLinea           Int?
+  envioTotalCompra        Int?
+  costoEnvioUnitario      Int?
+  costoUnitarioReal       Int?
+  eliminadoEn             DateTime       @default(now())
+}
+
 model Pedido {
   id             String       @id @default(cuid())
   fecha          DateTime

@@ -25,7 +25,7 @@ export default function MovimientosPage() {
       />
       <div className="space-y-6">
         <MovimientoForm onSuccess={cargar} />
-        <MovimientosTable movimientos={movimientos} />
+        <MovimientosTable movimientos={movimientos} onChanged={cargar} />
       </div>
     </>
   );

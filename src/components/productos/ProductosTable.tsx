@@ -24,6 +24,7 @@ import { MonedaCell } from "@/components/shared/MonedaCell";
 import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { ProductoDialog } from "./ProductoDialog";
 import { PrecioDialog } from "./PrecioDialog";
+import { compararTalles } from "@/lib/calculations";
 import type { ProductoConStock } from "@/lib/types";
 
 type Grupo = {
@@ -50,6 +51,9 @@ function agruparPorTipo(productos: ProductoConStock[]): Grupo[] {
         lineas: [p],
       });
     }
+  }
+  for (const g of grupos.values()) {
+    g.lineas.sort((a, b) => compararTalles(a.talle, b.talle));
   }
   return Array.from(grupos.values());
 }
@@ -91,7 +95,7 @@ export function ProductosTable() {
     [productos]
   );
   const talles = useMemo(
-    () => Array.from(new Set(productos.map((p) => p.talle))).sort(),
+    () => Array.from(new Set(productos.map((p) => p.talle))).sort(compararTalles),
     [productos]
   );
 

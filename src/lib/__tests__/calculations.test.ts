@@ -12,7 +12,28 @@ import {
   calcularCostoUnitarioReal,
   calcularCostoPromedioPonderado,
   fechaAPeriodo,
+  compararTalles,
 } from "../calculations";
+
+// ── compararTalles ────────────────────────────────────────────────────────────
+
+describe("compararTalles", () => {
+  it("ordena numéricos de menor a mayor", () => {
+    expect(["14", "2", "10", "4"].sort(compararTalles)).toEqual(["2", "4", "10", "14"]);
+  });
+
+  it("ordena letras según XS, S, M, L, XL, XXL", () => {
+    expect(["L", "XS", "M", "S"].sort(compararTalles)).toEqual(["XS", "S", "M", "L"]);
+  });
+
+  it("pone los numéricos antes que los de letra", () => {
+    expect(["L", "4", "XS", "10"].sort(compararTalles)).toEqual(["4", "10", "XS", "L"]);
+  });
+
+  it("es insensible a mayúsculas/minúsculas en letras", () => {
+    expect(["l", "xs", "m"].sort(compararTalles)).toEqual(["xs", "m", "l"]);
+  });
+});
 
 // ── calcularPrecioEfectivo ────────────────────────────────────────────────────
 

@@ -2,15 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { z } from "zod";
-import {
-  fechaAPeriodo,
-  calcularCostoUnitarioCompra,
-  calcularSubtotalLinea,
-  distribuirEnvioProporcional,
-  calcularCostoUnitarioReal,
-  calcularCostoPromedioPonderado,
-} from "@/lib/calculations";
-import { obtenerStockActual } from "@/lib/stock";
+import { fechaAPeriodo, calcularLineasCompra } from "@/lib/calculations";
+import { crearLineasDeCompra } from "@/lib/compraStock";
 
 const lineaSchema = z.object({
   productoId: z.string(),
@@ -25,6 +18,7 @@ const compraSchema = z.object({
   notas: z.string().optional(),
   compraId: z.string().optional(),
   envioTotalCompra: z.number().int().nonnegative().optional(),
+  valorGeneralCompra: z.number().int().nonnegative().optional(),
   lineas: z.array(lineaSchema).min(1),
 });
 
@@ -59,99 +53,19 @@ export async function POST(req: NextRequest) {
   const periodo = fechaAPeriodo(fecha);
   const compraId = data.compraId || `COMPRA-${Date.now()}`;
 
-  const lineasCalculadas = data.lineas.map((linea) => {
-    let costoUnitarioCompra = linea.costoUnitarioCompra ?? null;
-    if (linea.totalLineaCompra != null) {
-      costoUnitarioCompra = calcularCostoUnitarioCompra(linea.totalLineaCompra, linea.cantidad);
-    }
-    const subtotalLinea = calcularSubtotalLinea(
-      linea.totalLineaCompra ?? null,
-      linea.cantidad,
-      costoUnitarioCompra ?? 0
-    );
-    return { ...linea, costoUnitarioCompra, subtotalLinea };
-  });
-
-  const costosEnvio =
-    data.envioTotalCompra != null
-      ? distribuirEnvioProporcional(lineasCalculadas, data.envioTotalCompra)
-      : lineasCalculadas.map(() => 0);
+  const lineasCalculadas = calcularLineasCompra(data.lineas, data.envioTotalCompra, data.valorGeneralCompra);
 
   const movimientos = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const creados = [];
-
-    for (let i = 0; i < lineasCalculadas.length; i++) {
-      const linea = lineasCalculadas[i];
-      const producto = productoPorId.get(linea.productoId)!;
-      const costoEnvioUnitario = costosEnvio[i];
-      const costoUnitarioReal = calcularCostoUnitarioReal(
-        linea.costoUnitarioCompra ?? 0,
-        costoEnvioUnitario
-      );
-
-      const m = await tx.movimientoStock.create({
-        data: {
-          fecha,
-          periodo,
-          productoId: linea.productoId,
-          temporada: producto.temporada,
-          genero: producto.genero,
-          productoNombre: producto.nombre,
-          talle: producto.talle,
-          tipo: "INGRESO",
-          cantidad: linea.cantidad,
-          motivo: data.motivo,
-          notas: data.notas,
-          compraId,
-          costoUnitarioCompra: linea.costoUnitarioCompra,
-          totalLineaCompra: linea.totalLineaCompra ?? null,
-          subtotalLinea: linea.subtotalLinea,
-          envioTotalCompra: data.envioTotalCompra ?? null,
-          costoEnvioUnitario,
-          costoUnitarioReal,
-          stockProcesado: true,
-        },
-      });
-      creados.push(m);
-
-      if (costoUnitarioReal > 0) {
-        // Se recalcula en cada iteracion (no se puede pre-computar antes del
-        // loop) porque si dos lineas de la misma compra son el mismo
-        // producto, la segunda tiene que ver el stock que dejo la primera.
-        const stockAntes = await obtenerStockActual(tx, linea.productoId);
-        const costoAnterior = producto.costoActual;
-        const nuevoCostoPromedio = calcularCostoPromedioPonderado(
-          stockAntes,
-          costoAnterior,
-          linea.cantidad,
-          costoUnitarioReal
-        );
-
-        await tx.producto.update({
-          where: { id: linea.productoId },
-          data: { costoActual: nuevoCostoPromedio },
-        });
-        await tx.historialPrecios.create({
-          data: {
-            productoId: producto.id,
-            temporada: producto.temporada,
-            genero: producto.genero,
-            productoNombre: producto.nombre,
-            talle: producto.talle,
-            costoAnterior: costoAnterior ?? 0,
-            costoNuevo: nuevoCostoPromedio,
-            precioAnterior: producto.precioVenta,
-            precioNuevo: producto.precioVenta,
-            motivo: "Cambio automático por ingreso de stock (promedio ponderado)",
-          },
-        });
-        // Mantiene el costoActual en memoria al dia por si otra linea de
-        // esta misma compra vuelve a tocar el mismo producto.
-        producto.costoActual = nuevoCostoPromedio;
-      }
-    }
-
-    return creados;
+    return crearLineasDeCompra(tx, {
+      fecha,
+      periodo,
+      motivo: data.motivo,
+      notas: data.notas,
+      compraId,
+      envioTotalCompra: data.envioTotalCompra ?? null,
+      lineasCalculadas,
+      productoPorId,
+    });
   });
 
   return NextResponse.json({ compraId, movimientos }, { status: 201 });
