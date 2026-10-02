@@ -165,6 +165,91 @@ model HistorialPrecios {
   producto Producto @relation(fields: [productoId], references: [id])
 }
 
+// ── Torneo (seccion separada, sin relacion con el modelo de indumentaria) ──
+
+model GrupoEdad {
+  id        String   @id @default(cuid())
+  nombre    String   @unique
+  createdAt DateTime @default(now())
+
+  horarios Horario[]
+}
+
+model Torneo {
+  id                  String       @id @default(cuid())
+  mes                 Int
+  anio                Int
+  estado              EstadoTorneo @default(PLANIFICADO)
+  precioEfectivo      Int          @default(18000)
+  precioTransferencia Int          @default(22000)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  horarios Horario[]
+  gastos   GastoTorneo[]
+
+  @@unique([mes, anio])
+}
+
+model GastoTorneo {
+  id        String   @id @default(cuid())
+  torneoId  String
+  concepto  String
+  monto     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  torneo Torneo @relation(fields: [torneoId], references: [id])
+}
+
+model Horario {
+  id          String   @id @default(cuid())
+  torneoId    String
+  grupoEdadId String
+  hora        String
+  cupoMaximo  Int?
+  orden       Int      @default(0)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  torneo        Torneo              @relation(fields: [torneoId], references: [id])
+  grupoEdad     GrupoEdad           @relation(fields: [grupoEdadId], references: [id])
+  inscripciones InscripcionTorneo[]
+}
+
+enum EstadoTorneo {
+  PLANIFICADO
+  EN_CURSO
+  FINALIZADO
+}
+
+model InscripcionTorneo {
+  id         String            @id @default(cuid())
+  nombre     String
+  edad       String
+  horarioId  String
+  pago       Boolean           @default(false)
+  metodoPago MetodoPagoTorneo?
+  equipo     EquipoTorneo?
+  equipoAsignadoAt DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  horario Horario @relation(fields: [horarioId], references: [id])
+}
+
+enum MetodoPagoTorneo {
+  EFECTIVO
+  TRANSFERENCIA
+}
+
+enum EquipoTorneo {
+  ROJO
+  AMARILLO
+  NARANJA
+}
+
 enum Temporada {
   VERANO
   INVIERNO

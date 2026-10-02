@@ -7,10 +7,13 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClientInstance | undefined;
 };
 
-const adapter = new PrismaLibSQL({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN,
-});
+const onVercel = !!process.env.VERCEL;
+
+const adapter = new PrismaLibSQL(
+  onVercel
+    ? { url: process.env.TURSO_DATABASE_URL!, authToken: process.env.TURSO_AUTH_TOKEN }
+    : { url: process.env.DATABASE_URL! }
+);
 
 export const prisma: PrismaClientInstance =
   globalForPrisma.prisma ??

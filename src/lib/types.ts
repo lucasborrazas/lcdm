@@ -1,4 +1,6 @@
-import type { Producto, Stock, Pedido, PedidoGrupo, MovimientoStock, HistorialPrecios, PedidoEliminado } from "@/generated/prisma/client";
+import type { Producto, Stock, Pedido, PedidoGrupo, MovimientoStock, HistorialPrecios, PedidoEliminado, Horario, InscripcionTorneo, Torneo, GrupoEdad, GastoTorneo } from "@/generated/prisma/client";
+
+export type { GastoTorneo };
 
 export type ProductoConStock = Producto & {
   stock: Stock | null;
@@ -47,6 +49,23 @@ export type CobranzaEstado = {
   cantidadPedidos: number;
   total: number;
   saldo: number;
+};
+
+export type HorarioConCupo = Horario & {
+  grupoEdad: GrupoEdad;
+  inscriptos: number;
+};
+
+export type InscripcionConHorario = InscripcionTorneo & {
+  horario: Horario & { grupoEdad: GrupoEdad };
+};
+
+export type TorneoConResumen = Torneo & {
+  cantidadHorarios: number;
+  cantidadInscriptos: number;
+  recaudado: number;
+  totalGastos: number;
+  ganancia: number;
 };
 
 export type StockResumen = {

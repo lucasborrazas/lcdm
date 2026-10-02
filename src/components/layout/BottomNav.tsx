@@ -9,6 +9,10 @@ import {
   ArrowLeftRight,
   ShoppingCart,
   History,
+  ClipboardList,
+  Users,
+  CalendarDays,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,19 +23,23 @@ const NAV_ITEMS = [
   { href: "/stock", label: "Stock", icon: Boxes },
   { href: "/movimientos", label: "Movim.", icon: ArrowLeftRight },
   { href: "/historial", label: "Historial", icon: History },
+  { href: "/torneo/resumen", label: "Resumen", icon: Wallet },
+  { href: "/torneo/inscripciones", label: "Inscrip.", icon: ClipboardList },
+  { href: "/torneo/equipos", label: "Equipos", icon: Users },
+  { href: "/torneo/historial", label: "Torneos", icon: CalendarDays },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card border-t z-30 flex">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card border-t z-30 flex overflow-x-auto">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
         <Link
           key={href}
           href={href}
           className={cn(
-            "flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
+            "flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] font-medium transition-colors shrink-0",
             pathname === href
               ? "text-primary"
               : "text-muted-foreground"
