@@ -8,6 +8,7 @@ const updateSchema = z.object({
   horarioId: z.string().min(1).optional(),
   pago: z.boolean().optional(),
   metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]).nullable().optional(),
+  monto: z.number().int().nonnegative().nullable().optional(),
   equipo: z.enum(["ROJO", "AMARILLO", "NARANJA"]).nullable().optional(),
   equipoAsignadoAt: z.string().nullable().optional(),
 });

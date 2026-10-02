@@ -6,6 +6,9 @@ const inscripcionSchema = z.object({
   nombre: z.string().min(1),
   edad: z.string().min(1),
   horarioId: z.string().min(1),
+  pago: z.boolean().optional(),
+  metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]).nullable().optional(),
+  monto: z.number().int().nonnegative().nullable().optional(),
 });
 
 export const dynamic = "force-dynamic";
@@ -44,6 +47,9 @@ export async function POST(req: NextRequest) {
       nombre: data.nombre,
       edad: data.edad,
       horarioId: data.horarioId,
+      pago: data.pago ?? false,
+      metodoPago: data.metodoPago ?? null,
+      monto: data.monto ?? null,
     },
     include: { horario: { include: { grupoEdad: true } } },
   });

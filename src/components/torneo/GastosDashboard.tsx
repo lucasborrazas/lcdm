@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelL
 import { MonedaCell } from "@/components/shared/MonedaCell";
 import { TorneoSwitcher } from "./TorneoSwitcher";
 import { NuevoTorneoButton } from "./NuevoTorneoButton";
+import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
 import { formatearMoneda } from "@/lib/calculations";
 import { colorHorario } from "@/lib/torneo";
@@ -205,8 +206,9 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
             torneoId={torneoId}
             onSelect={seleccionarTorneo}
           />
-          <NuevoTorneoButton torneos={torneos} onCreated={onTorneoCreado} />
+          <EstadoTorneoBadge torneo={torneoActual} />
         </div>
+        <NuevoTorneoButton torneos={torneos} onCreated={onTorneoCreado} />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">

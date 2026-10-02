@@ -17,7 +17,7 @@ export function NuevoTorneoButton({
 
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         <Plus className="h-4 w-4 mr-1.5" />
         Nuevo torneo
       </Button>

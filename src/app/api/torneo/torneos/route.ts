@@ -16,7 +16,7 @@ export async function GET() {
   const torneos = await prisma.torneo.findMany({
     include: {
       horarios: {
-        include: { inscripciones: { select: { pago: true, metodoPago: true } } },
+        include: { inscripciones: { select: { pago: true, monto: true } } },
       },
       gastos: { select: { monto: true } },
     },
@@ -25,11 +25,7 @@ export async function GET() {
 
   const result = torneos.map((t) => {
     const inscripciones = t.horarios.flatMap((h) => h.inscripciones);
-    const recaudado = inscripciones.reduce((sum, i) => {
-      if (!i.pago) return sum;
-      const precio = i.metodoPago === "EFECTIVO" ? t.precioEfectivo : i.metodoPago === "TRANSFERENCIA" ? t.precioTransferencia : 0;
-      return sum + precio;
-    }, 0);
+    const recaudado = inscripciones.reduce((sum, i) => (i.pago ? sum + (i.monto ?? 0) : sum), 0);
     const totalGastos = t.gastos.reduce((sum, g) => sum + g.monto, 0);
     return {
       id: t.id,

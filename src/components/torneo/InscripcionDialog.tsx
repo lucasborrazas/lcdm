@@ -15,13 +15,15 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { EDADES_DISPONIBLES } from "@/lib/torneo";
-import type { HorarioConCupo, InscripcionConHorario } from "@/lib/types";
+import { EDADES_DISPONIBLES, montoPorMetodoPago } from "@/lib/torneo";
+import type { HorarioConCupo, InscripcionConHorario, TorneoConResumen } from "@/lib/types";
 
 const schema = z.object({
   nombre: z.string().min(1, "Requerido"),
   edad: z.string().min(1, "Requerido"),
   horarioId: z.string().min(1, "Seleccione un horario"),
+  metodoPago: z.enum(["NO_PAGO", "EFECTIVO", "TRANSFERENCIA"]),
+  monto: z.string(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -31,43 +33,66 @@ export function InscripcionDialog({
   onOpenChange,
   inscripcion,
   horarios,
+  torneo,
   onSuccess,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   inscripcion: InscripcionConHorario | null;
   horarios: HorarioConCupo[];
+  torneo: TorneoConResumen | null;
   onSuccess: () => void;
 }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { nombre: "", edad: "", horarioId: "" },
+    defaultValues: { nombre: "", edad: "", horarioId: "", metodoPago: "NO_PAGO", monto: "" },
   });
 
   useEffect(() => {
     if (inscripcion) {
+      const metodoPago = inscripcion.pago ? inscripcion.metodoPago ?? "NO_PAGO" : "NO_PAGO";
       form.reset({
         nombre: inscripcion.nombre,
         edad: inscripcion.edad,
         horarioId: inscripcion.horarioId,
+        metodoPago,
+        monto: inscripcion.monto?.toString() ?? "",
       });
     } else {
-      form.reset({ nombre: "", edad: "", horarioId: "" });
+      form.reset({ nombre: "", edad: "", horarioId: "", metodoPago: "NO_PAGO", monto: "" });
     }
   }, [inscripcion, open]);
 
+  const onMetodoPagoChange = (valor: string, onChange: (v: string) => void) => {
+    onChange(valor);
+    if (!torneo) return;
+    const monto = montoPorMetodoPago(torneo, valor === "NO_PAGO" ? null : (valor as "EFECTIVO" | "TRANSFERENCIA"));
+    form.setValue("monto", monto != null ? monto.toString() : "");
+  };
+
   const onSubmit = async (values: FormValues) => {
+    const body = {
+      nombre: values.nombre,
+      edad: values.edad,
+      horarioId: values.horarioId,
+      pago: values.metodoPago !== "NO_PAGO",
+      metodoPago: values.metodoPago === "NO_PAGO" ? null : values.metodoPago,
+      monto: values.metodoPago === "NO_PAGO" ? null : (parseInt(values.monto) || 0),
+    };
+
     const url = inscripcion ? `/api/torneo/inscripciones/${inscripcion.id}` : "/api/torneo/inscripciones";
     const method = inscripcion ? "PUT" : "POST";
 
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify(body),
     });
 
     if (res.ok) onSuccess();
   };
+
+  const metodoPagoActual = form.watch("metodoPago");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,6 +159,51 @@ export function InscripcionDialog({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="metodoPago"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pago</FormLabel>
+                    <Select value={field.value} onValueChange={(v) => onMetodoPagoChange(v, field.onChange)}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="NO_PAGO">Sin pagar</SelectItem>
+                        <SelectItem value="EFECTIVO">Efectivo</SelectItem>
+                        <SelectItem value="TRANSFERENCIA">Transferencia</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="monto"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monto</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        disabled={metodoPagoActual === "NO_PAGO"}
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

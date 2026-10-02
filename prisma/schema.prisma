@@ -231,6 +231,7 @@ model InscripcionTorneo {
   horarioId  String
   pago       Boolean           @default(false)
   metodoPago MetodoPagoTorneo?
+  monto      Int?
   equipo     EquipoTorneo?
   equipoAsignadoAt DateTime?
   createdAt  DateTime          @default(now())

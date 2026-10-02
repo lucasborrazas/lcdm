@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Undo2, RotateCcw } from "lucide-react";
 import { TorneoSwitcher } from "./TorneoSwitcher";
-import { NuevoTorneoButton } from "./NuevoTorneoButton";
+import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
 import { calcularFormacion, type JugadorEnCancha } from "@/lib/formacion";
 import { cn } from "@/lib/utils";
@@ -165,7 +165,7 @@ function CanchaFormacion({ equipo, jugadores }: { equipo: Equipo; jugadores: Ins
 }
 
 export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) {
-  const { torneos, torneoId, seleccionarTorneo, recargarTorneos } = useTorneoActual(torneoIdInicial);
+  const { torneos, torneoId, torneoActual, seleccionarTorneo } = useTorneoActual(torneoIdInicial);
 
   const [horarios, setHorarios] = useState<HorarioConCupo[]>([]);
   const [inscripciones, setInscripciones] = useState<InscripcionConHorario[]>([]);
@@ -198,11 +198,6 @@ export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) 
   >([]);
 
   useEffect(() => { setHistorial([]); }, [horarioId]);
-
-  const onTorneoCreado = async (id: string) => {
-    await recargarTorneos();
-    seleccionarTorneo(id);
-  };
 
   const inscripcionesDelHorario = useMemo(
     () => inscripciones.filter((i) => i.horarioId === horarioId),
@@ -308,7 +303,6 @@ export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) 
             torneoId={torneoId}
             onSelect={seleccionarTorneo}
           />
-          <NuevoTorneoButton torneos={torneos} onCreated={onTorneoCreado} />
           <div className="max-w-xs">
             <label className="text-xs text-muted-foreground mb-1 block">Horario</label>
             <Select value={horarioId} onValueChange={setHorarioId}>
@@ -324,6 +318,7 @@ export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) 
               </SelectContent>
             </Select>
           </div>
+          <EstadoTorneoBadge torneo={torneoActual} />
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={deshacer} disabled={historial.length === 0}>

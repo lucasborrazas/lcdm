@@ -16,67 +16,112 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuRadioGroup, DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Pencil, Trash2, Settings2, ChevronDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Settings2, ChevronDown, Save, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { InscripcionDialog } from "./InscripcionDialog";
 import { GestionarTorneoDialog } from "./GestionarTorneoDialog";
 import { TorneoSwitcher } from "./TorneoSwitcher";
-import { NuevoTorneoButton } from "./NuevoTorneoButton";
+import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
 import { formatearMoneda } from "@/lib/calculations";
-import { colorHorario } from "@/lib/torneo";
+import { colorHorario, montoPorMetodoPago } from "@/lib/torneo";
 import { cn } from "@/lib/utils";
-import type { HorarioConCupo, InscripcionConHorario } from "@/lib/types";
+import type { HorarioConCupo, InscripcionConHorario, TorneoConResumen } from "@/lib/types";
 
-function PagoDropdown({
+function CeldaPago({
   inscripcion,
-  precioEfectivo,
-  precioTransferencia,
+  torneo,
   onChange,
 }: {
   inscripcion: InscripcionConHorario;
-  precioEfectivo: number;
-  precioTransferencia: number;
-  onChange: (pago: boolean, metodoPago: "EFECTIVO" | "TRANSFERENCIA" | null) => void;
+  torneo: TorneoConResumen | null;
+  onChange: (pago: boolean, metodoPago: "EFECTIVO" | "TRANSFERENCIA" | null, monto: number | null) => void;
 }) {
-  const valorActual = !inscripcion.pago
-    ? "NO_PAGO"
-    : inscripcion.metodoPago ?? "NO_PAGO";
+  const [editandoMonto, setEditandoMonto] = useState(false);
+  const [montoInput, setMontoInput] = useState("");
+
+  const precioEfectivo = torneo?.precioEfectivo ?? 18000;
+  const precioTransferencia = torneo?.precioTransferencia ?? 22000;
+
+  const valorActual = !inscripcion.pago ? "NO_PAGO" : inscripcion.metodoPago ?? "NO_PAGO";
 
   const badge: ReactNode = !inscripcion.pago ? (
     <Badge variant="outline" className="text-xs font-normal">Sin pagar</Badge>
-  ) : inscripcion.metodoPago === "EFECTIVO" ? (
-    <Badge variant="secondary" className="text-xs font-normal">Efectivo · {formatearMoneda(precioEfectivo)}</Badge>
   ) : (
-    <Badge variant="secondary" className="text-xs font-normal">Transferencia · {formatearMoneda(precioTransferencia)}</Badge>
+    <Badge variant="secondary" className="text-xs font-normal">
+      {inscripcion.metodoPago === "EFECTIVO" ? "Efectivo" : "Transferencia"} · {formatearMoneda(inscripcion.monto ?? 0)}
+    </Badge>
   );
 
   const onSelect = (valor: string) => {
-    if (valor === "NO_PAGO") onChange(false, null);
-    else onChange(true, valor as "EFECTIVO" | "TRANSFERENCIA");
+    if (valor === "NO_PAGO") {
+      onChange(false, null, null);
+    } else {
+      const metodoPago = valor as "EFECTIVO" | "TRANSFERENCIA";
+      onChange(true, metodoPago, montoPorMetodoPago({ precioEfectivo, precioTransferencia }, metodoPago));
+    }
   };
 
+  const empezarEdicion = () => {
+    setMontoInput((inscripcion.monto ?? 0).toString());
+    setEditandoMonto(true);
+  };
+
+  const guardarMonto = () => {
+    onChange(true, inscripcion.metodoPago ?? "EFECTIVO", parseInt(montoInput) || 0);
+    setEditandoMonto(false);
+  };
+
+  if (editandoMonto) {
+    return (
+      <div className="flex items-center gap-1">
+        <Input
+          type="number"
+          min="0"
+          value={montoInput}
+          onChange={(e) => setMontoInput(e.target.value)}
+          className="h-7 w-24 text-sm"
+          autoFocus
+        />
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={guardarMonto}>
+          <Save className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditandoMonto(false)}>
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded -mx-1 px-1 py-0.5 hover:bg-muted"
-          >
-            {badge}
-            <ChevronDown className="h-3 w-3 text-muted-foreground" />
-          </button>
-        }
-      />
-      <DropdownMenuContent align="start">
-        <DropdownMenuRadioGroup value={valorActual} onValueChange={onSelect}>
-          <DropdownMenuRadioItem value="NO_PAGO" closeOnClick>Sin pagar</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="EFECTIVO" closeOnClick>Efectivo · {formatearMoneda(precioEfectivo)}</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="TRANSFERENCIA" closeOnClick>Transferencia · {formatearMoneda(precioTransferencia)}</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-1">
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded -mx-1 px-1 py-0.5 hover:bg-muted"
+            >
+              {badge}
+              <ChevronDown className="h-3 w-3 text-muted-foreground" />
+            </button>
+          }
+        />
+        <DropdownMenuContent align="start">
+          <DropdownMenuRadioGroup value={valorActual} onValueChange={onSelect}>
+            <DropdownMenuRadioItem value="NO_PAGO" closeOnClick>Sin pagar</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="EFECTIVO" closeOnClick>Efectivo · {formatearMoneda(precioEfectivo)}</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="TRANSFERENCIA" closeOnClick>Transferencia · {formatearMoneda(precioTransferencia)}</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {inscripcion.pago && (
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={empezarEdicion} title="Editar monto">
+          <Pencil className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
   );
 }
 
@@ -206,21 +251,18 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
   const cambiarPago = async (
     i: InscripcionConHorario,
     pago: boolean,
-    metodoPago: "EFECTIVO" | "TRANSFERENCIA" | null
+    metodoPago: "EFECTIVO" | "TRANSFERENCIA" | null,
+    monto: number | null
   ) => {
     setInscripciones((prev) =>
-      prev.map((x) => (x.id === i.id ? { ...x, pago, metodoPago } : x))
+      prev.map((x) => (x.id === i.id ? { ...x, pago, metodoPago, monto } : x))
     );
     await fetch(`/api/torneo/inscripciones/${i.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pago, metodoPago }),
+      body: JSON.stringify({ pago, metodoPago, monto }),
     });
-  };
-
-  const onTorneoCreado = async (id: string) => {
-    await recargarTorneos();
-    seleccionarTorneo(id);
+    recargarTorneos();
   };
 
   const cambiarHorario = async (i: InscripcionConHorario, horarioId: string) => {
@@ -260,9 +302,9 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
             onChange={setFiltroHorario}
             className="w-56"
           />
+          <EstadoTorneoBadge torneo={torneoActual} />
         </div>
         <div className="flex gap-2">
-          <NuevoTorneoButton torneos={torneos} onCreated={onTorneoCreado} />
           <Button variant="outline" onClick={() => setGestionarOpen(true)} disabled={!torneoId}>
             <Settings2 className="h-4 w-4 mr-1.5" />
             Gestionar torneo
@@ -310,11 +352,10 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
                     />
                   </TableCell>
                   <TableCell>
-                    <PagoDropdown
+                    <CeldaPago
                       inscripcion={i}
-                      precioEfectivo={torneoActual?.precioEfectivo ?? 18000}
-                      precioTransferencia={torneoActual?.precioTransferencia ?? 22000}
-                      onChange={(pago, metodoPago) => cambiarPago(i, pago, metodoPago)}
+                      torneo={torneoActual}
+                      onChange={(pago, metodoPago, monto) => cambiarPago(i, pago, metodoPago, monto)}
                     />
                   </TableCell>
                   <TableCell>
@@ -346,7 +387,8 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
         onOpenChange={setDialogOpen}
         inscripcion={editando}
         horarios={horarios}
-        onSuccess={() => { setDialogOpen(false); cargar(); }}
+        torneo={torneoActual}
+        onSuccess={() => { setDialogOpen(false); cargar(); recargarTorneos(); }}
       />
       <GestionarTorneoDialog
         open={gestionarOpen}
