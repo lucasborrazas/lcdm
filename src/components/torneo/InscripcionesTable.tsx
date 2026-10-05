@@ -365,7 +365,7 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
               inscripcionesFiltradas.map((i) => (
                 <TableRow key={i.id}>
                   <TableCell className="font-medium">{i.nombre}</TableCell>
-                  <TableCell>{i.edad} años</TableCell>
+                  <TableCell>{i.edad || <span className="text-muted-foreground">—</span>}</TableCell>
                   <TableCell>
                     <HorarioDropdown
                       inscripcion={i}

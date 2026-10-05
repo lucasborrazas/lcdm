@@ -251,7 +251,7 @@ enum EstadoTorneo {
 model InscripcionTorneo {
   id         String            @id @default(cuid())
   nombre     String
-  edad       String
+  edad       String?
   horarioId  String
   pago       Boolean           @default(false)
   metodoPago MetodoPagoTorneo?

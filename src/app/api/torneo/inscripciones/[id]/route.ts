@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const updateSchema = z.object({
   nombre: z.string().min(1).optional(),
-  edad: z.string().min(1).optional(),
+  edad: z.string().nullable().optional(),
   horarioId: z.string().min(1).optional(),
   pago: z.boolean().optional(),
   metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]).nullable().optional(),

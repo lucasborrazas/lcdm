@@ -16,7 +16,6 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 const NAV_GROUPS = [
   {
@@ -32,7 +31,6 @@ const NAV_GROUPS = [
   },
   {
     label: "Torneo",
-    badge: "Beta",
     items: [
       { href: "/torneo/resumen", label: "Resumen", icon: Wallet },
       { href: "/torneo/inscripciones", label: "Inscripciones", icon: ClipboardList },
@@ -64,11 +62,6 @@ export function Navbar() {
               <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 {group.label}
               </span>
-              {group.badge && (
-                <Badge variant="secondary" className="h-4 px-1 text-[9px] leading-none">
-                  {group.badge}
-                </Badge>
-              )}
             </div>
             <div className="space-y-0.5">
               {group.items.map(({ href, label, icon: Icon }) => (

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const inscripcionSchema = z.object({
   nombre: z.string().min(1),
-  edad: z.string().min(1),
+  edad: z.string().nullable().optional(),
   horarioId: z.string().min(1),
   pago: z.boolean().optional(),
   metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]).nullable().optional(),
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   const inscripcion = await prisma.inscripcionTorneo.create({
     data: {
       nombre: data.nombre,
-      edad: data.edad,
+      edad: data.edad ?? null,
       horarioId: data.horarioId,
       pago: data.pago ?? false,
       metodoPago: data.metodoPago ?? null,

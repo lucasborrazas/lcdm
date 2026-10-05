@@ -7,7 +7,11 @@ export function nombreTorneo(mes: number, anio: number): string {
   return `${NOMBRES_MESES[mes - 1]} ${anio}`;
 }
 
-export const EDADES_DISPONIBLES = Array.from({ length: 13 }, (_, i) => (i + 3).toString());
+export const EDADES_DISPONIBLES = [
+  "Sala de 3 a 5",
+  "1° a 7° grado",
+  "1° a 2° año",
+];
 
 export const ESTADOS_TORNEO = [
   { value: "PLANIFICADO", label: "Planificado" },

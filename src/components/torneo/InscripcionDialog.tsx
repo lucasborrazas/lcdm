@@ -18,9 +18,11 @@ import { Button } from "@/components/ui/button";
 import { EDADES_DISPONIBLES, montoPorMetodoPago } from "@/lib/torneo";
 import type { HorarioConCupo, InscripcionConHorario, TorneoConResumen } from "@/lib/types";
 
+const SIN_EDAD = "SIN_ESPECIFICAR";
+
 const schema = z.object({
   nombre: z.string().min(1, "Requerido"),
-  edad: z.string().min(1, "Requerido"),
+  edad: z.string(),
   horarioId: z.string().min(1, "Seleccione un horario"),
   metodoPago: z.enum(["NO_PAGO", "EFECTIVO", "TRANSFERENCIA"]),
   monto: z.string(),
@@ -45,7 +47,7 @@ export function InscripcionDialog({
 }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { nombre: "", edad: "", horarioId: "", metodoPago: "NO_PAGO", monto: "" },
+    defaultValues: { nombre: "", edad: SIN_EDAD, horarioId: "", metodoPago: "NO_PAGO", monto: "" },
   });
 
   useEffect(() => {
@@ -53,13 +55,13 @@ export function InscripcionDialog({
       const metodoPago = inscripcion.pago ? inscripcion.metodoPago ?? "NO_PAGO" : "NO_PAGO";
       form.reset({
         nombre: inscripcion.nombre,
-        edad: inscripcion.edad,
+        edad: inscripcion.edad ?? SIN_EDAD,
         horarioId: inscripcion.horarioId,
         metodoPago,
         monto: inscripcion.monto?.toString() ?? "",
       });
     } else {
-      form.reset({ nombre: "", edad: "", horarioId: "", metodoPago: "NO_PAGO", monto: "" });
+      form.reset({ nombre: "", edad: SIN_EDAD, horarioId: "", metodoPago: "NO_PAGO", monto: "" });
     }
   }, [inscripcion, open]);
 
@@ -73,7 +75,7 @@ export function InscripcionDialog({
   const onSubmit = async (values: FormValues) => {
     const body = {
       nombre: values.nombre,
-      edad: values.edad,
+      edad: values.edad === SIN_EDAD ? null : values.edad,
       horarioId: values.horarioId,
       pago: values.metodoPago !== "NO_PAGO",
       metodoPago: values.metodoPago === "NO_PAGO" ? null : values.metodoPago,
@@ -120,7 +122,7 @@ export function InscripcionDialog({
                 name="edad"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Edad</FormLabel>
+                    <FormLabel>Edad escolar</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -128,8 +130,9 @@ export function InscripcionDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value={SIN_EDAD}>Sin especificar</SelectItem>
                         {EDADES_DISPONIBLES.map((e) => (
-                          <SelectItem key={e} value={e}>{e} años</SelectItem>
+                          <SelectItem key={e} value={e}>{e}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

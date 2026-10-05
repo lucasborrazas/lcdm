@@ -55,7 +55,7 @@ function AlumnoCard({ inscripcion, dragging }: { inscripcion: InscripcionConHora
       )}
     >
       <div className="font-medium">{inscripcion.nombre}</div>
-      <div className="text-xs text-muted-foreground">{inscripcion.edad} años</div>
+      {inscripcion.edad && <div className="text-xs text-muted-foreground">{inscripcion.edad}</div>}
     </div>
   );
 }
