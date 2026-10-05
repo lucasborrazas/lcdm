@@ -19,6 +19,7 @@ import {
 import { Plus, Pencil, Trash2, Settings2, ChevronDown, Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
+import { SearchSelectFilter } from "@/components/shared/SearchSelectFilter";
 import { InscripcionDialog } from "./InscripcionDialog";
 import { GestionarTorneoDialog } from "./GestionarTorneoDialog";
 import { TorneoSwitcher } from "./TorneoSwitcher";
@@ -199,6 +200,7 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
   const [gestionarOpen, setGestionarOpen] = useState(false);
   const [editando, setEditando] = useState<InscripcionConHorario | null>(null);
   const [filtroHorario, setFiltroHorario] = useState<string[]>([]);
+  const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
 
   const cargar = useCallback(async () => {
     if (!torneoId) return;
@@ -214,6 +216,7 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
 
   useEffect(() => {
     setFiltroHorario([]);
+    setFiltroNombre([]);
     cargar();
   }, [cargar]);
 
@@ -227,10 +230,21 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
     [horarios]
   );
 
+  const opcionesNombre = useMemo(
+    () =>
+      Array.from(new Set(inscripciones.map((i) => i.nombre)))
+        .sort((a, b) => a.localeCompare(b))
+        .map((nombre) => ({ value: nombre, label: nombre })),
+    [inscripciones]
+  );
+
   const inscripcionesFiltradas = useMemo(() => {
-    if (filtroHorario.length === 0) return inscripciones;
-    return inscripciones.filter((i) => filtroHorario.includes(i.horarioId));
-  }, [inscripciones, filtroHorario]);
+    return inscripciones.filter((i) => {
+      const pasaHorario = filtroHorario.length === 0 || filtroHorario.includes(i.horarioId);
+      const pasaNombre = filtroNombre.length === 0 || filtroNombre.includes(i.nombre);
+      return pasaHorario && pasaNombre;
+    });
+  }, [inscripciones, filtroHorario, filtroNombre]);
 
   const abrirNueva = () => {
     setEditando(null);
@@ -293,6 +307,14 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
             torneos={torneos}
             torneoId={torneoId}
             onSelect={seleccionarTorneo}
+          />
+          <SearchSelectFilter
+            label="Nombre"
+            placeholder="Buscar alumno..."
+            options={opcionesNombre}
+            selected={filtroNombre}
+            onChange={setFiltroNombre}
+            className="w-56"
           />
           <MultiSelectFilter
             label="Horario"
