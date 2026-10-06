@@ -4,25 +4,9 @@ import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useModoCliente } from "./ModoClienteProvider";
 
-export function ModoClienteToggle({ variant }: { variant: "sidebar" | "bottom" }) {
+export function ModoClienteToggle() {
   const { modoCliente, toggle } = useModoCliente();
   const Icon = modoCliente ? EyeOff : Eye;
-
-  if (variant === "bottom") {
-    return (
-      <button
-        type="button"
-        onClick={toggle}
-        className={cn(
-          "flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] font-medium transition-colors shrink-0",
-          modoCliente ? "text-primary" : "text-muted-foreground"
-        )}
-      >
-        <Icon className="h-5 w-5" />
-        {modoCliente ? "Cliente" : "Completo"}
-      </button>
-    );
-  }
 
   return (
     <button

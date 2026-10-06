@@ -90,7 +90,7 @@ export function Navbar() {
         ))}
       </nav>
       <div className="border-t p-2">
-        <ModoClienteToggle variant="sidebar" />
+        <ModoClienteToggle />
       </div>
     </aside>
   );

@@ -25,6 +25,7 @@ import { GestionarTorneoDialog } from "./GestionarTorneoDialog";
 import { TorneoSwitcher } from "./TorneoSwitcher";
 import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
+import { InscripcionesMobile } from "./InscripcionesMobile";
 import { formatearMoneda } from "@/lib/calculations";
 import { colorHorario, montoPorMetodoPago } from "@/lib/torneo";
 import { cn } from "@/lib/utils";
@@ -190,7 +191,13 @@ function CupoKpiCard({ horario }: { horario: HorarioConCupo }) {
   );
 }
 
-export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: string }) {
+export function InscripcionesTable({
+  torneoIdInicial,
+  abrirGestionarInicial,
+}: {
+  torneoIdInicial?: string;
+  abrirGestionarInicial?: boolean;
+}) {
   const { torneos, torneoId, torneoActual, seleccionarTorneo, recargarTorneos } = useTorneoActual(torneoIdInicial);
 
   const [inscripciones, setInscripciones] = useState<InscripcionConHorario[]>([]);
@@ -201,6 +208,11 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
   const [editando, setEditando] = useState<InscripcionConHorario | null>(null);
   const [filtroHorario, setFiltroHorario] = useState<string[]>([]);
   const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
+
+  // "Gestionar torneo" desde Mas (mobile): /torneo/inscripciones?gestionar=1
+  useEffect(() => {
+    if (abrirGestionarInicial && torneoId) setGestionarOpen(true);
+  }, [abrirGestionarInicial, torneoId]);
 
   const cargar = useCallback(async () => {
     if (!torneoId) return;
@@ -300,7 +312,8 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
   };
 
   return (
-    <div>
+    <>
+    <div className="hidden md:block">
       <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
         <div className="flex flex-wrap items-end gap-3">
           <TorneoSwitcher
@@ -403,6 +416,24 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
           </TableBody>
         </Table>
       </div>
+    </div>
+
+    <div className="md:hidden">
+      <InscripcionesMobile
+        key={torneoId}
+        torneos={torneos}
+        torneoId={torneoId}
+        torneoActual={torneoActual}
+        seleccionarTorneo={seleccionarTorneo}
+        inscripciones={inscripciones}
+        setInscripciones={setInscripciones}
+        horarios={horarios}
+        loading={loading}
+        cargar={cargar}
+        recargarTorneos={recargarTorneos}
+        onGestionar={() => setGestionarOpen(true)}
+      />
+    </div>
 
       <InscripcionDialog
         open={dialogOpen}
@@ -419,6 +450,6 @@ export function InscripcionesTable({ torneoIdInicial }: { torneoIdInicial?: stri
         horarios={horarios}
         onUpdate={onTorneoActualizado}
       />
-    </div>
+    </>
   );
 }
