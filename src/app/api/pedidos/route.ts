@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { descuentaStock } from "@/lib/stock";
 import { Prisma } from "@/generated/prisma/client";
 import { z } from "zod";
 import {
@@ -95,16 +96,9 @@ export async function POST(req: NextRequest) {
         saldoRestante,
         estadoPedido: data.estadoPedido,
         estadoPago: data.estadoPago,
-        stockDescontado: false,
+        stockDescontado: descuentaStock(data.estadoPedido),
       },
     });
-
-    if (data.estadoPedido === "ENTREGADO") {
-      await tx.pedido.update({
-        where: { id: p.id },
-        data: { stockDescontado: true },
-      });
-    }
 
     return p;
   });

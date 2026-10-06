@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { descuentaStock } from "@/lib/stock";
 import { Prisma } from "@/generated/prisma/client";
 import { z } from "zod";
 import {
@@ -68,6 +69,7 @@ export async function PUT(
       where: { id: params.id },
       data: {
         ...data,
+        stockDescontado: descuentaStock(data.estadoPedido ?? pedidoActual.estadoPedido),
         precioUnitario,
         costoUnitario,
         costoTotal,
@@ -76,16 +78,6 @@ export async function PUT(
         saldoRestante,
       },
     });
-
-    const pasaAEntregado =
-      data.estadoPedido === "ENTREGADO" && !pedidoActual.stockDescontado;
-
-    if (pasaAEntregado) {
-      await tx.pedido.update({
-        where: { id: params.id },
-        data: { stockDescontado: true },
-      });
-    }
 
     return p;
   });

@@ -1,3 +1,4 @@
+import { descuentaStock } from "../stock";
 import {
   calcularPrecioEfectivo,
   calcularPrecioUnitario,
@@ -38,24 +39,29 @@ describe("compararTalles", () => {
 // ── calcularPrecioEfectivo ────────────────────────────────────────────────────
 
 describe("calcularPrecioEfectivo", () => {
-  it("aplica 15% de descuento y redondea al múltiplo de 1000 hacia abajo", () => {
-    // 10000 * 0.85 = 8500 → floor(8500/1000)*1000 = 8000
-    expect(calcularPrecioEfectivo(10000)).toBe(8000);
+  it("aplica 15% de descuento y redondea al millar superior", () => {
+    // 10000 * 0.85 = 8500 → 9000
+    expect(calcularPrecioEfectivo(10000)).toBe(9000);
   });
 
   it("resultado exactamente divisible por 1000 no cambia", () => {
-    // 20000 * 0.85 = 17000 → floor(17000/1000)*1000 = 17000
+    // 20000 * 0.85 = 17000 → 17000
     expect(calcularPrecioEfectivo(20000)).toBe(17000);
   });
 
-  it("redondea hacia abajo cuando el resultado tiene decimales de miles", () => {
-    // 15000 * 0.85 = 12750 → floor(12750/1000)*1000 = 12000
-    expect(calcularPrecioEfectivo(15000)).toBe(12000);
+  it("redondea hacia arriba cuando el resultado tiene decimales de miles", () => {
+    // 15000 * 0.85 = 12750 → 13000
+    expect(calcularPrecioEfectivo(15000)).toBe(13000);
   });
 
   it("funciona con precio bajo", () => {
-    // 5000 * 0.85 = 4250 → floor(4250/1000)*1000 = 4000
-    expect(calcularPrecioEfectivo(5000)).toBe(4000);
+    // 5000 * 0.85 = 4250 → 5000
+    expect(calcularPrecioEfectivo(5000)).toBe(5000);
+  });
+
+  it("conjuntos invierno: 87000 transferencia → 74000 efectivo", () => {
+    // 87000 * 0.85 = 73950 → 74000
+    expect(calcularPrecioEfectivo(87000)).toBe(74000);
   });
 });
 
@@ -63,7 +69,7 @@ describe("calcularPrecioEfectivo", () => {
 
 describe("calcularPrecioUnitario", () => {
   it("aplica descuento cuando el método de pago es EFECTIVO", () => {
-    expect(calcularPrecioUnitario(10000, "EFECTIVO")).toBe(8000);
+    expect(calcularPrecioUnitario(10000, "EFECTIVO")).toBe(9000);
   });
 
   it("usa precio normal cuando el método de pago es TRANSFERENCIA", () => {
@@ -256,24 +262,15 @@ describe("fechaAPeriodo", () => {
 // ── Regla: no descontar stock dos veces ───────────────────────────────────────
 
 describe("lógica de descuento de stock", () => {
-  it("stockDescontado false implica que se debe descontar", () => {
-    const pedido = { estadoPedido: "ENTREGADO", stockDescontado: false };
-    const debeDescontar =
-      pedido.estadoPedido === "ENTREGADO" && !pedido.stockDescontado;
-    expect(debeDescontar).toBe(true);
+  it("POR_PEDIR no descuenta stock", () => {
+    expect(descuentaStock("POR_PEDIR")).toBe(false);
   });
 
-  it("stockDescontado true impide segundo descuento", () => {
-    const pedido = { estadoPedido: "ENTREGADO", stockDescontado: true };
-    const debeDescontar =
-      pedido.estadoPedido === "ENTREGADO" && !pedido.stockDescontado;
-    expect(debeDescontar).toBe(false);
+  it("ENCARGADO descuenta stock", () => {
+    expect(descuentaStock("ENCARGADO")).toBe(true);
   });
 
-  it("pedido no ENTREGADO no descuenta stock", () => {
-    const pedido = { estadoPedido: "ENCARGADO", stockDescontado: false };
-    const debeDescontar =
-      pedido.estadoPedido === "ENTREGADO" && !pedido.stockDescontado;
-    expect(debeDescontar).toBe(false);
+  it("ENTREGADO descuenta stock", () => {
+    expect(descuentaStock("ENTREGADO")).toBe(true);
   });
 });

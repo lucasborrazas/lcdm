@@ -65,7 +65,7 @@ function LineaPedido({
   const cantidad = parseInt(useWatch({ control: form.control, name: `lineas.${index}.cantidad` }) || "1") || 1;
   const precioUnitario = parseInt(useWatch({ control: form.control, name: `lineas.${index}.precioUnitario` }) || "0") || 0;
 
-  const productosDisponibles = productos.filter((p) => !p.archivado && p.stockActual > 0);
+  const productosDisponibles = productos.filter((p) => !p.archivado);
   const nombresDisponibles = Array.from(new Set(productosDisponibles.map((p) => p.nombre))).sort();
   const generosDisponibles = Array.from(
     new Set(productosDisponibles.filter((p) => p.nombre === selNombre).map((p) => p.genero))

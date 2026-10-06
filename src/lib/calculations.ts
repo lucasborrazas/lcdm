@@ -27,8 +27,11 @@ export function compararTalles(a: string, b: string): number {
 
 // ── Precios ────────────────────────────────────────────────────────────────────
 
+// 15% de descuento, redondeado al millar superior (el redondeo favorece al
+// vendedor). Se usa aritmetica entera para que un resultado exacto en miles
+// no se corra por error de punto flotante.
 export function calcularPrecioEfectivo(precioVenta: number): number {
-  return Math.floor((precioVenta * 0.85) / 1000) * 1000;
+  return Math.ceil((precioVenta * 85) / 100000) * 1000;
 }
 
 export function calcularPrecioUnitario(

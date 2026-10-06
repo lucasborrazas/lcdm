@@ -25,3 +25,9 @@ export async function obtenerStockActual(
 
   return stockInicial + ingresos - egresosMovimientos - egresosPedidos;
 }
+
+// El stock se descuenta apenas el pedido se encarga (o entrega); en POR_PEDIR
+// todavia no hay nada comprometido, asi que se puede pedir sin stock.
+export function descuentaStock(estadoPedido: string): boolean {
+  return estadoPedido === "ENCARGADO" || estadoPedido === "ENTREGADO";
+}

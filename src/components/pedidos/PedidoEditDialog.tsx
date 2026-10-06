@@ -307,7 +307,7 @@ export function PedidoEditDialog({
 
             {pedido.stockDescontado && (
               <p className="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-md">
-                ✓ Stock ya descontado
+                ✓ Stock ya descontado (pedido encargado o entregado)
               </p>
             )}
 
