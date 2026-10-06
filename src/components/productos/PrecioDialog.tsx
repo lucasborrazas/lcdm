@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { formatearMoneda } from "@/lib/calculations";
 import type { ProductoConStock } from "@/lib/types";
+import { useModoCliente } from "@/components/layout/ModoClienteProvider";
 
 const schema = z.object({
   costoActual: z.string().optional(),
@@ -41,6 +42,7 @@ export function PrecioDialog({
   producto: ProductoConStock | null;
   onSuccess: () => void;
 }) {
+  const { modoCliente } = useModoCliente();
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { costoActual: "", precioVenta: "" },
@@ -74,30 +76,33 @@ export function PrecioDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Cambiar costo / precio</DialogTitle>
+          <DialogTitle>{modoCliente ? "Cambiar precio" : "Cambiar costo / precio"}</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground -mt-2">
           {producto.nombre} — Talle {producto.talle}
         </p>
         <div className="text-xs text-muted-foreground space-y-0.5">
-          <p>Costo actual: {formatearMoneda(producto.costoActual ?? 0)}</p>
+          {!modoCliente && <p>Costo actual: {formatearMoneda(producto.costoActual ?? 0)}</p>}
           <p>Precio actual: {formatearMoneda(producto.precioVenta)}</p>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="costoActual"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nuevo costo ($)</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="0" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* En modo cliente el campo se esconde pero el valor se conserva en el form. */}
+            {!modoCliente && (
+              <FormField
+                control={form.control}
+                name="costoActual"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nuevo costo ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="precioVenta"

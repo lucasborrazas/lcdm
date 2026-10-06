@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { InfoTip } from "@/components/shared/InfoTip";
 import type { ProductoConStock } from "@/lib/types";
+import { useModoCliente } from "@/components/layout/ModoClienteProvider";
 
 const schema = z.object({
   temporada: z.enum(["VERANO", "INVIERNO"]),
@@ -55,6 +56,7 @@ export function ProductoDialog({
   productosExistentes?: ProductoConStock[];
   onSuccess: () => void;
 }) {
+  const { modoCliente } = useModoCliente();
   const [productoBaseKey, setProductoBaseKey] = useState("");
 
   const combosExistentes = useMemo(() => {
@@ -250,31 +252,33 @@ export function ProductoDialog({
             />
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="costoActual"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center gap-1">
-                      <FormLabel>Costo ($)</FormLabel>
-                      <InfoTip>
-                        <p>
-                          <strong>Dejalo vacío</strong> si es una compra nueva con envío u otros
-                          costos a prorratear — se completa solo al cargar el ingreso en Movimientos.
-                        </p>
-                        <p className="mt-2">
-                          <strong>Completalo</strong> solo si ya sabés el costo final (por ejemplo,
-                          stock que ya tenías antes de usar el sistema).
-                        </p>
-                      </InfoTip>
-                    </div>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!modoCliente && (
+                <FormField
+                  control={form.control}
+                  name="costoActual"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-1">
+                        <FormLabel>Costo ($)</FormLabel>
+                        <InfoTip>
+                          <p>
+                            <strong>Dejalo vacío</strong> si es una compra nueva con envío u otros
+                            costos a prorratear — se completa solo al cargar el ingreso en Movimientos.
+                          </p>
+                          <p className="mt-2">
+                            <strong>Completalo</strong> solo si ya sabés el costo final (por ejemplo,
+                            stock que ya tenías antes de usar el sistema).
+                          </p>
+                        </InfoTip>
+                      </div>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <FormField
                 control={form.control}
                 name="precioVenta"

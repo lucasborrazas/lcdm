@@ -15,6 +15,9 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { esRutaOculta } from "@/lib/modoCliente";
+import { useModoCliente } from "./ModoClienteProvider";
+import { ModoClienteToggle } from "./ModoClienteToggle";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -31,10 +34,11 @@ const NAV_ITEMS = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { modoCliente } = useModoCliente();
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card border-t z-30 flex overflow-x-auto">
-      {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+      {NAV_ITEMS.filter(({ href }) => !(modoCliente && esRutaOculta(href))).map(({ href, label, icon: Icon }) => (
         <Link
           key={href}
           href={href}
@@ -49,6 +53,7 @@ export function BottomNav() {
           {label}
         </Link>
       ))}
+      <ModoClienteToggle variant="bottom" />
     </nav>
   );
 }

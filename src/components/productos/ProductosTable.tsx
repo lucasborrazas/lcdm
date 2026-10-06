@@ -25,6 +25,7 @@ import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { ProductoDialog } from "./ProductoDialog";
 import { PrecioDialog } from "./PrecioDialog";
 import { compararTalles } from "@/lib/calculations";
+import { useModoCliente } from "@/components/layout/ModoClienteProvider";
 import type { ProductoConStock } from "@/lib/types";
 
 type Grupo = {
@@ -67,6 +68,7 @@ async function patchArchivado(id: string, archivado: boolean) {
 }
 
 export function ProductosTable() {
+  const { modoCliente } = useModoCliente();
   const [productos, setProductos] = useState<ProductoConStock[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -160,21 +162,25 @@ export function ProductosTable() {
         {p.nombre}
       </TableCell>
       <TableCell className="text-sm">{p.talle}</TableCell>
-      <TableCell className="text-right text-sm">
-        <MonedaCell valor={p.costoActual} />
-      </TableCell>
+      {!modoCliente && (
+        <TableCell className="text-right text-sm">
+          <MonedaCell valor={p.costoActual} />
+        </TableCell>
+      )}
       <TableCell className="text-right text-sm">
         <MonedaCell valor={p.precioVenta} />
       </TableCell>
-      <TableCell className="text-right text-sm">
-        {p.gananciaUnitaria != null ? (
-          <span className={p.gananciaUnitaria >= 0 ? "text-green-600" : "text-red-500"}>
-            <MonedaCell valor={p.gananciaUnitaria} />
-          </span>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        )}
-      </TableCell>
+      {!modoCliente && (
+        <TableCell className="text-right text-sm">
+          {p.gananciaUnitaria != null ? (
+            <span className={p.gananciaUnitaria >= 0 ? "text-green-600" : "text-red-500"}>
+              <MonedaCell valor={p.gananciaUnitaria} />
+            </span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </TableCell>
+      )}
       <TableCell className="text-right">
         <span
           className={
@@ -193,7 +199,7 @@ export function ProductosTable() {
             size="icon"
             className="h-8 w-8"
             onClick={() => handlePrecio(p)}
-            title="Cambiar costo/precio"
+            title={modoCliente ? "Cambiar precio" : "Cambiar costo/precio"}
           >
             <History className="h-3.5 w-3.5" />
           </Button>
@@ -290,9 +296,9 @@ export function ProductosTable() {
               <TableHead>Género</TableHead>
               <TableHead>Producto</TableHead>
               <TableHead>Talle</TableHead>
-              <TableHead className="text-right">Costo</TableHead>
+              {!modoCliente && <TableHead className="text-right">Costo</TableHead>}
               <TableHead className="text-right">Precio</TableHead>
-              <TableHead className="text-right">Ganancia</TableHead>
+              {!modoCliente && <TableHead className="text-right">Ganancia</TableHead>}
               <TableHead className="text-right">Stock</TableHead>
               <TableHead className="w-[130px]"></TableHead>
             </TableRow>
@@ -300,13 +306,13 @@ export function ProductosTable() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={modoCliente ? 7 : 9} className="text-center py-8 text-muted-foreground">
                   Cargando...
                 </TableCell>
               </TableRow>
             ) : grupos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={modoCliente ? 7 : 9} className="text-center py-8 text-muted-foreground">
                   No hay productos
                 </TableCell>
               </TableRow>

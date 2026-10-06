@@ -22,6 +22,7 @@ import {
   calcularPrecioTotal, calcularGanancia, formatearMoneda, compararTalles,
 } from "@/lib/calculations";
 import type { ProductoConStock } from "@/lib/types";
+import { useModoCliente } from "@/components/layout/ModoClienteProvider";
 
 const lineaSchema = z.object({
   productoId: z.string().min(1, "Seleccione un producto"),
@@ -57,6 +58,7 @@ function LineaPedido({
   onRemove: () => void;
   removable: boolean;
 }) {
+  const { modoCliente } = useModoCliente();
   const [selNombre, setSelNombre] = useState("");
   const [selGenero, setSelGenero] = useState("");
 
@@ -238,7 +240,11 @@ function LineaPedido({
       {productoSel && (
         <p className="text-xs text-muted-foreground">
           Total línea: <strong className="text-foreground">{formatearMoneda(precioTotal)}</strong>
-          {" · "}Ganancia: <span className={ganancia >= 0 ? "text-green-600" : "text-red-500"}>{formatearMoneda(ganancia)}</span>
+          {!modoCliente && (
+            <>
+              {" · "}Ganancia: <span className={ganancia >= 0 ? "text-green-600" : "text-red-500"}>{formatearMoneda(ganancia)}</span>
+            </>
+          )}
         </p>
       )}
     </div>

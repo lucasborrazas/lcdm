@@ -6,7 +6,7 @@ export default function ProductosPage() {
     <>
       <PageHeader
         title="Productos"
-        description="Catálogo completo de productos con costos, precios y stock actual"
+        description="Catálogo completo de productos con precios y stock actual"
       />
       <ProductosTable />
     </>

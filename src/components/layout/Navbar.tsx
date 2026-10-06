@@ -16,6 +16,9 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { esRutaOculta } from "@/lib/modoCliente";
+import { useModoCliente } from "./ModoClienteProvider";
+import { ModoClienteToggle } from "./ModoClienteToggle";
 
 const NAV_GROUPS = [
   {
@@ -42,6 +45,7 @@ const NAV_GROUPS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { modoCliente } = useModoCliente();
 
   return (
     <aside className="hidden md:flex fixed inset-y-0 left-0 w-56 flex-col border-r bg-card z-30">
@@ -64,7 +68,9 @@ export function Navbar() {
               </span>
             </div>
             <div className="space-y-0.5">
-              {group.items.map(({ href, label, icon: Icon }) => (
+              {group.items
+                .filter(({ href }) => !(modoCliente && esRutaOculta(href)))
+                .map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}
@@ -83,6 +89,9 @@ export function Navbar() {
           </div>
         ))}
       </nav>
+      <div className="border-t p-2">
+        <ModoClienteToggle variant="sidebar" />
+      </div>
     </aside>
   );
 }

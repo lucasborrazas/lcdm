@@ -22,6 +22,7 @@ import {
   calcularPrecioTotal, calcularGanancia, calcularSaldoRestante, formatearMoneda,
 } from "@/lib/calculations";
 import type { PedidoConProducto } from "@/lib/types";
+import { useModoCliente } from "@/components/layout/ModoClienteProvider";
 
 const schema = z.object({
   cliente: z.string().min(1),
@@ -47,6 +48,7 @@ export function PedidoEditDialog({
   pedido: PedidoConProducto | null;
   onSuccess: () => void;
 }) {
+  const { modoCliente } = useModoCliente();
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -289,12 +291,14 @@ export function PedidoEditDialog({
                 <p className="text-xs text-muted-foreground">Total</p>
                 <p className="font-semibold">{formatearMoneda(precioTotal)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Ganancia</p>
-                <p className={ganancia >= 0 ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
-                  {formatearMoneda(ganancia)}
-                </p>
-              </div>
+              {!modoCliente && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Ganancia</p>
+                  <p className={ganancia >= 0 ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+                    {formatearMoneda(ganancia)}
+                  </p>
+                </div>
+              )}
               {!enGrupo && (
                 <div>
                   <p className="text-xs text-muted-foreground">Saldo restante</p>
