@@ -18,6 +18,7 @@ import {
 import { Plus, ClipboardList, Users, Wallet } from "lucide-react";
 import { MonedaCell } from "@/components/shared/MonedaCell";
 import { NuevoTorneoDialog } from "./NuevoTorneoDialog";
+import { HistorialMobile } from "./HistorialMobile";
 import { nombreTorneo, ESTADOS_TORNEO } from "@/lib/torneo";
 import type { TorneoConResumen } from "@/lib/types";
 
@@ -45,7 +46,8 @@ export function HistorialTorneos() {
   };
 
   return (
-    <div>
+    <>
+    <div className="hidden md:block">
       <div className="flex justify-end mb-4">
         <Button onClick={() => setNuevoOpen(true)}>
           <Plus className="h-4 w-4 mr-1.5" />
@@ -124,5 +126,15 @@ export function HistorialTorneos() {
         onCreated={cargar}
       />
     </div>
+
+    <div className="md:hidden">
+      <HistorialMobile
+        torneos={torneos}
+        loading={loading}
+        onEstado={actualizarEstado}
+        onCreado={cargar}
+      />
+    </div>
+    </>
   );
 }

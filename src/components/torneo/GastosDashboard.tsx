@@ -14,10 +14,11 @@ import { TorneoSwitcher } from "./TorneoSwitcher";
 import { NuevoTorneoButton } from "./NuevoTorneoButton";
 import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
+import { ResumenMobile } from "./ResumenMobile";
 import { formatearMoneda } from "@/lib/calculations";
 import { colorHorario } from "@/lib/torneo";
 import { cn } from "@/lib/utils";
-import type { GastoTorneo, HorarioConCupo } from "@/lib/types";
+import type { GastoTorneo, HorarioConCupo, InscripcionConHorario } from "@/lib/types";
 
 function MetricaCard({
   titulo,
@@ -140,6 +141,7 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
 
   const [gastos, setGastos] = useState<GastoTorneo[]>([]);
   const [horarios, setHorarios] = useState<HorarioConCupo[]>([]);
+  const [inscripciones, setInscripciones] = useState<InscripcionConHorario[]>([]);
   const [loading, setLoading] = useState(true);
   const [nuevoConcepto, setNuevoConcepto] = useState("");
   const [nuevoMonto, setNuevoMonto] = useState("");
@@ -147,12 +149,14 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
   const cargar = useCallback(async () => {
     if (!torneoId) return;
     setLoading(true);
-    const [resGastos, resHorarios] = await Promise.all([
+    const [resGastos, resHorarios, resInscripciones] = await Promise.all([
       fetch(`/api/torneo/gastos?torneoId=${torneoId}`),
       fetch(`/api/torneo/horarios?torneoId=${torneoId}`),
+      fetch(`/api/torneo/inscripciones?torneoId=${torneoId}`),
     ]);
     setGastos(await resGastos.json());
     setHorarios(await resHorarios.json());
+    setInscripciones(await resInscripciones.json());
     setLoading(false);
   }, [torneoId]);
 
@@ -198,7 +202,8 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
   }));
 
   return (
-    <div>
+    <>
+    <div className="hidden md:block">
       <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
         <div className="flex flex-wrap items-end gap-3">
           <TorneoSwitcher
@@ -320,5 +325,21 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
         </CardContent>
       </Card>
     </div>
+
+    <div className="md:hidden">
+      <ResumenMobile
+        torneos={torneos}
+        torneoId={torneoId}
+        torneoActual={torneoActual}
+        seleccionarTorneo={seleccionarTorneo}
+        gastos={gastos}
+        horarios={horarios}
+        inscripciones={inscripciones}
+        loading={loading}
+        onActualizar={actualizar}
+        onTorneoCreado={onTorneoCreado}
+      />
+    </div>
+    </>
   );
 }

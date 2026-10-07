@@ -4,10 +4,12 @@ import { HistorialTorneos } from "@/components/torneo/HistorialTorneos";
 export default function HistorialTorneosPage() {
   return (
     <>
-      <PageHeader
-        title="Historial de torneos"
-        description="Todas las ediciones mensuales, su estado y cómo les fue"
-      />
+      <div className="hidden md:block">
+        <PageHeader
+          title="Historial de torneos"
+          description="Todas las ediciones mensuales, su estado y cómo les fue"
+        />
+      </div>
       <HistorialTorneos />
     </>
   );

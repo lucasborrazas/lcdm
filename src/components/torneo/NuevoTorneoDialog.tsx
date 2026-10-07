@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { NOMBRES_MESES, nombreTorneo } from "@/lib/torneo";
 import type { TorneoConResumen } from "@/lib/types";
 
-function proximoMesAnio(torneos: TorneoConResumen[]): { mes: number; anio: number } {
+export function proximoMesAnio(torneos: TorneoConResumen[]): { mes: number; anio: number } {
   if (torneos.length === 0) {
     const hoy = new Date();
     return { mes: hoy.getMonth() + 1, anio: hoy.getFullYear() };

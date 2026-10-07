@@ -8,10 +8,12 @@ export default function ResumenTorneoPage({
 }) {
   return (
     <>
-      <PageHeader
-        title="Resumen — Torneo"
-        description="Cuánto entró, cuánto se gastó y cuánto ganaste o perdiste en el mes"
-      />
+      <div className="hidden md:block">
+        <PageHeader
+          title="Resumen — Torneo"
+          description="Cuánto entró, cuánto se gastó y cuánto ganaste o perdiste en el mes"
+        />
+      </div>
       <GastosDashboard torneoIdInicial={searchParams.torneoId} />
     </>
   );
