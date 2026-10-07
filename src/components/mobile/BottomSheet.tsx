@@ -34,7 +34,7 @@ export function BottomSheet({
           <SheetPrimitive.Title className="shrink-0 px-5 pb-2 pt-3 text-lg font-bold">
             {title}
           </SheetPrimitive.Title>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-1">
             {children}
           </div>
         </SheetPrimitive.Popup>
