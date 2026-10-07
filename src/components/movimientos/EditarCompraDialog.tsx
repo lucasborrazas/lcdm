@@ -21,6 +21,7 @@ import {
 } from "./MovimientoForm";
 import type { ProductoConStock } from "@/lib/types";
 import type { MovimientoStock } from "@/generated/prisma/client";
+import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 type Impacto = { productoId: string; productoNombre: string; talle: string; costoAnterior: number | null; costoNuevo: number | null };
 
@@ -48,6 +49,7 @@ export function EditarCompraDialog({
       lineas: [LINEA_VACIA],
     },
   });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "lineas" });
 
@@ -123,14 +125,14 @@ export function EditarCompraDialog({
     });
     setGuardando(false);
     if (res.ok) {
-      onOpenChange(false);
+      proteccion.cerrar();
       onSuccess();
     }
   };
 
   if (impactos) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Este cambio afecta el costo promedio</DialogTitle>
@@ -158,13 +160,14 @@ export function EditarCompraDialog({
               {guardando ? "Guardando..." : "Confirmar cambios"}
             </Button>
           </div>
+          <ProtegerCierre proteccion={proteccion} />
         </DialogContent>
       </Dialog>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar compra</DialogTitle>
@@ -244,7 +247,7 @@ export function EditarCompraDialog({
 
               <Separator />
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                <Button type="button" variant="outline" onClick={() => proteccion.onOpenChange(false)}>
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -254,6 +257,7 @@ export function EditarCompraDialog({
             </form>
           </Form>
         )}
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );

@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { InfoTip } from "@/components/shared/InfoTip";
 import type { ProductoConStock } from "@/lib/types";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
+import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 const schema = z.object({
   temporada: z.enum(["VERANO", "INVIERNO"]),
@@ -82,6 +83,7 @@ export function ProductoDialog({
       stockMinimo: "",
     },
   });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
 
   useEffect(() => {
     setProductoBaseKey("");
@@ -150,7 +152,7 @@ export function ProductoDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{producto ? "Editar producto" : "Agregar producto"}</DialogTitle>
@@ -309,7 +311,7 @@ export function ProductoDialog({
             />
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => proteccion.onOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -318,6 +320,7 @@ export function ProductoDialog({
             </div>
           </form>
         </Form>
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );

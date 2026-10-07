@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { formatearMoneda } from "@/lib/calculations";
 import type { ProductoConStock } from "@/lib/types";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
+import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 const schema = z.object({
   costoActual: z.string().optional(),
@@ -47,6 +48,7 @@ export function PrecioDialog({
     resolver: zodResolver(schema),
     defaultValues: { costoActual: "", precioVenta: "" },
   });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
 
   useEffect(() => {
     if (producto) {
@@ -73,7 +75,7 @@ export function PrecioDialog({
   if (!producto) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>{modoCliente ? "Cambiar precio" : "Cambiar costo / precio"}</DialogTitle>
@@ -117,7 +119,7 @@ export function PrecioDialog({
               )}
             />
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => proteccion.onOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -126,6 +128,7 @@ export function PrecioDialog({
             </div>
           </form>
         </Form>
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );

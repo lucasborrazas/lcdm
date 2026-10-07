@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EDADES_DISPONIBLES, montoPorMetodoPago } from "@/lib/torneo";
 import type { HorarioConCupo, InscripcionConHorario, TorneoConResumen } from "@/lib/types";
+import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 const SIN_EDAD = "SIN_ESPECIFICAR";
 
@@ -49,6 +50,7 @@ export function InscripcionDialog({
     resolver: zodResolver(schema),
     defaultValues: { nombre: "", edad: SIN_EDAD, horarioId: "", metodoPago: "NO_PAGO", monto: "" },
   });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
 
   useEffect(() => {
     if (inscripcion) {
@@ -97,7 +99,7 @@ export function InscripcionDialog({
   const metodoPagoActual = form.watch("metodoPago");
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{inscripcion ? "Editar inscripción" : "Nueva inscripción"}</DialogTitle>
@@ -214,7 +216,7 @@ export function InscripcionDialog({
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => proteccion.onOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -223,6 +225,7 @@ export function InscripcionDialog({
             </div>
           </form>
         </Form>
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );

@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { StockResumen } from "@/lib/types";
+import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 const schema = z.object({
   stockInicial: z.string().min(1, "Requerido"),
@@ -36,6 +37,7 @@ export function StockEditDialog({
     resolver: zodResolver(schema),
     defaultValues: { stockInicial: "0", alertaMinimo: "0" },
   });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
 
   useEffect(() => {
     if (item) {
@@ -67,7 +69,7 @@ export function StockEditDialog({
     item.egresos;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>Editar stock</DialogTitle>
@@ -113,7 +115,7 @@ export function StockEditDialog({
             />
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => proteccion.onOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -122,6 +124,7 @@ export function StockEditDialog({
             </div>
           </form>
         </Form>
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );

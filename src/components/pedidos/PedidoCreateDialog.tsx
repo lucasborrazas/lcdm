@@ -23,6 +23,7 @@ import {
 } from "@/lib/calculations";
 import type { ProductoConStock } from "@/lib/types";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
+import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 const lineaSchema = z.object({
   productoId: z.string().min(1, "Seleccione un producto"),
@@ -306,6 +307,7 @@ export function PedidoCreateDialog({
       lineas: [LINEA_VACIA],
     },
   });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "lineas" });
 
@@ -347,12 +349,12 @@ export function PedidoCreateDialog({
 
     if (res.ok) {
       onSuccess();
-      onOpenChange(false);
+      proteccion.cerrar();
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nuevo pedido</DialogTitle>
@@ -488,7 +490,7 @@ export function PedidoCreateDialog({
             <ResumenPedido control={form.control} />
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => proteccion.onOpenChange(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -497,6 +499,7 @@ export function PedidoCreateDialog({
             </div>
           </form>
         </Form>
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );

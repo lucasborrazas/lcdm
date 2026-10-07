@@ -23,6 +23,7 @@ import {
 } from "@/lib/calculations";
 import type { PedidoConProducto } from "@/lib/types";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
+import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 const schema = z.object({
   cliente: z.string().min(1),
@@ -62,6 +63,7 @@ export function PedidoEditDialog({
       estadoPago: "PENDIENTE",
     },
   });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
 
   useEffect(() => {
     if (pedido) {
@@ -121,7 +123,7 @@ export function PedidoEditDialog({
   if (!pedido) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Editar pedido</DialogTitle>
@@ -321,7 +323,7 @@ export function PedidoEditDialog({
                 Eliminar
               </Button>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                <Button type="button" variant="outline" onClick={() => proteccion.onOpenChange(false)}>
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -331,6 +333,7 @@ export function PedidoEditDialog({
             </div>
           </form>
         </Form>
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );
