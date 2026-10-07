@@ -113,8 +113,8 @@ function Cancha({
           >
             {p.numero}
           </span>
-          <span className="max-w-[72px] truncate text-[11px] font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,.6)]">
-            {p.jugador.nombre.split(" ")[0]}
+          <span className="max-w-[88px] truncate rounded bg-black/50 px-1 text-[10.5px] font-medium text-white">
+            {nombreCorto(p.jugador.nombre)}
           </span>
         </button>
       ))}
