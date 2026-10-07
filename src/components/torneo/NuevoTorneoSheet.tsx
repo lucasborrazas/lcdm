@@ -6,6 +6,7 @@ import type { TorneoConResumen } from "@/lib/types";
 import { BottomSheet } from "@/components/mobile/BottomSheet";
 import { EtiquetaSeccion } from "@/components/mobile/ui";
 import { proximoMesAnio } from "./NuevoTorneoDialog";
+import { useReportarCambios } from "@/components/shared/CierreProtegido";
 
 const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
 
@@ -43,6 +44,12 @@ function FormNuevoTorneo({
   const [duplicarDesde, setDuplicarDesde] = useState(torneos[0]?.id ?? "ninguno");
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+
+  useReportarCambios(
+    mes !== sugerido.mes ||
+      anio !== sugerido.anio.toString() ||
+      duplicarDesde !== (torneos[0]?.id ?? "ninguno")
+  );
 
   const crear = async () => {
     setGuardando(true);

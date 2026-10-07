@@ -11,6 +11,7 @@ import { MobileHeader, TorneoPill } from "@/components/mobile/MobileHeader";
 import { useToast } from "@/components/mobile/ToastUndo";
 import { EtiquetaSeccion } from "@/components/mobile/ui";
 import { NuevoTorneoSheet } from "./NuevoTorneoSheet";
+import { useReportarCambios } from "@/components/shared/CierreProtegido";
 
 const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
 
@@ -30,6 +31,8 @@ function FormCosto({
   const [monto, setMonto] = useState(gasto?.monto.toString() ?? "");
   const [confirmar, setConfirmar] = useState(false);
   const [guardando, setGuardando] = useState(false);
+
+  useReportarCambios(concepto !== (gasto?.concepto ?? "") || monto !== (gasto?.monto.toString() ?? ""));
 
   const guardar = async () => {
     setGuardando(true);

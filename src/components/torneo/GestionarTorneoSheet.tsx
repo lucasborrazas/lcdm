@@ -8,6 +8,7 @@ import type { HorarioConCupo, TorneoConResumen } from "@/lib/types";
 import { BottomSheet } from "@/components/mobile/BottomSheet";
 import { useToast } from "@/components/mobile/ToastUndo";
 import { EtiquetaSeccion, Segmented } from "@/components/mobile/ui";
+import { useReportarCambios } from "@/components/shared/CierreProtegido";
 
 const inputCls = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
 const btnPrimario =
@@ -30,6 +31,7 @@ function DatosTorneo({
     estado !== torneo.estado ||
     precioEfectivo !== torneo.precioEfectivo.toString() ||
     precioTransferencia !== torneo.precioTransferencia.toString();
+  useReportarCambios(cambiado);
 
   const guardar = async () => {
     setGuardando(true);
@@ -100,6 +102,7 @@ function FilaHorario({
     grupoEdadNombre !== horario.grupoEdad.nombre ||
     cupoMaximo !== (horario.cupoMaximo?.toString() ?? "") ||
     activo !== horario.activo;
+  useReportarCambios(cambiado);
 
   const guardar = async () => {
     setGuardando(true);
@@ -209,6 +212,8 @@ function NuevoHorario({ torneo, onUpdate }: { torneo: TorneoConResumen; onUpdate
   const [grupo, setGrupo] = useState("");
   const [cupo, setCupo] = useState("");
   const [guardando, setGuardando] = useState(false);
+
+  useReportarCambios(!!(hora || grupo || cupo));
 
   const agregar = async () => {
     setGuardando(true);

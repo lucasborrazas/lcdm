@@ -2,6 +2,7 @@
 
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
+import { ProtegerCierre, useCierreProtegido } from "@/components/shared/CierreProtegido";
 
 // Hoja inferior para mobile: esquinas superiores 24px, handle, overlay
 // azulado, max-h 90% y scroll interno.
@@ -18,8 +19,12 @@ export function BottomSheet({
   children: React.ReactNode;
   className?: string;
 }) {
+  // Las hojas con formulario avisan sus cambios con useReportarCambios; si
+  // alguna tiene algo sin guardar, cerrar (fondo, Esc) pide confirmacion.
+  const proteccion = useCierreProtegido({ open, onOpenChange });
+
   return (
-    <SheetPrimitive.Root open={open} onOpenChange={onOpenChange}>
+    <SheetPrimitive.Root open={open} onOpenChange={proteccion.onOpenChange}>
       <SheetPrimitive.Portal>
         <SheetPrimitive.Backdrop className="fixed inset-0 z-50 bg-[rgba(15,20,50,.45)] transition-opacity duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
         <SheetPrimitive.Popup
@@ -35,7 +40,7 @@ export function BottomSheet({
             {title}
           </SheetPrimitive.Title>
           <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-1">
-            {children}
+            <ProtegerCierre proteccion={proteccion}>{children}</ProtegerCierre>
           </div>
         </SheetPrimitive.Popup>
       </SheetPrimitive.Portal>

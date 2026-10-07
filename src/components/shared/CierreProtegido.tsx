@@ -7,6 +7,8 @@ import { debeConfirmarCierre, hayCambios } from "@/lib/cierreProtegido";
 
 type Fuentes = Map<string, boolean>;
 
+const ID_SEGUIR = "cierre-seguir-editando";
+
 export type CierreProtegido = {
   /** Reemplaza al onOpenChange del modal: pregunta si hay cambios sin guardar. */
   onOpenChange: (open: boolean) => void;
@@ -114,7 +116,12 @@ export function ProtegerCierre({
           if (!abierto) proteccion.seguirEditando();
         }}
       >
-        <DialogContent className="sm:max-w-sm z-[70]" showCloseButton={false}>
+        <DialogContent
+          className="sm:max-w-sm z-[70]"
+          showCloseButton={false}
+          // el foco arranca en "Seguir editando": un Enter de mas no descarta nada
+          initialFocus={() => document.getElementById(ID_SEGUIR)}
+        >
           <DialogHeader>
             <DialogTitle>¿Cerrar sin guardar?</DialogTitle>
             <DialogDescription>
@@ -125,7 +132,7 @@ export function ProtegerCierre({
             <Button type="button" variant="destructive" onClick={proteccion.descartar}>
               Descartar cambios
             </Button>
-            <Button type="button" autoFocus onClick={proteccion.seguirEditando}>
+            <Button type="button" id={ID_SEGUIR} onClick={proteccion.seguirEditando}>
               Seguir editando
             </Button>
           </div>

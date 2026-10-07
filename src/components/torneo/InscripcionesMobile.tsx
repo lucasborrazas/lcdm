@@ -18,6 +18,7 @@ import { BottomSheet } from "@/components/mobile/BottomSheet";
 import { MobileHeader, TorneoPill } from "@/components/mobile/MobileHeader";
 import { useToast } from "@/components/mobile/ToastUndo";
 import { Chip, EtiquetaSeccion, Fab, Segmented, SwitchGrande } from "@/components/mobile/ui";
+import { useReportarCambios } from "@/components/shared/CierreProtegido";
 
 type Metodo = "EFECTIVO" | "TRANSFERENCIA";
 type ValorPago = "NO_PAGO" | Metodo;
@@ -179,6 +180,15 @@ function FormAlumno({
   const [confirmarBorrado, setConfirmarBorrado] = useState(false);
   const [guardando, setGuardando] = useState(false);
 
+  const pagoOriginal: ValorPago = inscripcion.pago ? inscripcion.metodoPago ?? "NO_PAGO" : "NO_PAGO";
+  useReportarCambios(
+    nombre !== inscripcion.nombre ||
+      edad !== (inscripcion.edad ?? null) ||
+      horarioId !== inscripcion.horarioId ||
+      pago !== pagoOriginal ||
+      (pago !== "NO_PAGO" && monto !== (inscripcion.monto?.toString() ?? ""))
+  );
+
   const elegirPago = (v: ValorPago) => {
     setPago(v);
     const m = torneo ? montoPorMetodoPago(torneo, v === "NO_PAGO" ? null : v) : null;
@@ -307,6 +317,8 @@ function FormNueva({
   const [horarioId, setHorarioId] = useState("");
   const [pago, setPago] = useState<ValorPago>("NO_PAGO");
   const [guardando, setGuardando] = useState(false);
+
+  useReportarCambios(!!nombre.trim() || edad !== null || horarioId !== "" || pago !== "NO_PAGO");
 
   const guardar = async () => {
     setGuardando(true);
