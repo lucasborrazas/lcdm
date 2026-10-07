@@ -83,7 +83,7 @@ export function ProductoDialog({
       stockMinimo: "",
     },
   });
-  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty });
+  const proteccion = useCierreProtegido({ open, onOpenChange, dirty: form.formState.isDirty || productoBaseKey !== "" });
 
   useEffect(() => {
     setProductoBaseKey("");

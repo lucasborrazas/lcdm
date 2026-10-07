@@ -23,7 +23,7 @@ import {
 } from "@/lib/calculations";
 import type { ProductoConStock } from "@/lib/types";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
-import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
+import { useCierreProtegido, ProtegerCierre, useReportarCambios } from "@/components/shared/CierreProtegido";
 
 const lineaSchema = z.object({
   productoId: z.string().min(1, "Seleccione un producto"),
@@ -62,6 +62,7 @@ function LineaPedido({
   const { modoCliente } = useModoCliente();
   const [selNombre, setSelNombre] = useState("");
   const [selGenero, setSelGenero] = useState("");
+  useReportarCambios(!!selNombre || !!selGenero);
 
   const productoId = useWatch({ control: form.control, name: `lineas.${index}.productoId` });
   const metodoPago = useWatch({ control: form.control, name: "metodoPago" });
@@ -356,6 +357,7 @@ export function PedidoCreateDialog({
   return (
     <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <ProtegerCierre proteccion={proteccion}>
         <DialogHeader>
           <DialogTitle>Nuevo pedido</DialogTitle>
         </DialogHeader>
@@ -499,7 +501,7 @@ export function PedidoCreateDialog({
             </div>
           </form>
         </Form>
-        <ProtegerCierre proteccion={proteccion} />
+        </ProtegerCierre>
       </DialogContent>
     </Dialog>
   );
