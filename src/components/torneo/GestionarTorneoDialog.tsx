@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Save } from "lucide-react";
 import { ESTADOS_TORNEO, nombreTorneo } from "@/lib/torneo";
 import type { HorarioConCupo, TorneoConResumen } from "@/lib/types";
+import { useCierreProtegido, ProtegerCierre, useReportarCambios } from "@/components/shared/CierreProtegido";
 
 function FilaHorario({
   horario,
@@ -32,6 +33,7 @@ function FilaHorario({
     grupoEdadNombre !== horario.grupoEdad.nombre ||
     cupoMaximo !== (horario.cupoMaximo?.toString() ?? "") ||
     activo !== horario.activo;
+  useReportarCambios(cambiado);
 
   const guardar = async () => {
     setGuardando(true);
@@ -121,6 +123,7 @@ function DatosTorneo({
     estado !== torneo.estado ||
     precioEfectivo !== torneo.precioEfectivo.toString() ||
     precioTransferencia !== torneo.precioTransferencia.toString();
+  useReportarCambios(cambiado);
 
   const guardar = async () => {
     setGuardando(true);
@@ -187,6 +190,13 @@ export function GestionarTorneoDialog({
   const [nuevoGrupoEdad, setNuevoGrupoEdad] = useState("");
   const [nuevoCupo, setNuevoCupo] = useState("");
 
+  // el formulario de "nuevo horario" tambien cuenta si quedo algo escrito
+  const proteccion = useCierreProtegido({
+    open,
+    onOpenChange,
+    dirty: !!(nuevaHora || nuevoGrupoEdad || nuevoCupo),
+  });
+
   useEffect(() => {
     if (open) {
       setNuevaHora("");
@@ -214,8 +224,9 @@ export function GestionarTorneoDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-xl">
+        <ProtegerCierre proteccion={proteccion}>
         <DialogHeader>
           <DialogTitle>
             {torneo ? `Gestionar torneo — ${nombreTorneo(torneo.mes, torneo.anio)}` : "Gestionar torneo"}
@@ -255,6 +266,7 @@ export function GestionarTorneoDialog({
             Agregar
           </Button>
         </div>
+        </ProtegerCierre>
       </DialogContent>
     </Dialog>
   );

@@ -34,7 +34,7 @@ export function useCierreProtegido({
   dirty?: boolean;
 }): CierreProtegido {
   const [confirmando, setConfirmando] = useState(false);
-  const fuentes = useRef<Fuentes>(new Map()).current;
+  const [fuentes] = useState<Fuentes>(() => new Map());
   const dirtyRef = useRef(dirty);
   useEffect(() => {
     dirtyRef.current = dirty;

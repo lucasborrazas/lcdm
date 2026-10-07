@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { NOMBRES_MESES, nombreTorneo } from "@/lib/torneo";
 import type { TorneoConResumen } from "@/lib/types";
+import { useCierreProtegido, ProtegerCierre, useReportarCambios } from "@/components/shared/CierreProtegido";
 
 export function proximoMesAnio(torneos: TorneoConResumen[]): { mes: number; anio: number } {
   if (torneos.length === 0) {
@@ -40,6 +41,16 @@ export function NuevoTorneoDialog({
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
 
+  const sugerido = proximoMesAnio(torneos);
+  const proteccion = useCierreProtegido({
+    open,
+    onOpenChange,
+    dirty:
+      mes !== sugerido.mes ||
+      anio !== sugerido.anio ||
+      duplicarDesde !== (torneos[0]?.id ?? "ninguno"),
+  });
+
   useEffect(() => {
     if (open) {
       const sugerido = proximoMesAnio(torneos);
@@ -65,7 +76,7 @@ export function NuevoTorneoDialog({
     setGuardando(false);
     if (res.ok) {
       const data = await res.json();
-      onOpenChange(false);
+      proteccion.cerrar();
       onCreated(data.id);
     } else {
       const data = await res.json().catch(() => null);
@@ -74,7 +85,7 @@ export function NuevoTorneoDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={proteccion.onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Nuevo torneo</DialogTitle>
@@ -117,12 +128,13 @@ export function NuevoTorneoDialog({
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => proteccion.onOpenChange(false)}>Cancelar</Button>
             <Button onClick={crear} disabled={guardando}>
               {guardando ? "Creando..." : "Crear torneo"}
             </Button>
           </div>
         </div>
+        <ProtegerCierre proteccion={proteccion} />
       </DialogContent>
     </Dialog>
   );
