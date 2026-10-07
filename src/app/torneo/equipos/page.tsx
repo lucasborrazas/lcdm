@@ -8,10 +8,12 @@ export default function EquiposTorneoPage({
 }) {
   return (
     <>
-      <PageHeader
-        title="Equipos — Torneo"
-        description="Arrastrá a cada alumno al equipo que corresponda, por horario"
-      />
+      <div className="hidden md:block">
+        <PageHeader
+          title="Equipos — Torneo"
+          description="Arrastrá a cada alumno al equipo que corresponda, por horario"
+        />
+      </div>
       <EquiposBoard torneoIdInicial={searchParams.torneoId} />
     </>
   );

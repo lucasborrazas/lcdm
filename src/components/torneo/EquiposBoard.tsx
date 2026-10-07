@@ -19,6 +19,7 @@ import { Undo2, RotateCcw } from "lucide-react";
 import { TorneoSwitcher } from "./TorneoSwitcher";
 import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
+import { EquiposMobile, type EstadoEquipo } from "./EquiposMobile";
 import { calcularFormacion, type JugadorEnCancha } from "@/lib/formacion";
 import { cn } from "@/lib/utils";
 import type { HorarioConCupo, InscripcionConHorario } from "@/lib/types";
@@ -223,23 +224,36 @@ export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) 
     setActiveId(event.active.id as string);
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    setActiveId(null);
-    const { active, over } = event;
-    if (!over) return;
+  const putEquipo = async (id: string, body: Record<string, unknown>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/torneo/inscripciones/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
 
-    const inscripcionId = active.id as string;
-    const destino = over.id as string;
-    const nuevoEquipo: Equipo | null = destino === "SIN_ASIGNAR" ? null : (destino as Equipo);
+  const aplicarEstado = (previos: EstadoEquipo[]) => {
+    setInscripciones((prev) =>
+      prev.map((i) => {
+        const p = previos.find((x) => x.id === i.id);
+        return p ? { ...i, equipo: p.equipo, equipoAsignadoAt: p.equipoAsignadoAt } : i;
+      })
+    );
+  };
 
+  // Asigna (o quita) el equipo de una inscripcion: optimista, con historial
+  // para "Deshacer" y reversion si el guardado falla.
+  const moverInscripcion = async (inscripcionId: string, nuevoEquipo: Equipo | null): Promise<boolean> => {
     const actual = inscripciones.find((i) => i.id === inscripcionId);
-    if (!actual || actual.equipo === nuevoEquipo) return;
+    if (!actual || actual.equipo === nuevoEquipo) return false;
+    const previo: EstadoEquipo = { id: inscripcionId, equipo: actual.equipo, equipoAsignadoAt: actual.equipoAsignadoAt };
 
-    setHistorial((prev) => [
-      ...prev,
-      { id: inscripcionId, equipo: actual.equipo, equipoAsignadoAt: actual.equipoAsignadoAt },
-    ]);
-
+    setHistorial((prev) => [...prev, previo]);
     setInscripciones((prev) =>
       prev.map((i) =>
         i.id === inscripcionId
@@ -248,11 +262,41 @@ export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) 
       )
     );
 
-    await fetch(`/api/torneo/inscripciones/${inscripcionId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ equipo: nuevoEquipo }),
+    const ok = await putEquipo(inscripcionId, { equipo: nuevoEquipo });
+    if (!ok) {
+      aplicarEstado([previo]);
+      setHistorial((prev) => prev.slice(0, -1));
+    }
+    return ok;
+  };
+
+  // Deshacer puntual (toast de mobile): vuelve al estado previo y lo saca del historial.
+  const restaurar = async (previo: EstadoEquipo) => {
+    aplicarEstado([previo]);
+    setHistorial((prev) => {
+      const idx = prev.map((h) => h.id).lastIndexOf(previo.id);
+      return idx === -1 ? prev : prev.filter((_, k) => k !== idx);
     });
+    await putEquipo(previo.id, { equipo: previo.equipo, equipoAsignadoAt: previo.equipoAsignadoAt });
+  };
+
+  const restaurarVarios = async (previos: EstadoEquipo[]) => {
+    aplicarEstado(previos);
+    await Promise.all(
+      previos.map((p) => putEquipo(p.id, { equipo: p.equipo, equipoAsignadoAt: p.equipoAsignadoAt }))
+    );
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const destino = over.id as string;
+    await moverInscripcion(
+      active.id as string,
+      destino === "SIN_ASIGNAR" ? null : (destino as Equipo)
+    );
   };
 
   const deshacer = async () => {
@@ -273,29 +317,35 @@ export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) 
     });
   };
 
-  const reiniciarTodo = async () => {
+  // Quita el equipo de todos los del horario; devuelve el estado previo para poder restaurarlo.
+  const reiniciarHorario = async (): Promise<EstadoEquipo[]> => {
     const asignados = inscripcionesDelHorario.filter((i) => i.equipo);
-    if (asignados.length === 0) return;
-    if (!confirm(`¿Quitar a los ${asignados.length} jugadores de sus equipos en este horario?`)) return;
+    if (asignados.length === 0) return [];
+    const previos: EstadoEquipo[] = asignados.map((i) => ({
+      id: i.id,
+      equipo: i.equipo,
+      equipoAsignadoAt: i.equipoAsignadoAt,
+    }));
 
     setHistorial([]);
     setInscripciones((prev) =>
       prev.map((i) => (i.horarioId === horarioId ? { ...i, equipo: null, equipoAsignadoAt: null } : i))
     );
 
-    await Promise.all(
-      asignados.map((i) =>
-        fetch(`/api/torneo/inscripciones/${i.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ equipo: null }),
-        })
-      )
-    );
+    await Promise.all(asignados.map((i) => putEquipo(i.id, { equipo: null })));
+    return previos;
+  };
+
+  const reiniciarTodo = async () => {
+    const asignados = inscripcionesDelHorario.filter((i) => i.equipo);
+    if (asignados.length === 0) return;
+    if (!confirm(`¿Quitar a los ${asignados.length} jugadores de sus equipos en este horario?`)) return;
+    await reiniciarHorario();
   };
 
   return (
-    <div>
+    <>
+    <div className="hidden md:block">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
         <div className="flex flex-wrap items-end gap-4">
           <TorneoSwitcher
@@ -360,5 +410,25 @@ export function EquiposBoard({ torneoIdInicial }: { torneoIdInicial?: string }) 
         </DndContext>
       )}
     </div>
+
+    <div className="md:hidden">
+      <EquiposMobile
+        torneos={torneos}
+        torneoId={torneoId}
+        seleccionarTorneo={seleccionarTorneo}
+        horarios={horarios}
+        horarioId={horarioId}
+        setHorarioId={setHorarioId}
+        inscripciones={inscripciones}
+        loading={loading}
+        puedeDeshacer={historial.length > 0}
+        onDeshacer={deshacer}
+        onMover={moverInscripcion}
+        onRestaurar={restaurar}
+        onReiniciar={reiniciarHorario}
+        onRestaurarVarios={restaurarVarios}
+      />
+    </div>
+    </>
   );
 }
