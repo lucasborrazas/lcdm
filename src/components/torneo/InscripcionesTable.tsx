@@ -26,6 +26,7 @@ import { TorneoSwitcher } from "./TorneoSwitcher";
 import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
 import { InscripcionesMobile } from "./InscripcionesMobile";
+import { GestionarTorneoSheet } from "./GestionarTorneoSheet";
 import { formatearMoneda } from "@/lib/calculations";
 import { colorHorario, montoPorMetodoPago } from "@/lib/torneo";
 import { cn } from "@/lib/utils";
@@ -205,13 +206,17 @@ export function InscripcionesTable({
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [gestionarOpen, setGestionarOpen] = useState(false);
+  const [gestionarMobileOpen, setGestionarMobileOpen] = useState(false);
   const [editando, setEditando] = useState<InscripcionConHorario | null>(null);
   const [filtroHorario, setFiltroHorario] = useState<string[]>([]);
   const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
 
   // "Gestionar torneo" desde Mas (mobile): /torneo/inscripciones?gestionar=1
   useEffect(() => {
-    if (abrirGestionarInicial && torneoId) setGestionarOpen(true);
+    if (!abrirGestionarInicial || !torneoId) return;
+    const esDesktop = window.matchMedia("(min-width: 768px)").matches;
+    if (esDesktop) setGestionarOpen(true);
+    else setGestionarMobileOpen(true);
   }, [abrirGestionarInicial, torneoId]);
 
   const cargar = useCallback(async () => {
@@ -431,7 +436,7 @@ export function InscripcionesTable({
         loading={loading}
         cargar={cargar}
         recargarTorneos={recargarTorneos}
-        onGestionar={() => setGestionarOpen(true)}
+        onGestionar={() => setGestionarMobileOpen(true)}
       />
     </div>
 
@@ -442,6 +447,13 @@ export function InscripcionesTable({
         horarios={horarios}
         torneo={torneoActual}
         onSuccess={() => { setDialogOpen(false); cargar(); recargarTorneos(); }}
+      />
+      <GestionarTorneoSheet
+        open={gestionarMobileOpen}
+        onOpenChange={setGestionarMobileOpen}
+        torneo={torneoActual}
+        horarios={horarios}
+        onUpdate={onTorneoActualizado}
       />
       <GestionarTorneoDialog
         open={gestionarOpen}
