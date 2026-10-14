@@ -1,17 +1,19 @@
 "use client";
 
-import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 export const COLOR_MASCULINO = "#3b82f6";
 export const COLOR_FEMENINO = "#ec4899";
 
-export type DatoTurno = { hora: string; masculino: number; femenino: number };
+export type DatoTurno = { hora: string; masculino: number; femenino: number; id?: string };
 
 const sinCeros = (valor: unknown) => (valor === 0 ? "" : String(valor));
 
 // Barras apiladas por turno: masculino abajo, femenino arriba, con la cantidad
 // dentro de cada tramo y el total del turno arriba de la barra.
-export function GraficoChicos({ datos }: { datos: DatoTurno[] }) {
+export function GraficoChicos({ datos, destacadoId }: { datos: DatoTurno[]; destacadoId?: string }) {
+  // con un turno destacado, los demas se atenuan
+  const opacidad = (d: DatoTurno) => (destacadoId && d.id !== destacadoId ? 0.3 : 1);
   const conTotal = datos.map((d) => ({ ...d, total: d.masculino + d.femenino, cima: 0 }));
 
   return (
@@ -21,6 +23,9 @@ export function GraficoChicos({ datos }: { datos: DatoTurno[] }) {
           <XAxis dataKey="hora" tick={{ fontSize: 13, fontWeight: 600 }} axisLine={false} tickLine={false} />
           <YAxis hide domain={[0, (max: number) => Math.max(max, 1)]} />
           <Bar dataKey="masculino" stackId="chicos" fill={COLOR_MASCULINO} isAnimationActive={false}>
+            {datos.map((d, i) => (
+              <Cell key={i} fillOpacity={opacidad(d)} />
+            ))}
             <LabelList
               dataKey="masculino"
               position="center"
@@ -29,6 +34,9 @@ export function GraficoChicos({ datos }: { datos: DatoTurno[] }) {
             />
           </Bar>
           <Bar dataKey="femenino" stackId="chicos" fill={COLOR_FEMENINO} isAnimationActive={false}>
+            {datos.map((d, i) => (
+              <Cell key={i} fillOpacity={opacidad(d)} />
+            ))}
             <LabelList
               dataKey="femenino"
               position="center"

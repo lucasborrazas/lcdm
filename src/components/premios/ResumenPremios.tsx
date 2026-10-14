@@ -78,13 +78,17 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
   );
   // Los costos son de toda la entrega, no de un turno.
   const t = useMemo(() => totalesEntrega(familiasVista, filtrando ? [] : gastos), [familiasVista, filtrando, gastos]);
+  const totalGeneral = useMemo(() => totalesEntrega(familias, []), [familias]);
   const porTurno = useMemo(
     () => resumenPorTurno(turnosVisibles.map((x) => x.id), familias),
     [turnosVisibles, familias]
   );
-  const datosGrafico = turnosVisibles
-    .map((x, i) => ({ hora: x.hora, masculino: porTurno[i].masculino, femenino: porTurno[i].femenino, id: x.id }))
-    .filter((d) => !filtrando || d.id === turnoFiltro);
+  const datosGrafico = turnosVisibles.map((x, i) => ({
+    id: x.id,
+    hora: x.hora,
+    masculino: porTurno[i].masculino,
+    femenino: porTurno[i].femenino,
+  }));
 
   const onEntregaCreada = async (id: string) => {
     await recargarEntregas();
@@ -148,7 +152,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
               {t.chicos === 0 ? (
                 <p className="py-10 text-center text-sm text-muted-foreground">Todavía no hay alumnos inscriptos</p>
               ) : (
-                <GraficoChicos datos={datosGrafico} />
+                <GraficoChicos datos={datosGrafico} destacadoId={filtrando ? turnoFiltro : undefined} />
               )}
             </div>
           </div>
@@ -198,51 +202,44 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
 
           <div>
             <EtiquetaSeccion>Detalle por turno</EtiquetaSeccion>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {turnosVisibles.map((x, i) => {
-                const r = porTurno[i];
-                const cobradoTurno = familias
-                  .filter((f) => f.turnoId === x.id && f.metodoPago)
-                  .reduce((s, f) => s + f.monto, 0);
-                return (
-                  <button
-                    key={x.id}
-                    type="button"
-                    onClick={() => setFiltro(turnoFiltro === x.id ? "all" : x.id)}
-                    className={cn(
-                      "rounded-[14px] border p-3 text-left transition-colors",
-                      turnoFiltro === x.id ? "bg-[hsl(209_65%_95%)] ring-2 ring-primary" : "hover:bg-muted/50"
-                    )}
-                  >
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-lg font-bold">{x.hora}</span>
-                      {x.grupoEdad && <span className="truncate text-xs text-muted-foreground">{x.grupoEdad.nombre}</span>}
-                    </div>
-                    <div className="mt-2 grid grid-cols-3 gap-1 text-center">
-                      <div>
-                        <div className="text-xl font-bold leading-tight">{r.familias}</div>
-                        <div className="text-[11px] text-muted-foreground">Familias</div>
-                      </div>
-                      <div>
-                        <div className="text-xl font-bold leading-tight">{r.chicos}</div>
-                        <div className="text-[11px] text-muted-foreground">Alumnos</div>
-                      </div>
-                      <div>
-                        <div className="text-xl font-bold leading-tight">{r.personas}</div>
-                        <div className="text-[11px] text-muted-foreground">Personas</div>
-                      </div>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between border-t pt-2 text-xs">
-                      <span className="font-semibold">
-                        <span className="text-blue-700">{r.masculino} M</span>
-                        {" · "}
-                        <span className="text-pink-700">{r.femenino} F</span>
-                      </span>
-                      <span className="text-muted-foreground">Cobrado {formatearMoneda(cobradoTurno)}</span>
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="overflow-hidden rounded-[14px] border">
+              <div className="grid grid-cols-[1fr_3.5rem_3.5rem_3rem_3rem_3.5rem] gap-x-2 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
+                <span>Turno</span>
+                <span className="text-right">Familias</span>
+                <span className="text-right">Alumnos</span>
+                <span className="text-right text-blue-700">Masc.</span>
+                <span className="text-right text-pink-700">Fem.</span>
+                <span className="text-right">Personas</span>
+              </div>
+              {turnosVisibles.map((x, i) => (
+                <button
+                  key={x.id}
+                  type="button"
+                  onClick={() => setFiltro(turnoFiltro === x.id ? "all" : x.id)}
+                  className={cn(
+                    "grid w-full grid-cols-[1fr_3.5rem_3.5rem_3rem_3rem_3.5rem] gap-x-2 items-center border-b px-4 py-2.5 text-left text-[15px] last:border-b-0",
+                    turnoFiltro === x.id ? "bg-[hsl(209_65%_95%)]" : "hover:bg-muted/40"
+                  )}
+                >
+                  <span className="min-w-0 truncate font-semibold">
+                    {x.hora}
+                    {x.grupoEdad && <span className="font-normal text-muted-foreground"> · {x.grupoEdad.nombre}</span>}
+                  </span>
+                  <span className="text-right">{porTurno[i].familias}</span>
+                  <span className="text-right">{porTurno[i].chicos}</span>
+                  <span className="text-right font-semibold text-blue-700">{porTurno[i].masculino}</span>
+                  <span className="text-right font-semibold text-pink-700">{porTurno[i].femenino}</span>
+                  <span className="text-right font-semibold">{porTurno[i].personas}</span>
+                </button>
+              ))}
+              <div className="grid grid-cols-[1fr_3.5rem_3.5rem_3rem_3rem_3.5rem] gap-x-2 bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
+                <span>Total</span>
+                <span className="text-right">{totalGeneral.familias}</span>
+                <span className="text-right">{totalGeneral.chicos}</span>
+                <span className="text-right text-blue-700">{totalGeneral.masculino}</span>
+                <span className="text-right text-pink-700">{totalGeneral.femenino}</span>
+                <span className="text-right">{totalGeneral.personas}</span>
+              </div>
             </div>
           </div>
         </div>
