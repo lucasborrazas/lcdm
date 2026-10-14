@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Settings } from "lucide-react";
+import { ChevronDown, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { esRutaOculta } from "@/lib/modoCliente";
 import { INFO_SECCION } from "@/lib/secciones";
@@ -16,6 +17,20 @@ export function Navbar() {
   const pathname = usePathname();
   const { modoCliente } = useModoCliente();
   const { activas } = useConfiguracion();
+  const [plegados, setPlegados] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("nav-plegados") ?? "[]");
+    } catch {
+      return [];
+    }
+  });
+  const alternar = (label: string) => {
+    const nuevo = plegados.includes(label) ? plegados.filter((l) => l !== label) : [...plegados, label];
+    setPlegados(nuevo);
+    try {
+      localStorage.setItem("nav-plegados", JSON.stringify(nuevo));
+    } catch {}
+  };
   const grupos = activas.map((s) => ({ label: INFO_SECCION[s].nombre, items: NAV_ESCRITORIO[s] }));
 
   return (
@@ -33,12 +48,24 @@ export function Navbar() {
       <nav className="flex-1 py-3 px-2 space-y-4 overflow-y-auto">
         {grupos.map((group) => (
           <div key={group.label}>
-            <div className="flex items-center gap-1.5 px-3 mb-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <button
+              type="button"
+              onClick={() => alternar(group.label)}
+              aria-expanded={!plegados.includes(group.label)}
+              suppressHydrationWarning
+              className="mb-1 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left hover:bg-accent"
+            >
+              <span className="text-[13px] font-extrabold uppercase tracking-wide text-foreground">
                 {group.label}
               </span>
-            </div>
-            <div className="space-y-0.5">
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-muted-foreground transition-transform",
+                  plegados.includes(group.label) && "-rotate-90"
+                )}
+              />
+            </button>
+            <div suppressHydrationWarning className={cn("space-y-0.5", plegados.includes(group.label) && "hidden")}>
               {group.items
                 .filter(({ href }) => !(modoCliente && esRutaOculta(href)))
                 .map(({ href, label, icon: Icon }) => (
