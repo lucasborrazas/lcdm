@@ -306,3 +306,12 @@ enum EstadoPago {
   SENA
   PAGO
 }
+
+// ── Configuracion general de la app (fila unica, id "singleton") ──
+
+model Configuracion {
+  id                  String   @id @default("singleton")
+  indumentariaActiva  Boolean  @default(true)
+  torneoActivo        Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
+}

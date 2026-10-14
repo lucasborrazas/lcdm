@@ -8,6 +8,7 @@ export const RUTAS_OCULTAS_MODO_CLIENTE = [
   "/movimientos",
   "/torneo/resumen",
   "/torneo/historial",
+  "/configuracion",
 ];
 
 export function esRutaOculta(pathname: string): boolean {

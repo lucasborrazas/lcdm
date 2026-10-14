@@ -6,19 +6,17 @@ import { useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
-import { MobileHeader, NOMBRE_SECCION, RUTA_INICIO_SECCION, type Seccion } from "@/components/mobile/MobileHeader";
+import { useConfiguracion } from "@/components/layout/ConfiguracionProvider";
+import { MobileHeader } from "@/components/mobile/MobileHeader";
 import { EtiquetaSeccion } from "@/components/mobile/ui";
-
-const SUBTITULO: Record<Seccion, string> = {
-  tor: "Inscripciones y equipos",
-  ind: "Pedidos y stock",
-};
+import { INFO_SECCION } from "@/lib/secciones";
 
 type Fila = { href: string; label: string; sub: string };
 
 function MasContenido() {
   const seccionParam = useSearchParams().get("seccion");
-  const seccion: Seccion = seccionParam === "tor" ? "tor" : "ind";
+  const { activas } = useConfiguracion();
+  const seccion = activas.find((s) => s === seccionParam) ?? activas[0];
   const { modoCliente, toggle } = useModoCliente();
 
   const filas: Fila[] =
@@ -36,24 +34,24 @@ function MasContenido() {
       <MobileHeader seccion={seccion} title="Más" />
       <div className="flex flex-col gap-2.5">
         <EtiquetaSeccion>Sección</EtiquetaSeccion>
-        <div className="flex gap-2">
-          {(["tor", "ind"] as Seccion[]).map((s) => (
+        <div className="flex flex-wrap gap-2">
+          {activas.map((s) => (
             <Link
               key={s}
-              href={RUTA_INICIO_SECCION[s]}
+              href={INFO_SECCION[s].inicio}
               className={cn(
-                "min-h-[72px] flex-1 rounded-[14px] p-3.5",
+                "min-h-[72px] min-w-[calc(50%-4px)] flex-1 rounded-[14px] p-3.5",
                 seccion === s ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
               )}
             >
-              <div className="text-[15px] font-bold">{NOMBRE_SECCION[s]}</div>
-              <div className="text-xs opacity-85">{SUBTITULO[s]}</div>
+              <div className="text-[15px] font-bold">{INFO_SECCION[s].nombre}</div>
+              <div className="text-xs opacity-85">{INFO_SECCION[s].subtitulo}</div>
             </Link>
           ))}
         </div>
 
         <div className="mt-2">
-          <EtiquetaSeccion>{seccion === "tor" ? "Gestionar torneo" : "Indumentaria"}</EtiquetaSeccion>
+          <EtiquetaSeccion>{seccion === "tor" ? "Gestionar torneo" : INFO_SECCION[seccion].nombre}</EtiquetaSeccion>
         </div>
         <div className="overflow-hidden rounded-[14px] border">
           {filas.map((f) => (
@@ -75,6 +73,19 @@ function MasContenido() {
             </div>
           )}
         </div>
+
+        {!modoCliente && (
+          <Link
+            href={`/configuracion?seccion=${seccion}`}
+            className="mt-1.5 flex min-h-14 items-center justify-between gap-2.5 rounded-[14px] border px-4 py-1.5"
+          >
+            <div>
+              <div className="text-[15px] font-semibold">Configuración</div>
+              <div className="text-xs text-muted-foreground">Secciones visibles de la app</div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </Link>
+        )}
 
         <button
           type="button"

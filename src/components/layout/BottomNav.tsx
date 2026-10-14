@@ -2,57 +2,33 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import {
-  LayoutDashboard,
-  Package,
-  Boxes,
-  ShoppingCart,
-  ClipboardList,
-  Users,
-  CalendarDays,
-  Wallet,
-  Menu,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { esRutaOculta } from "@/lib/modoCliente";
+import { seccionDeRuta, type Seccion } from "@/lib/secciones";
 import { useModoCliente } from "./ModoClienteProvider";
-import type { Seccion } from "@/components/mobile/MobileHeader";
+import { useConfiguracion } from "./ConfiguracionProvider";
+import { NAV_MOBILE, SUBPANTALLAS_MAS } from "./navSecciones";
 
-const NAV_TORNEO = [
-  { href: "/torneo/resumen", label: "Resumen", icon: Wallet },
-  { href: "/torneo/inscripciones", label: "Inscrip.", icon: ClipboardList },
-  { href: "/torneo/equipos", label: "Equipos", icon: Users },
-  { href: "/torneo/historial", label: "Historial", icon: CalendarDays },
-  { href: "/mas?seccion=tor", label: "Más", icon: Menu },
-];
-
-const NAV_INDUMENTARIA = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/pedidos", label: "Pedidos", icon: ShoppingCart },
-  { href: "/productos", label: "Productos", icon: Package },
-  { href: "/stock", label: "Stock", icon: Boxes },
-  { href: "/mas?seccion=ind", label: "Más", icon: Menu },
-];
-
-// Pantallas de Indumentaria que viven dentro de "Más".
-const SUBPANTALLAS_MAS = ["/movimientos", "/historial"];
-
-function seccionActual(pathname: string, seccionParam: string | null): Seccion {
-  if (pathname.startsWith("/torneo")) return "tor";
-  if (pathname.startsWith("/mas")) return seccionParam === "tor" ? "tor" : "ind";
-  return "ind";
+// Seccion cuya barra se muestra. En pantallas sin seccion (Mas, Configuracion)
+// manda el parametro ?seccion= y, si no hay, la primera activa.
+function seccionActual(pathname: string, seccionParam: string | null, activas: Seccion[]): Seccion {
+  const deRuta = seccionDeRuta(pathname);
+  if (deRuta) return deRuta;
+  return activas.find((s) => s === seccionParam) ?? activas[0];
 }
 
 export function BottomNav() {
   const pathname = usePathname();
   const seccionParam = useSearchParams().get("seccion");
   const { modoCliente } = useModoCliente();
+  const { activas } = useConfiguracion();
 
-  const seccion = seccionActual(pathname, seccionParam);
-  const items = (seccion === "tor" ? NAV_TORNEO : NAV_INDUMENTARIA).filter(
-    ({ href }) => !(modoCliente && esRutaOculta(href))
-  );
-  const enMas = pathname.startsWith("/mas") || SUBPANTALLAS_MAS.some((r) => pathname.startsWith(r));
+  const seccion = seccionActual(pathname, seccionParam, activas);
+  const items = NAV_MOBILE[seccion].filter(({ href }) => !(modoCliente && esRutaOculta(href)));
+  const enMas =
+    pathname.startsWith("/mas") ||
+    pathname.startsWith("/configuracion") ||
+    SUBPANTALLAS_MAS[seccion].some((r) => pathname.startsWith(r));
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-stretch gap-1 border-t bg-card px-2 pb-[env(safe-area-inset-bottom)] pt-1.5 h-[calc(76px+env(safe-area-inset-bottom))]">

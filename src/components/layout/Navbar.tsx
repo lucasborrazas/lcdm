@@ -3,49 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Package,
-  Boxes,
-  ArrowLeftRight,
-  ShoppingCart,
-  History,
-  ClipboardList,
-  Users,
-  CalendarDays,
-  Wallet,
-} from "lucide-react";
+import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { esRutaOculta } from "@/lib/modoCliente";
+import { INFO_SECCION } from "@/lib/secciones";
 import { useModoCliente } from "./ModoClienteProvider";
+import { useConfiguracion } from "./ConfiguracionProvider";
 import { ModoClienteToggle } from "./ModoClienteToggle";
-
-const NAV_GROUPS = [
-  {
-    label: "Indumentaria",
-    items: [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/pedidos", label: "Pedidos", icon: ShoppingCart },
-      { href: "/productos", label: "Productos", icon: Package },
-      { href: "/stock", label: "Stock", icon: Boxes },
-      { href: "/movimientos", label: "Movimientos", icon: ArrowLeftRight },
-      { href: "/historial", label: "Historial", icon: History },
-    ],
-  },
-  {
-    label: "Torneo",
-    items: [
-      { href: "/torneo/resumen", label: "Resumen", icon: Wallet },
-      { href: "/torneo/inscripciones", label: "Inscripciones", icon: ClipboardList },
-      { href: "/torneo/equipos", label: "Equipos", icon: Users },
-      { href: "/torneo/historial", label: "Historial", icon: CalendarDays },
-    ],
-  },
-];
+import { NAV_ESCRITORIO } from "./navSecciones";
 
 export function Navbar() {
   const pathname = usePathname();
   const { modoCliente } = useModoCliente();
+  const { activas } = useConfiguracion();
+  const grupos = activas.map((s) => ({ label: INFO_SECCION[s].nombre, items: NAV_ESCRITORIO[s] }));
 
   return (
     <aside className="hidden md:flex fixed inset-y-0 left-0 w-56 flex-col border-r bg-card z-30">
@@ -60,7 +31,7 @@ export function Navbar() {
         />
       </div>
       <nav className="flex-1 py-3 px-2 space-y-4 overflow-y-auto">
-        {NAV_GROUPS.map((group) => (
+        {grupos.map((group) => (
           <div key={group.label}>
             <div className="flex items-center gap-1.5 px-3 mb-1">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -89,7 +60,21 @@ export function Navbar() {
           </div>
         ))}
       </nav>
-      <div className="border-t p-2">
+      <div className="border-t p-2 space-y-0.5">
+        {!modoCliente && (
+          <Link
+            href="/configuracion"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+              pathname === "/configuracion"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            )}
+          >
+            <Settings className="h-4 w-4 shrink-0" />
+            Configuración
+          </Link>
+        )}
         <ModoClienteToggle />
       </div>
     </aside>

@@ -2,15 +2,19 @@
 
 import { usePathname } from "next/navigation";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
+import { seccionDeRuta } from "@/lib/secciones";
+import { useConfiguracion } from "@/components/layout/ConfiguracionProvider";
 import { BotonOjo, EyebrowSeccion } from "./MobileHeader";
 
 // Barra superior mobile global: franja "Modo cliente" y, en las pantallas de
 // Indumentaria (que conservan su propio PageHeader), el selector de seccion
-// y el ojo. Torneo y Mas dibujan su propio MobileHeader.
+// y el ojo. Torneo, Mas y Configuracion dibujan su propio encabezado.
 export function MobileTopBar() {
   const pathname = usePathname();
   const { modoCliente } = useModoCliente();
-  const propio = pathname.startsWith("/torneo") || pathname.startsWith("/mas");
+  const { activas } = useConfiguracion();
+  const propio =
+    pathname.startsWith("/torneo") || pathname.startsWith("/mas") || pathname.startsWith("/configuracion");
 
   return (
     <div className="md:hidden">
@@ -21,7 +25,7 @@ export function MobileTopBar() {
       )}
       {!propio && (
         <div className="mb-3 flex items-center justify-between">
-          <EyebrowSeccion seccion="ind" />
+          <EyebrowSeccion seccion={seccionDeRuta(pathname) ?? activas[0]} />
           <BotonOjo />
         </div>
       )}

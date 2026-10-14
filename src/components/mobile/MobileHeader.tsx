@@ -4,22 +4,14 @@ import { useRouter } from "next/navigation";
 import { ArrowUpDown, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nombreTorneo } from "@/lib/torneo";
+import { INFO_SECCION, type Seccion } from "@/lib/secciones";
 import type { TorneoConResumen } from "@/lib/types";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
+import { useConfiguracion } from "@/components/layout/ConfiguracionProvider";
 import { BottomSheet } from "./BottomSheet";
 import { useState } from "react";
 
-export type Seccion = "tor" | "ind";
-
-export const RUTA_INICIO_SECCION: Record<Seccion, string> = {
-  tor: "/torneo/inscripciones",
-  ind: "/pedidos",
-};
-
-export const NOMBRE_SECCION: Record<Seccion, string> = {
-  tor: "Torneo",
-  ind: "Indumentaria",
-};
+export type { Seccion };
 
 export function BotonOjo() {
   const { modoCliente, toggle } = useModoCliente();
@@ -39,19 +31,45 @@ export function BotonOjo() {
   );
 }
 
-// Texto sobre el titulo: al tocarlo alterna entre Torneo e Indumentaria.
+// Texto sobre el titulo: con mas de una seccion activa, al tocarlo abre una
+// hoja para cambiar de seccion.
 export function EyebrowSeccion({ seccion }: { seccion: Seccion }) {
   const router = useRouter();
-  const otra: Seccion = seccion === "tor" ? "ind" : "tor";
+  const { activas } = useConfiguracion();
+  const [abierto, setAbierto] = useState(false);
+  const puedeCambiar = activas.length > 1;
+  const clases = "flex h-7 items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.6px] text-primary";
+
+  if (!puedeCambiar) return <div className={clases}>{INFO_SECCION[seccion].nombre}</div>;
+
   return (
-    <button
-      type="button"
-      onClick={() => router.push(RUTA_INICIO_SECCION[otra])}
-      className="flex h-7 items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.6px] text-primary"
-    >
-      {NOMBRE_SECCION[seccion]}
-      <ArrowUpDown className="h-3 w-3" />
-    </button>
+    <>
+      <button type="button" onClick={() => setAbierto(true)} className={clases}>
+        {INFO_SECCION[seccion].nombre}
+        <ArrowUpDown className="h-3 w-3" />
+      </button>
+      <BottomSheet open={abierto} onOpenChange={setAbierto} title="Cambiar de sección">
+        <div className="space-y-1.5">
+          {activas.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => {
+                setAbierto(false);
+                router.push(INFO_SECCION[s].inicio);
+              }}
+              className={cn(
+                "flex min-h-14 w-full flex-col items-start justify-center rounded-xl px-4 text-left",
+                s === seccion ? "bg-[hsl(209_65%_95%)] ring-2 ring-primary" : "bg-muted/60"
+              )}
+            >
+              <span className="text-[15px] font-semibold">{INFO_SECCION[s].nombre}</span>
+              <span className="text-xs text-muted-foreground">{INFO_SECCION[s].subtitulo}</span>
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
+    </>
   );
 }
 
