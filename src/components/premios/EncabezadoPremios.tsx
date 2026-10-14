@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { MobileHeader } from "@/components/mobile/MobileHeader";
 import { BottomSheet } from "@/components/mobile/BottomSheet";
@@ -19,15 +20,18 @@ function EntregaSwitcher({ entregas, entregaId, onSelect }: Selector) {
   return (
     <div>
       <label className="mb-1 block text-xs text-muted-foreground">Año</label>
-      <select
-        value={entregaId ?? ""}
-        onChange={(e) => onSelect(e.target.value)}
-        className="h-9 w-40 rounded-lg border bg-background px-3 text-sm outline-none"
-      >
-        {entregas.map((e) => (
-          <option key={e.id} value={e.id}>{e.anio}</option>
-        ))}
-      </select>
+      <Select value={entregaId} onValueChange={(v) => v && onSelect(v)}>
+        <SelectTrigger className="w-56">
+          <SelectValue placeholder="Elegir año..." />
+        </SelectTrigger>
+        <SelectContent>
+          {entregas.map((e) => (
+            <SelectItem key={e.id} value={e.id}>
+              {e.anio}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
