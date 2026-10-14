@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { SELECCIONADO } from "@/lib/estilosEstado";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEsDesktop } from "@/components/shared/useEsDesktop";
 import { useFetchJson } from "@/components/shared/useFetchJson";
@@ -127,6 +126,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
         entregas={entregas}
         entregaId={entregaId}
         onSelect={seleccionarEntrega}
+        filtroTurno={{ turnos: turnosVisibles, value: turnoFiltro, onChange: setFiltro }}
         acciones={
           <Button onClick={() => setNuevaAbierta(true)}>
             <Plus className="mr-1.5 h-4 w-4" />
@@ -139,25 +139,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
         <SinEntrega entregas={entregas} onCreada={onEntregaCreada} />
       ) : (
         <div className="space-y-5">
-          {esDesktop ? (
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Turno</label>
-              <Select value={turnoFiltro} onValueChange={(v) => v && setFiltro(v)}>
-                <SelectTrigger className="w-56">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los turnos</SelectItem>
-                  {turnosVisibles.map((x) => (
-                    <SelectItem key={x.id} value={x.id}>
-                      {x.hora}
-                      {x.grupoEdad && ` — ${x.grupoEdad.nombre}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : (
+          {!esDesktop && (
             <div className="-mx-4 flex gap-2 overflow-x-auto px-4">
               <Chip active={!filtrando} onClick={() => setFiltro("all")}>Todos los turnos</Chip>
               {turnosVisibles.map((x) => (

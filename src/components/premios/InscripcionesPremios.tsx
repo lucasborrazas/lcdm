@@ -163,6 +163,7 @@ export function InscripcionesPremios({
         entregas={entregas}
         entregaId={entregaId}
         onSelect={seleccionarEntrega}
+        filtroTurno={{ turnos: turnos.filter((t) => t.activo), value: filtroTurno, onChange: setFiltroTurno }}
         acciones={
           <>
             <Button variant="outline" onClick={() => setGestionarOpen(true)} disabled={!entregaId}>
@@ -217,7 +218,7 @@ export function InscripcionesPremios({
               />
             </div>
 
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-0.5 [scrollbar-width:none] md:mx-0 md:px-0">
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-0.5 [scrollbar-width:none] md:hidden">
               <Chip active={filtroTurno === "all"} onClick={() => setFiltroTurno("all")}>Todos los turnos</Chip>
               {turnos.filter((t) => t.activo).map((t) => (
                 <Chip key={t.id} active={filtroTurno === t.id} onClick={() => setFiltroTurno(t.id)}>

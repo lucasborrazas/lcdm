@@ -10,6 +10,12 @@ import { BottomSheet } from "@/components/mobile/BottomSheet";
 import type { EntregaConResumen } from "@/lib/types";
 import { NuevaEntregaModal } from "./NuevaEntregaModal";
 
+export type FiltroTurno = {
+  turnos: { id: string; hora: string; grupoEdad?: { nombre: string } | null }[];
+  value: string;
+  onChange: (id: string) => void;
+};
+
 type Selector = {
   entregas: EntregaConResumen[];
   entregaId: string | undefined;
@@ -84,10 +90,13 @@ export function EncabezadoPremios({
   entregaId,
   onSelect,
   acciones,
+  filtroTurno,
 }: Selector & {
   titulo: string;
   descripcion: string;
   acciones?: React.ReactNode;
+  // Escritorio: selector de turno al lado del de año ("all" = todos).
+  filtroTurno?: FiltroTurno;
 }) {
   return (
     <>
@@ -99,7 +108,28 @@ export function EncabezadoPremios({
       <div className="hidden md:block">
         <PageHeader title={`${titulo} — Entrega de premios`} description={descripcion} />
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          {entregas.length > 0 ? <EntregaSwitcher entregas={entregas} entregaId={entregaId} onSelect={onSelect} /> : <div />}
+          <div className="flex flex-wrap items-end gap-3">
+            {entregas.length > 0 ? <EntregaSwitcher entregas={entregas} entregaId={entregaId} onSelect={onSelect} /> : <div />}
+            {filtroTurno && (
+              <div>
+                <label className="mb-1 block text-xs text-muted-foreground">Turno</label>
+                <Select value={filtroTurno.value} onValueChange={(v) => v && filtroTurno.onChange(v)}>
+                  <SelectTrigger className="w-56">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los turnos</SelectItem>
+                    {filtroTurno.turnos.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.hora}
+                        {t.grupoEdad && ` — ${t.grupoEdad.nombre}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
           {acciones && <div className="flex gap-2">{acciones}</div>}
         </div>
       </div>
