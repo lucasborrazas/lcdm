@@ -11,6 +11,7 @@ import { formatearMoneda } from "@/lib/calculations";
 import { montoBono, normalizarNombre, resumenPorTurno, totalesEntrega, type MetodoPago } from "@/lib/premios";
 import type { FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 import { ModalResponsivo } from "@/components/shared/ModalResponsivo";
+import { SearchSelectFilter } from "@/components/shared/SearchSelectFilter";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
 import { FamiliaModal } from "./FamiliaModal";
 import { GestionarEntregaModal } from "./GestionarEntregaModal";
@@ -61,6 +62,7 @@ export function InscripcionesPremios({
   const [turnoInicialId, setTurnoInicialId] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [filtroTurno, setFiltroTurno] = useState<string>("all");
+  const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
 
   const totales = useMemo(() => totalesEntrega(familias, []), [familias]);
   const porTurno = useMemo(
@@ -68,14 +70,23 @@ export function InscripcionesPremios({
     [turnos, familias]
   );
 
+  const opcionesNombre = useMemo(
+    () =>
+      Array.from(new Set(familias.flatMap((f) => [f.nombre, ...f.chicos.map((c) => c.nombre)])))
+        .sort((a, b) => a.localeCompare(b))
+        .map((n) => ({ value: n, label: n })),
+    [familias]
+  );
+
   const visibles = useMemo(() => {
     const busqueda = normalizarNombre(q);
     return familias.filter((f) => {
       if (filtroTurno !== "all" && f.turnoId !== filtroTurno) return false;
+      if (filtroNombre.length > 0 && ![f.nombre, ...f.chicos.map((c) => c.nombre)].some((n) => filtroNombre.includes(n))) return false;
       if (!busqueda) return true;
       return [f.nombre, ...f.chicos.map((c) => c.nombre)].some((n) => normalizarNombre(n).includes(busqueda));
     });
-  }, [familias, q, filtroTurno]);
+  }, [familias, q, filtroTurno, filtroNombre]);
 
   const refrescar = async () => {
     await Promise.all([recargarFamilias(), recargarTurnos(), recargarEntregas()]);
@@ -164,6 +175,16 @@ export function InscripcionesPremios({
         entregaId={entregaId}
         onSelect={seleccionarEntrega}
         filtroTurno={{ turnos: turnos.filter((t) => t.activo), value: filtroTurno, onChange: setFiltroTurno }}
+        filtros={
+          <SearchSelectFilter
+            label="Familia o alumno"
+            placeholder="Buscar..."
+            options={opcionesNombre}
+            selected={filtroNombre}
+            onChange={setFiltroNombre}
+            className="w-56"
+          />
+        }
         acciones={
           <>
             <Button variant="outline" onClick={() => setGestionarOpen(true)} disabled={!entregaId}>
@@ -208,7 +229,7 @@ export function InscripcionesPremios({
               />
             </div>
 
-            <div className="mb-2 flex h-11 items-center gap-2 rounded-xl bg-muted px-3 md:max-w-sm">
+            <div className="mb-2 flex h-11 items-center gap-2 rounded-xl bg-muted px-3 md:hidden">
               <Search className="h-[18px] w-[18px] text-muted-foreground" />
               <input
                 value={q}

@@ -91,12 +91,15 @@ export function EncabezadoPremios({
   onSelect,
   acciones,
   filtroTurno,
+  filtros,
 }: Selector & {
   titulo: string;
   descripcion: string;
   acciones?: React.ReactNode;
   // Escritorio: selector de turno al lado del de año ("all" = todos).
   filtroTurno?: FiltroTurno;
+  // Otros filtros de escritorio, a la par de los anteriores.
+  filtros?: React.ReactNode;
 }) {
   return (
     <>
@@ -129,6 +132,7 @@ export function EncabezadoPremios({
                 </Select>
               </div>
             )}
+            {filtros}
           </div>
           {acciones && <div className="flex gap-2">{acciones}</div>}
         </div>
