@@ -22,6 +22,8 @@ function MasContenido() {
   const filas: Fila[] =
     seccion === "tor"
       ? [{ href: "/torneo/inscripciones?gestionar=1", label: "Gestionar torneo", sub: "Precios, estado y horarios" }]
+      : seccion === "pre"
+      ? [{ href: "/premios/inscripciones?gestionar=1", label: "Gestionar entrega", sub: "Precios del bono y turnos" }]
       : modoCliente
         ? []
         : [
@@ -51,7 +53,7 @@ function MasContenido() {
         </div>
 
         <div className="mt-2">
-          <EtiquetaSeccion>{seccion === "tor" ? "Gestionar torneo" : INFO_SECCION[seccion].nombre}</EtiquetaSeccion>
+          <EtiquetaSeccion>{seccion === "tor" ? "Gestionar torneo" : seccion === "pre" ? "Gestionar entrega" : INFO_SECCION[seccion].nombre}</EtiquetaSeccion>
         </div>
         <div className="overflow-hidden rounded-[14px] border">
           {filas.map((f) => (

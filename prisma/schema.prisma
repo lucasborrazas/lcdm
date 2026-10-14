@@ -71,54 +71,54 @@ model MovimientoStock {
 }
 
 model MovimientoEliminado {
-  id                      String         @id @default(cuid())
-  movimientoIdOriginal    String
-  fecha                   DateTime
-  periodo                 String
-  productoId              String
-  temporada               Temporada
-  genero                  Genero
-  productoNombre          String
-  talle                   String
-  tipo                    TipoMovimiento
-  cantidad                Int
-  motivo                  String
-  notas                   String?
-  compraId                String?
-  costoUnitarioCompra     Int?
-  totalLineaCompra        Int?
-  subtotalLinea           Int?
-  envioTotalCompra        Int?
-  costoEnvioUnitario      Int?
-  costoUnitarioReal       Int?
-  eliminadoEn             DateTime       @default(now())
+  id                   String         @id @default(cuid())
+  movimientoIdOriginal String
+  fecha                DateTime
+  periodo              String
+  productoId           String
+  temporada            Temporada
+  genero               Genero
+  productoNombre       String
+  talle                String
+  tipo                 TipoMovimiento
+  cantidad             Int
+  motivo               String
+  notas                String?
+  compraId             String?
+  costoUnitarioCompra  Int?
+  totalLineaCompra     Int?
+  subtotalLinea        Int?
+  envioTotalCompra     Int?
+  costoEnvioUnitario   Int?
+  costoUnitarioReal    Int?
+  eliminadoEn          DateTime       @default(now())
 }
 
 model Pedido {
-  id             String       @id @default(cuid())
-  fecha          DateTime
-  periodo        String
-  cliente        String
-  productoId     String
-  temporada      Temporada
-  genero         Genero
-  productoNombre String
-  talle          String
-  cantidad       Int
-  costoUnitario  Int
-  costoTotal     Int
-  metodoPago     MetodoPago
-  precioUnitario Int
-  precioTotal    Int
-  ganancia       Int
-  sena           Int          @default(0)
-  saldoRestante  Int
-  estadoPedido   EstadoPedido @default(POR_PEDIR)
-  estadoPago     EstadoPago   @default(PENDIENTE)
-  stockDescontado Boolean     @default(false)
-  pedidoGrupoId  String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id              String       @id @default(cuid())
+  fecha           DateTime
+  periodo         String
+  cliente         String
+  productoId      String
+  temporada       Temporada
+  genero          Genero
+  productoNombre  String
+  talle           String
+  cantidad        Int
+  costoUnitario   Int
+  costoTotal      Int
+  metodoPago      MetodoPago
+  precioUnitario  Int
+  precioTotal     Int
+  ganancia        Int
+  sena            Int          @default(0)
+  saldoRestante   Int
+  estadoPedido    EstadoPedido @default(POR_PEDIR)
+  estadoPago      EstadoPago   @default(PENDIENTE)
+  stockDescontado Boolean      @default(false)
+  pedidoGrupoId   String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   producto    Producto     @relation(fields: [productoId], references: [id])
   pedidoGrupo PedidoGrupo? @relation(fields: [pedidoGrupoId], references: [id])
@@ -196,7 +196,8 @@ model GrupoEdad {
   nombre    String   @unique
   createdAt DateTime @default(now())
 
-  horarios Horario[]
+  horarios      Horario[]
+  turnosEntrega TurnoEntrega[]
 }
 
 model Torneo {
@@ -249,17 +250,17 @@ enum EstadoTorneo {
 }
 
 model InscripcionTorneo {
-  id         String            @id @default(cuid())
-  nombre     String
-  edad       String?
-  horarioId  String
-  pago       Boolean           @default(false)
-  metodoPago MetodoPagoTorneo?
-  monto      Int?
-  equipo     EquipoTorneo?
+  id               String            @id @default(cuid())
+  nombre           String
+  edad             String?
+  horarioId        String
+  pago             Boolean           @default(false)
+  metodoPago       MetodoPagoTorneo?
+  monto            Int?
+  equipo           EquipoTorneo?
   equipoAsignadoAt DateTime?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   horario Horario @relation(fields: [horarioId], references: [id])
 }
@@ -310,8 +311,76 @@ enum EstadoPago {
 // ── Configuracion general de la app (fila unica, id "singleton") ──
 
 model Configuracion {
-  id                  String   @id @default("singleton")
-  indumentariaActiva  Boolean  @default(true)
-  torneoActivo        Boolean  @default(true)
+  id                 String   @id @default("singleton")
+  indumentariaActiva Boolean  @default(true)
+  torneoActivo       Boolean  @default(true)
+  premiosActivo      Boolean  @default(false)
+  updatedAt          DateTime @updatedAt
+}
+
+// ── Entrega de premios (evento anual, la familia es la unidad de cobro) ──
+
+model EntregaPremios {
+  id                  String   @id @default(cuid())
+  anio                Int      @unique
+  precioTransferencia Int      @default(48000)
+  precioEfectivo      Int      @default(40000)
+  createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+
+  turnos TurnoEntrega[]
+  gastos GastoEntrega[]
+}
+
+model TurnoEntrega {
+  id          String   @id @default(cuid())
+  entregaId   String
+  hora        String
+  grupoEdadId String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  entrega   EntregaPremios   @relation(fields: [entregaId], references: [id])
+  grupoEdad GrupoEdad?       @relation(fields: [grupoEdadId], references: [id])
+  familias  FamiliaEntrega[]
+}
+
+// Una familia va completa a un turno y paga un solo bono, sin importar
+// cuantos chicos tenga. metodoPago null = todavia no pago; monto es lo que
+// corresponde cobrar (editable).
+model FamiliaEntrega {
+  id            String            @id @default(cuid())
+  turnoId       String
+  nombre        String
+  telefono      String?
+  totalPersonas Int
+  metodoPago    MetodoPagoTorneo?
+  monto         Int
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  turno  TurnoEntrega   @relation(fields: [turnoId], references: [id])
+  chicos ChicoEntrega[]
+}
+
+model ChicoEntrega {
+  id        String   @id @default(cuid())
+  familiaId String
+  nombre    String
+  genero    Genero
+  createdAt DateTime @default(now())
+
+  familia FamiliaEntrega @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+}
+
+model GastoEntrega {
+  id        String   @id @default(cuid())
+  entregaId String
+  concepto  String
+  monto     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entrega EntregaPremios @relation(fields: [entregaId], references: [id])
 }

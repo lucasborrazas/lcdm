@@ -8,6 +8,9 @@ export const RUTAS_OCULTAS_MODO_CLIENTE = [
   "/movimientos",
   "/torneo/resumen",
   "/torneo/historial",
+  "/premios/resumen",
+  "/premios/gastos",
+  "/premios/historial",
   "/configuracion",
 ];
 

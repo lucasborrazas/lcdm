@@ -1,10 +1,10 @@
 // Secciones de la app que se pueden activar u ocultar desde Configuracion.
 
-export type Seccion = "ind" | "tor";
+export type Seccion = "ind" | "tor" | "pre";
 
 export type ConfigSecciones = Record<Seccion, boolean>;
 
-export const SECCIONES: Seccion[] = ["ind", "tor"];
+export const SECCIONES: Seccion[] = ["ind", "tor", "pre"];
 
 type InfoSeccion = {
   nombre: string;
@@ -28,9 +28,15 @@ export const INFO_SECCION: Record<Seccion, InfoSeccion> = {
     inicio: "/torneo/inscripciones",
     rutas: ["/torneo"],
   },
+  pre: {
+    nombre: "Entrega de premios",
+    subtitulo: "Familias, bonos y gastos",
+    inicio: "/premios/inscripciones",
+    rutas: ["/premios"],
+  },
 };
 
-export const CONFIG_POR_DEFECTO: ConfigSecciones = { ind: true, tor: true };
+export const CONFIG_POR_DEFECTO: ConfigSecciones = { ind: true, tor: true, pre: false };
 
 function coincide(pathname: string, ruta: string): boolean {
   return ruta === "/" ? pathname === "/" : pathname === ruta || pathname.startsWith(`${ruta}/`);

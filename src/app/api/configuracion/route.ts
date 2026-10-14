@@ -5,7 +5,7 @@ import { leerConfigSecciones } from "@/lib/configuracion";
 import { seccionesActivas } from "@/lib/secciones";
 
 const schema = z.object({
-  secciones: z.object({ ind: z.boolean(), tor: z.boolean() }),
+  secciones: z.object({ ind: z.boolean(), tor: z.boolean(), pre: z.boolean() }),
 });
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,11 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Tiene que quedar al menos una sección activa" }, { status: 400 });
   }
 
-  const data = { indumentariaActiva: secciones.ind, torneoActivo: secciones.tor };
+  const data = {
+    indumentariaActiva: secciones.ind,
+    torneoActivo: secciones.tor,
+    premiosActivo: secciones.pre,
+  };
   await prisma.configuracion.upsert({
     where: { id: "singleton" },
     create: { id: "singleton", ...data },

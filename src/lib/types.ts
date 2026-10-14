@@ -1,6 +1,6 @@
-import type { Producto, Stock, Pedido, PedidoGrupo, MovimientoStock, HistorialPrecios, PedidoEliminado, Horario, InscripcionTorneo, Torneo, GrupoEdad, GastoTorneo } from "@/generated/prisma/client";
+import type { Producto, Stock, Pedido, PedidoGrupo, MovimientoStock, HistorialPrecios, PedidoEliminado, Horario, InscripcionTorneo, Torneo, GrupoEdad, GastoTorneo, EntregaPremios, TurnoEntrega, FamiliaEntrega, ChicoEntrega, GastoEntrega } from "@/generated/prisma/client";
 
-export type { GastoTorneo };
+export type { GastoTorneo, GastoEntrega };
 
 export type ProductoConStock = Producto & {
   stock: Stock | null;
@@ -81,4 +81,29 @@ export type StockResumen = {
   stockActual: number;
   alertaMinimo: number | null;
   stockBajo: boolean;
+};
+
+// Entrega de premios
+
+export type TurnoConConteo = TurnoEntrega & {
+  grupoEdad: GrupoEdad | null;
+  cantidadFamilias: number;
+};
+
+export type FamiliaConChicos = FamiliaEntrega & {
+  chicos: ChicoEntrega[];
+  turno: TurnoEntrega & { grupoEdad: GrupoEdad | null };
+};
+
+export type EntregaConResumen = EntregaPremios & {
+  cantidadTurnos: number;
+  cantidadFamilias: number;
+  cantidadChicos: number;
+  masculino: number;
+  femenino: number;
+  personas: number;
+  cobrado: number;
+  pendiente: number;
+  totalGastos: number;
+  ganancia: number;
 };

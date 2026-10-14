@@ -5,5 +5,9 @@ import { CONFIG_POR_DEFECTO, normalizarConfig, type ConfigSecciones } from "@/li
 export async function leerConfigSecciones(): Promise<ConfigSecciones> {
   const fila = await prisma.configuracion.findUnique({ where: { id: "singleton" } });
   if (!fila) return CONFIG_POR_DEFECTO;
-  return normalizarConfig({ ind: fila.indumentariaActiva, tor: fila.torneoActivo });
+  return normalizarConfig({
+    ind: fila.indumentariaActiva,
+    tor: fila.torneoActivo,
+    pre: fila.premiosActivo,
+  });
 }
