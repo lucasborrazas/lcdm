@@ -5,6 +5,10 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { SELECCIONADO } from "@/lib/estilosEstado";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useEsDesktop } from "@/components/shared/useEsDesktop";
 import { useFetchJson } from "@/components/shared/useFetchJson";
 import { Chip, EtiquetaSeccion } from "@/components/mobile/ui";
 import { formatearMoneda } from "@/lib/calculations";
@@ -20,6 +24,21 @@ const SIN_FAMILIAS: FamiliaConChicos[] = [];
 const SIN_GASTOS: GastoEntrega[] = [];
 
 function Dato({ titulo, valor, detalle, className, grande }: { titulo: string; valor: string; detalle?: string; className?: string; grande?: boolean }) {
+  const esDesktop = useEsDesktop();
+  // Escritorio: card de shadcn como en Torneo. Mobile: caja redondeada.
+  if (esDesktop) {
+    return (
+      <Card className={className}>
+        <CardHeader className="pb-1">
+          <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{titulo}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className={cn("font-bold", grande ? "text-3xl" : "text-2xl")}>{valor}</p>
+          {detalle && <p className="mt-0.5 text-xs text-muted-foreground">{detalle}</p>}
+        </CardContent>
+      </Card>
+    );
+  }
   return (
     <div className={cn("rounded-[14px] bg-muted px-3.5 py-3", className)}>
       <div className="text-xs font-medium text-muted-foreground">{titulo}</div>
@@ -66,6 +85,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
     SIN_GASTOS
   );
 
+  const esDesktop = useEsDesktop();
   const [nuevaAbierta, setNuevaAbierta] = useState(false);
   const [filtro, setFiltro] = useState<string>("all");
 
@@ -119,17 +139,37 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
         <SinEntrega entregas={entregas} onCreada={onEntregaCreada} />
       ) : (
         <div className="space-y-5">
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
-            <Chip active={!filtrando} onClick={() => setFiltro("all")}>Todos los turnos</Chip>
-            {turnosVisibles.map((x) => (
-              <Chip key={x.id} active={turnoFiltro === x.id} onClick={() => setFiltro(x.id)}>
-                {x.hora}
-              </Chip>
-            ))}
-          </div>
+          {esDesktop ? (
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">Turno</label>
+              <Select value={turnoFiltro} onValueChange={(v) => v && setFiltro(v)}>
+                <SelectTrigger className="w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los turnos</SelectItem>
+                  {turnosVisibles.map((x) => (
+                    <SelectItem key={x.id} value={x.id}>
+                      {x.hora}
+                      {x.grupoEdad && ` — ${x.grupoEdad.nombre}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4">
+              <Chip active={!filtrando} onClick={() => setFiltro("all")}>Todos los turnos</Chip>
+              {turnosVisibles.map((x) => (
+                <Chip key={x.id} active={turnoFiltro === x.id} onClick={() => setFiltro(x.id)}>
+                  {x.hora}
+                </Chip>
+              ))}
+            </div>
+          )}
 
           <div>
-            <EtiquetaSeccion>Cuánta gente viene</EtiquetaSeccion>
+            {!esDesktop && <EtiquetaSeccion>Cuánta gente viene</EtiquetaSeccion>}
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
               <Dato grande titulo="Familias" valor={t.familias.toString()} />
               <Dato grande titulo="Personas en total" valor={t.personas.toString()} detalle="con los alumnos" />
@@ -149,23 +189,37 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
             </div>
           </div>
 
-          <div>
-            <EtiquetaSeccion>Alumnos por turno</EtiquetaSeccion>
-            <div className="rounded-[14px] border p-3">
-              <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex gap-4">
-                  <Punto color={COLOR_MASCULINO} texto="Masculino" />
-                  <Punto color={COLOR_FEMENINO} texto="Femenino" />
+          {(() => {
+            const contenido = (
+              <>
+                <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex gap-4">
+                    <Punto color={COLOR_MASCULINO} texto="Masculino" />
+                    <Punto color={COLOR_FEMENINO} texto="Femenino" />
+                  </div>
+                  <span className="text-sm font-bold">Total {t.chicos}</span>
                 </div>
-                <span className="text-sm font-bold">Total {t.chicos}</span>
+                {t.chicos === 0 ? (
+                  <p className="py-10 text-center text-sm text-muted-foreground">Todavía no hay alumnos inscriptos</p>
+                ) : (
+                  <GraficoChicos datos={datosGrafico} destacadoId={filtrando ? turnoFiltro : undefined} />
+                )}
+              </>
+            );
+            return esDesktop ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Alumnos por turno</CardTitle>
+                </CardHeader>
+                <CardContent>{contenido}</CardContent>
+              </Card>
+            ) : (
+              <div>
+                <EtiquetaSeccion>Alumnos por turno</EtiquetaSeccion>
+                <div className="rounded-[14px] border p-3">{contenido}</div>
               </div>
-              {t.chicos === 0 ? (
-                <p className="py-10 text-center text-sm text-muted-foreground">Todavía no hay alumnos inscriptos</p>
-              ) : (
-                <GraficoChicos datos={datosGrafico} destacadoId={filtrando ? turnoFiltro : undefined} />
-              )}
-            </div>
-          </div>
+            );
+          })()}
 
           {!filtrando && (
           <div className="md:hidden rounded-[18px] bg-primary p-4 text-primary-foreground">
@@ -204,16 +258,66 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
               titulo="Falta cobrar"
               valor={formatearMoneda(t.pendiente)}
               detalle={`${t.familias - t.familiasPagaron} de ${t.familias} familias`}
-              className="bg-[hsl(30_90%_94%)]"
+              className="bg-amber-500/10"
             />
             <Dato titulo="Cobrado en efectivo" valor={formatearMoneda(t.cobradoEfectivo)} />
             <Dato titulo="Cobrado por transferencia" valor={formatearMoneda(t.cobradoTransferencia)} />
           </div>
 
+          {esDesktop ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Detalle por turno</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Turno</TableHead>
+                        <TableHead className="text-center">Familias</TableHead>
+                        <TableHead className="text-center">Alumnos</TableHead>
+                        <TableHead className="text-center text-blue-700">Masculino</TableHead>
+                        <TableHead className="text-center text-pink-700">Femenino</TableHead>
+                        <TableHead className="text-center">Total personas</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {turnosVisibles.map((x, i) => (
+                        <TableRow
+                          key={x.id}
+                          onClick={() => setFiltro(turnoFiltro === x.id ? "all" : x.id)}
+                          className={cn("cursor-pointer", turnoFiltro === x.id && `${SELECCIONADO} ring-inset hover:bg-[hsl(209_65%_95%)]`)}
+                        >
+                          <TableCell className="font-medium">
+                            {x.hora}
+                            {x.grupoEdad && <span className="font-normal text-muted-foreground"> · {x.grupoEdad.nombre}</span>}
+                          </TableCell>
+                          <TableCell className="text-center">{porTurno[i].familias}</TableCell>
+                          <TableCell className="text-center">{porTurno[i].chicos}</TableCell>
+                          <TableCell className="text-center font-semibold text-blue-700">{porTurno[i].masculino}</TableCell>
+                          <TableCell className="text-center font-semibold text-pink-700">{porTurno[i].femenino}</TableCell>
+                          <TableCell className="text-center font-semibold">{porTurno[i].personas}</TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow className="bg-muted/40 font-bold hover:bg-muted/40">
+                        <TableCell>Total</TableCell>
+                        <TableCell className="text-center">{totalGeneral.familias}</TableCell>
+                        <TableCell className="text-center">{totalGeneral.chicos}</TableCell>
+                        <TableCell className="text-center text-blue-700">{totalGeneral.masculino}</TableCell>
+                        <TableCell className="text-center text-pink-700">{totalGeneral.femenino}</TableCell>
+                        <TableCell className="text-center">{totalGeneral.personas}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
           <div>
             <EtiquetaSeccion>Detalle por turno</EtiquetaSeccion>
             <div className="overflow-hidden rounded-[14px] border">
-              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
+              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
                 <span>Turno</span>
                 <span className="text-center">Familias</span>
                 <span className="text-center">Alumnos</span>
@@ -227,8 +331,8 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                   type="button"
                   onClick={() => setFiltro(turnoFiltro === x.id ? "all" : x.id)}
                   className={cn(
-                    "grid w-full grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] items-center border-b px-4 py-2.5 text-left text-[15px] last:border-b-0",
-                    turnoFiltro === x.id ? "bg-[hsl(209_65%_95%)]" : "hover:bg-muted/40"
+                    "grid w-full grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 items-center border-b px-4 py-2.5 text-left text-[15px] last:border-b-0",
+                    turnoFiltro === x.id ? SELECCIONADO : "hover:bg-muted/40"
                   )}
                 >
                   <span className="min-w-0 truncate font-semibold">
@@ -242,7 +346,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                   <span className="text-center font-semibold">{porTurno[i].personas}</span>
                 </button>
               ))}
-              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
+              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
                 <span>Total</span>
                 <span className="text-center">{totalGeneral.familias}</span>
                 <span className="text-center">{totalGeneral.chicos}</span>
@@ -252,6 +356,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
               </div>
             </div>
           </div>
+          )}
         </div>
       )}
       <NuevaEntregaModal open={nuevaAbierta} onOpenChange={setNuevaAbierta} entregas={entregas} onCreada={onEntregaCreada} />

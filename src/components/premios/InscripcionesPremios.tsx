@@ -12,6 +12,7 @@ import { montoBono, normalizarNombre, resumenPorTurno, totalesEntrega, type Meto
 import type { FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 import { ModalResponsivo } from "@/components/shared/ModalResponsivo";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
+import { FamiliasTablaDesktop } from "./FamiliasTablaDesktop";
 import { FamiliaModal } from "./FamiliaModal";
 import { GestionarEntregaModal } from "./GestionarEntregaModal";
 import { useEntregaActual } from "./useEntregaActual";
@@ -121,6 +122,11 @@ export function InscripcionesPremios({
     );
   };
 
+  const editarMonto = async (f: FamiliaConChicos, monto: number) => {
+    if (!(await patchFamilia(f.id, { monto }))) return toast("No se pudo guardar el monto");
+    await refrescar();
+  };
+
   const eliminar = async (f: FamiliaConChicos) => {
     const res = await fetch(`/api/premios/familias/${f.id}`, { method: "DELETE" });
     if (!res.ok) return toast("No se pudo eliminar la familia");
@@ -181,6 +187,19 @@ export function InscripcionesPremios({
         <SinEntrega entregas={entregas} onCreada={onEntregaCreada} />
       ) : (
         <>
+          <div className="hidden md:block">
+            <FamiliasTablaDesktop
+              entrega={entregaActual}
+              turnos={turnos}
+              familias={familias}
+              cargando={loading || cargandoFamilias}
+              onEditar={abrirEditar}
+              onEliminar={eliminar}
+              onCambiarPago={cambiarPago}
+              onEditarMonto={editarMonto}
+            />
+          </div>
+          <div className="md:hidden">
           <div className="sticky top-0 z-10 -mx-4 border-b bg-background px-4 pb-2.5 pt-1 md:static md:mx-0 md:border-0 md:px-0">
             <div className="mb-2 grid grid-cols-2 gap-2 md:grid-cols-4">
               <Kpi
@@ -319,6 +338,7 @@ export function InscripcionesPremios({
                 })
             )}
           </div>
+          </div>
         </>
       )}
 
@@ -348,7 +368,7 @@ export function InscripcionesPremios({
                     if (f.metodoPago !== m) cambiarPago(f, m);
                   }}
                   className={cn(
-                    "flex min-h-14 w-full items-center justify-between rounded-xl px-4 text-left",
+                    "flex min-h-14 w-full items-center justify-between rounded-xl px-4 text-left md:min-h-10 md:rounded-lg",
                     cobrando.metodoPago === m ? "bg-[hsl(209_65%_95%)] ring-2 ring-primary" : "bg-muted/60"
                   )}
                 >
@@ -365,7 +385,7 @@ export function InscripcionesPremios({
                   setCobrando(null);
                   cambiarPago(f, null);
                 }}
-                className="h-12 w-full rounded-xl border text-[15px] font-semibold text-muted-foreground"
+                className="h-12 w-full rounded-xl border text-[15px] font-semibold text-muted-foreground md:h-9 md:rounded-lg md:text-sm"
               >
                 Marcar como sin pagar
               </button>

@@ -147,7 +147,7 @@ function FilaTurno({ turno, onUpdate }: { turno: TurnoConConteo; onUpdate: () =>
             type="button"
             onClick={eliminar}
             aria-label="Eliminar turno"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border text-destructive"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border text-destructive md:h-8 md:w-8 md:rounded-lg"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -155,7 +155,7 @@ function FilaTurno({ turno, onUpdate }: { turno: TurnoConConteo; onUpdate: () =>
             type="button"
             onClick={guardar}
             disabled={!cambiado || guardando || !hora}
-            className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            className="h-10 rounded-xl bg-primary px-4 text-sm md:h-8 md:rounded-lg font-semibold text-primary-foreground disabled:opacity-50"
           >
             Guardar
           </button>
@@ -202,7 +202,7 @@ function NuevoTurno({ entregaId, onUpdate }: { entregaId: string; onUpdate: () =
         type="button"
         onClick={agregar}
         disabled={!hora}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-[15px] font-semibold disabled:opacity-50"
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-[15px] font-semibold md:h-9 md:rounded-lg md:text-sm disabled:opacity-50"
       >
         <Plus className="h-4 w-4" />
         Agregar turno

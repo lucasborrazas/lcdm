@@ -7,7 +7,7 @@ import { useFetchJson } from "@/components/shared/useFetchJson";
 
 type Grupo = { id: string; nombre: string; enUso: number };
 
-const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
+const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none md:h-8 md:rounded-lg md:border md:border-input md:bg-transparent md:px-2.5 md:py-1 md:text-sm md:focus-visible:border-ring md:focus-visible:ring-3 md:focus-visible:ring-ring/50";
 const SIN_GRUPOS: Grupo[] = [];
 
 async function leerError(res: Response, porDefecto: string): Promise<string> {
@@ -47,7 +47,7 @@ function FilaGrupo({ grupo, onCambio }: { grupo: Grupo; onCambio: () => void }) 
           type="button"
           onClick={guardar}
           disabled={!nombre.trim() || nombre.trim() === grupo.nombre}
-          className="h-12 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40"
+          className="h-12 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40 md:h-8 md:rounded-lg"
         >
           Guardar
         </button>
@@ -55,7 +55,7 @@ function FilaGrupo({ grupo, onCambio }: { grupo: Grupo; onCambio: () => void }) 
           type="button"
           onClick={eliminar}
           aria-label={`Eliminar ${grupo.nombre}`}
-          className="flex h-12 w-11 shrink-0 items-center justify-center rounded-xl border text-destructive"
+          className="flex h-12 w-11 shrink-0 items-center justify-center rounded-xl border text-destructive md:h-8 md:rounded-lg"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -103,7 +103,7 @@ export function GruposEdadConfig() {
           type="button"
           onClick={agregar}
           disabled={!nuevo.trim()}
-          className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border px-4 text-sm font-semibold disabled:opacity-40"
+          className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border px-4 text-sm font-semibold disabled:opacity-40 md:h-8 md:rounded-lg"
         >
           <Plus className="h-4 w-4" />
           Agregar

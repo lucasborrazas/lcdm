@@ -30,6 +30,7 @@ import { GestionarTorneoSheet } from "./GestionarTorneoSheet";
 import { formatearMoneda } from "@/lib/calculations";
 import { colorHorario, montoPorMetodoPago } from "@/lib/torneo";
 import { cn } from "@/lib/utils";
+import { PILL_PAGO, PILL_SIN_PAGAR } from "@/lib/estilosEstado";
 import type { HorarioConCupo, InscripcionConHorario, TorneoConResumen } from "@/lib/types";
 
 function CeldaPago({
@@ -50,9 +51,9 @@ function CeldaPago({
   const valorActual = !inscripcion.pago ? "NO_PAGO" : inscripcion.metodoPago ?? "NO_PAGO";
 
   const badge: ReactNode = !inscripcion.pago ? (
-    <Badge variant="outline" className="text-xs font-normal">Sin pagar</Badge>
+    <Badge className={cn("text-xs font-normal", PILL_SIN_PAGAR)}>Sin pagar</Badge>
   ) : (
-    <Badge variant="secondary" className="text-xs font-normal">
+    <Badge className={cn("text-xs font-normal", PILL_PAGO)}>
       {inscripcion.metodoPago === "EFECTIVO" ? "Efectivo" : "Transferencia"} · {formatearMoneda(inscripcion.monto ?? 0)}
     </Badge>
   );

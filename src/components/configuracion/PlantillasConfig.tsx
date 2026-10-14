@@ -7,7 +7,7 @@ import { useFetchJson } from "@/components/shared/useFetchJson";
 type Plantilla = { id: string; hora: string; grupoEdad: { nombre: string } | null };
 type Seccion = "TORNEO" | "PREMIOS";
 
-const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
+const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none md:h-8 md:rounded-lg md:border md:border-input md:bg-transparent md:px-2.5 md:py-1 md:text-sm md:focus-visible:border-ring md:focus-visible:ring-3 md:focus-visible:ring-ring/50";
 const SIN_PLANTILLAS: Plantilla[] = [];
 
 async function leerError(res: Response, porDefecto: string): Promise<string> {
@@ -66,7 +66,7 @@ function FilaPlantilla({
           type="button"
           onClick={eliminar}
           aria-label="Quitar horario"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border text-destructive"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border text-destructive md:h-8 md:rounded-lg"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -74,7 +74,7 @@ function FilaPlantilla({
           type="button"
           onClick={guardar}
           disabled={!cambiado || !hora}
-          className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40"
+          className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-40 md:h-8 md:rounded-lg"
         >
           Guardar
         </button>
@@ -132,7 +132,7 @@ export function PlantillasConfig({ seccion, descripcion }: { seccion: Seccion; d
           type="button"
           onClick={agregar}
           disabled={!hora}
-          className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border px-4 text-sm font-semibold disabled:opacity-40"
+          className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border px-4 text-sm font-semibold disabled:opacity-40 md:h-8 md:rounded-lg"
         >
           <Plus className="h-4 w-4" />
           Agregar

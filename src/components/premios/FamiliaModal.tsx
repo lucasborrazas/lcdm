@@ -70,7 +70,7 @@ function BotonGenero({ genero, activo, onClick }: { genero: Genero; activo: bool
       onClick={onClick}
       aria-pressed={activo}
       className={cn(
-        "h-12 w-12 shrink-0 rounded-xl border text-[15px] font-bold transition-colors",
+        "h-12 w-12 shrink-0 rounded-xl border text-[15px] font-bold transition-colors md:h-8 md:w-8 md:rounded-lg md:text-sm",
         activo
           ? esM
             ? "border-blue-500 bg-blue-500 text-white"
@@ -239,7 +239,7 @@ function FormFamilia({
                   type="button"
                   aria-label={`Quitar alumno ${i + 1}`}
                   onClick={() => cambiar({ chicos: e.chicos.filter((x) => x.clave !== c.clave) })}
-                  className="flex h-12 w-9 shrink-0 items-center justify-center text-muted-foreground"
+                  className="flex h-12 w-9 shrink-0 md:h-8 items-center justify-center text-muted-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -250,7 +250,7 @@ function FormFamilia({
         <button
           type="button"
           onClick={() => cambiar({ chicos: [...e.chicos, { clave: nuevaClave(), nombre: "", genero: null }] })}
-          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed text-[15px] font-semibold text-muted-foreground"
+          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed text-[15px] md:h-9 md:rounded-lg md:text-sm font-semibold text-muted-foreground"
         >
           <Plus className="h-4 w-4" />
           Agregar alumno (hermano)

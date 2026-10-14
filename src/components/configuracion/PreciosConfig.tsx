@@ -6,7 +6,7 @@ import { formatearMoneda } from "@/lib/calculations";
 import { precioEfectivoDesde } from "@/lib/premios";
 import type { PreciosConfig } from "@/lib/preciosConfig";
 
-const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
+const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none md:h-8 md:rounded-lg md:border md:border-input md:bg-transparent md:px-2.5 md:py-1 md:text-sm md:focus-visible:border-ring md:focus-visible:ring-3 md:focus-visible:ring-ring/50";
 
 export function FormPrecios({
   seccion,
@@ -104,7 +104,7 @@ export function FormPrecios({
         type="button"
         onClick={guardar}
         disabled={!cambiado || guardando}
-        className="h-12 w-full rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground disabled:opacity-50"
+        className="h-12 w-full rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground disabled:opacity-50 md:h-8 md:rounded-lg"
       >
         {guardando ? "Guardando..." : "Guardar valores"}
       </button>

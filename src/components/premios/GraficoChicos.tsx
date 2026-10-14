@@ -13,7 +13,7 @@ const sinCeros = (valor: unknown) => (valor === 0 ? "" : String(valor));
 // dentro de cada tramo y el total del turno arriba de la barra.
 export function GraficoChicos({ datos, destacadoId }: { datos: DatoTurno[]; destacadoId?: string }) {
   // con un turno destacado, los demas se atenuan
-  const opacidad = (d: DatoTurno) => (destacadoId && d.id !== destacadoId ? 0.3 : 1);
+  const opacidad = (d: DatoTurno) => (!destacadoId ? 0.55 : d.id === destacadoId ? 0.9 : 0.2);
   const conTotal = datos.map((d) => ({ ...d, total: d.masculino + d.femenino, cima: 0 }));
 
   return (
@@ -30,7 +30,7 @@ export function GraficoChicos({ datos, destacadoId }: { datos: DatoTurno[]; dest
               dataKey="masculino"
               position="center"
               formatter={sinCeros}
-              style={{ fill: "#fff", fontSize: 14, fontWeight: 700 }}
+              style={{ fill: "currentColor", fontSize: 14, fontWeight: 700 }}
             />
           </Bar>
           <Bar dataKey="femenino" stackId="chicos" fill={COLOR_FEMENINO} isAnimationActive={false}>
@@ -41,7 +41,7 @@ export function GraficoChicos({ datos, destacadoId }: { datos: DatoTurno[]; dest
               dataKey="femenino"
               position="center"
               formatter={sinCeros}
-              style={{ fill: "#fff", fontSize: 14, fontWeight: 700 }}
+              style={{ fill: "currentColor", fontSize: 14, fontWeight: 700 }}
             />
           </Bar>
           {/* tramo de altura cero encima de la pila: solo sirve para mostrar el total */}
