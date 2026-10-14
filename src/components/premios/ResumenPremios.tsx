@@ -123,8 +123,8 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
             <div className="rounded-[14px] border p-3">
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex gap-4">
-                  <Punto color={COLOR_MASCULINO} texto={`Masculino ${t.masculino}`} />
-                  <Punto color={COLOR_FEMENINO} texto={`Femenino ${t.femenino}`} />
+                  <Punto color={COLOR_MASCULINO} texto="Masculino" />
+                  <Punto color={COLOR_FEMENINO} texto="Femenino" />
                 </div>
                 <span className="text-sm font-bold">Total {t.chicos}</span>
               </div>
