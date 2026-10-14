@@ -145,7 +145,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
           <div>
             <EtiquetaSeccion>Detalle por turno</EtiquetaSeccion>
             <div className="overflow-hidden rounded-[14px] border">
-              <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
+              <div className="grid grid-cols-[1fr_4.75rem_4.75rem_4.75rem] gap-x-2 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
                 <span>Turno</span>
                 <span className="text-right">Familias</span>
                 <span className="text-right">Alumnos</span>
@@ -154,7 +154,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
               {turnosVisibles.map((x, i) => (
                 <div
                   key={x.id}
-                  className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-4 border-b px-4 py-2.5 text-[15px] last:border-b-0"
+                  className="grid grid-cols-[1fr_4.75rem_4.75rem_4.75rem] items-center gap-x-2 border-b px-4 py-2.5 text-[15px] last:border-b-0"
                 >
                   <span className="min-w-0 truncate font-semibold">
                     {x.hora}
@@ -165,7 +165,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                   <span className="text-right font-semibold">{porTurno[i].personas}</span>
                 </div>
               ))}
-              <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
+              <div className="grid grid-cols-[1fr_4.75rem_4.75rem_4.75rem] gap-x-2 bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
                 <span>Total</span>
                 <span className="text-right">{t.familias}</span>
                 <span className="text-right">{t.chicos}</span>
