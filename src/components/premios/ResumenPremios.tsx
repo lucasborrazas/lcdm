@@ -82,7 +82,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
       {!loading && entregas.length === 0 ? (
         <SinEntrega entregas={entregas} onCreada={onEntregaCreada} />
       ) : (
-        <div className="max-w-4xl space-y-5">
+        <div className="space-y-5">
           <div className="rounded-[18px] bg-primary p-4 text-primary-foreground">
             <div className="text-xs font-semibold uppercase tracking-wide opacity-80">
               {t.ganancia >= 0 ? "Ganancia" : "Pérdida"}
