@@ -1,5 +1,6 @@
-import { GastosPremios } from "@/components/premios/GastosPremios";
+import { redirect } from "next/navigation";
 
-export default function GastosPremiosPage({ searchParams }: { searchParams: { entregaId?: string } }) {
-  return <GastosPremios entregaIdInicial={searchParams.entregaId} />;
+// Los costos viven en el Resumen, como en Torneo.
+export default function GastosPremiosPage() {
+  redirect("/premios/resumen");
 }

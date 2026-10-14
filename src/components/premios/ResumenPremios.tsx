@@ -8,6 +8,7 @@ import { formatearMoneda } from "@/lib/calculations";
 import { resumenPorTurno, totalesEntrega } from "@/lib/premios";
 import type { FamiliaConChicos, GastoEntrega, TurnoConConteo } from "@/lib/types";
 import { COLOR_FEMENINO, COLOR_MASCULINO, GraficoChicos } from "./GraficoChicos";
+import { CostosPremios } from "./CostosPremios";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
 import { useEntregaActual } from "./useEntregaActual";
 
@@ -44,7 +45,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
     entregaId ? `/api/premios/familias?entregaId=${entregaId}` : null,
     SIN_FAMILIAS
   );
-  const { data: gastos } = useFetchJson<GastoEntrega[]>(
+  const { data: gastos, loading: cargandoGastos, recargar: recargarGastos } = useFetchJson<GastoEntrega[]>(
     entregaId ? `/api/premios/gastos?entregaId=${entregaId}` : null,
     SIN_GASTOS
   );
@@ -63,6 +64,10 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
     masculino: porTurno[i].masculino,
     femenino: porTurno[i].femenino,
   }));
+
+  const actualizarCostos = async () => {
+    await Promise.all([recargarGastos(), recargarEntregas()]);
+  };
 
   const onEntregaCreada = async (id: string) => {
     await recargarEntregas();
@@ -110,6 +115,10 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
             <Dato titulo="Cobrado en efectivo" valor={formatearMoneda(t.cobradoEfectivo)} />
             <Dato titulo="Cobrado por transferencia" valor={formatearMoneda(t.cobradoTransferencia)} />
           </div>
+
+          {entregaId && (
+            <CostosPremios entregaId={entregaId} gastos={gastos} cargando={cargandoGastos} onActualizar={actualizarCostos} />
+          )}
 
           <div>
             <EtiquetaSeccion>Cuánta gente viene</EtiquetaSeccion>

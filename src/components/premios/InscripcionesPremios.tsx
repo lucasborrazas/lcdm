@@ -10,6 +10,7 @@ import { Chip, Fab, SwitchGrande } from "@/components/mobile/ui";
 import { formatearMoneda } from "@/lib/calculations";
 import { montoBono, normalizarNombre, resumenPorTurno, totalesEntrega, type MetodoPago } from "@/lib/premios";
 import type { FamiliaConChicos, TurnoConConteo } from "@/lib/types";
+import { ModalResponsivo } from "@/components/shared/ModalResponsivo";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
 import { FamiliaModal } from "./FamiliaModal";
 import { GestionarEntregaModal } from "./GestionarEntregaModal";
@@ -17,24 +18,6 @@ import { useEntregaActual } from "./useEntregaActual";
 
 const SIN_TURNOS: TurnoConConteo[] = [];
 const SIN_FAMILIAS: FamiliaConChicos[] = [];
-
-const CLAVE_ULTIMO_METODO = "premios-ultimo-metodo";
-
-function leerUltimoMetodo(): MetodoPago {
-  try {
-    return localStorage.getItem(CLAVE_ULTIMO_METODO) === "TRANSFERENCIA" ? "TRANSFERENCIA" : "EFECTIVO";
-  } catch {
-    return "EFECTIVO";
-  }
-}
-
-function guardarUltimoMetodo(metodo: MetodoPago) {
-  try {
-    localStorage.setItem(CLAVE_ULTIMO_METODO, metodo);
-  } catch {
-    // sin localStorage no se recuerda el medio y listo
-  }
-}
 
 const textoPago = (f: FamiliaConChicos) =>
   f.metodoPago
@@ -98,6 +81,8 @@ export function InscripcionesPremios({
     await Promise.all([recargarFamilias(), recargarTurnos(), recargarEntregas()]);
   };
 
+  const [cobrando, setCobrando] = useState<FamiliaConChicos | null>(null);
+
   const abrirNueva = (turnoId?: string) => {
     setEditando(null);
     setTurnoInicialId(turnoId ?? (filtroTurno !== "all" ? filtroTurno : null));
@@ -125,7 +110,6 @@ export function InscripcionesPremios({
     const esExcepcion = f.monto !== montoBono(entregaActual, f.metodoPago);
     const anterior = { metodoPago: f.metodoPago, monto: f.monto };
     const nuevo = { metodoPago: metodo, monto: esExcepcion ? f.monto : montoBono(entregaActual, metodo) };
-    if (metodo) guardarUltimoMetodo(metodo);
     if (!(await patchFamilia(f.id, nuevo))) return toast("No se pudo guardar el pago");
     await refrescar();
     toast(
@@ -284,7 +268,8 @@ export function InscripcionesPremios({
                         <div className="grid gap-2 lg:grid-cols-2">
                           {delTurno.map((f) => (
                             <div key={f.id} className="flex items-center gap-3 rounded-[14px] border px-3.5 py-3">
-                              <button type="button" onClick={() => abrirEditar(f)} className="min-w-0 flex-1 text-left">
+                              <div className="min-w-0 flex-1">
+                              <button type="button" onClick={() => abrirEditar(f)} className="block w-full text-left">
                                 <span className="block truncate text-[15px] font-semibold">{f.nombre}</span>
                                 <span className="mt-1 flex flex-wrap gap-1">
                                   {f.chicos.map((c) => (
@@ -306,9 +291,11 @@ export function InscripcionesPremios({
                                   </span>
                                   {f.telefono && <span>{f.telefono}</span>}
                                 </span>
+                              </button>
+                              <button type="button" onClick={() => setCobrando(f)} aria-label={`Cambiar el pago de ${f.nombre}`} className="mt-1.5 text-left">
                                 <span
                                   className={cn(
-                                    "mt-1.5 inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold",
+                                    "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold",
                                     f.metodoPago
                                       ? "bg-[hsl(150_50%_92%)] text-[hsl(152_55%_24%)]"
                                       : "border border-[hsl(30_80%_78%)] bg-background text-[hsl(25_75%_32%)]"
@@ -317,10 +304,11 @@ export function InscripcionesPremios({
                                   {textoPago(f)}
                                 </span>
                               </button>
+                              </div>
                               <SwitchGrande
                                 checked={f.metodoPago !== null}
                                 label={`Pago de la familia ${f.nombre}`}
-                                onChange={() => cambiarPago(f, f.metodoPago ? null : leerUltimoMetodo())}
+                                onChange={() => (f.metodoPago ? cambiarPago(f, null) : setCobrando(f))}
                               />
                             </div>
                           ))}
@@ -338,6 +326,53 @@ export function InscripcionesPremios({
         <Plus className="h-5 w-5" />
         Inscribir
       </Fab>
+
+      <ModalResponsivo
+        open={!!cobrando}
+        onOpenChange={(v) => !v && setCobrando(null)}
+        title={cobrando ? `Pago · ${cobrando.nombre}` : "Pago"}
+        className="sm:max-w-sm"
+      >
+        {cobrando && entregaActual && (
+          <div className="space-y-2.5">
+            {(["EFECTIVO", "TRANSFERENCIA"] as const).map((m) => {
+              const esExcepcion = cobrando.monto !== montoBono(entregaActual, cobrando.metodoPago);
+              const monto = esExcepcion ? cobrando.monto : montoBono(entregaActual, m);
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => {
+                    const f = cobrando;
+                    setCobrando(null);
+                    if (f.metodoPago !== m) cambiarPago(f, m);
+                  }}
+                  className={cn(
+                    "flex min-h-14 w-full items-center justify-between rounded-xl px-4 text-left",
+                    cobrando.metodoPago === m ? "bg-[hsl(209_65%_95%)] ring-2 ring-primary" : "bg-muted/60"
+                  )}
+                >
+                  <span className="text-[15px] font-semibold">{m === "EFECTIVO" ? "Efectivo" : "Transferencia"}</span>
+                  <span className="text-[15px] font-bold">{formatearMoneda(monto)}</span>
+                </button>
+              );
+            })}
+            {cobrando.metodoPago && (
+              <button
+                type="button"
+                onClick={() => {
+                  const f = cobrando;
+                  setCobrando(null);
+                  cambiarPago(f, null);
+                }}
+                className="h-12 w-full rounded-xl border text-[15px] font-semibold text-muted-foreground"
+              >
+                Marcar como sin pagar
+              </button>
+            )}
+          </div>
+        )}
+      </ModalResponsivo>
 
       <FamiliaModal
         open={formAbierto}
