@@ -196,8 +196,9 @@ model GrupoEdad {
   nombre    String   @unique
   createdAt DateTime @default(now())
 
-  horarios      Horario[]
-  turnosEntrega TurnoEntrega[]
+  horarios          Horario[]
+  turnosEntrega     TurnoEntrega[]
+  plantillaHorarios PlantillaHorario[]
 }
 
 model Torneo {
@@ -315,7 +316,14 @@ model Configuracion {
   indumentariaActiva Boolean  @default(true)
   torneoActivo       Boolean  @default(true)
   premiosActivo      Boolean  @default(false)
-  updatedAt          DateTime @updatedAt
+
+  // Precios por defecto al crear un torneo o una entrega nueva.
+  precioTorneoEfectivo      Int @default(18000)
+  precioTorneoTransferencia Int @default(22000)
+  bonoPrecioTransferencia   Int @default(48000)
+  bonoDescuentoEfectivoPct  Int @default(15)
+
+  updatedAt DateTime @updatedAt
 }
 
 // ── Entrega de premios (evento anual, la familia es la unidad de cobro) ──
@@ -383,4 +391,20 @@ model GastoEntrega {
   updatedAt DateTime @updatedAt
 
   entrega EntregaPremios @relation(fields: [entregaId], references: [id])
+}
+
+enum SeccionPlantilla {
+  TORNEO
+  PREMIOS
+}
+
+// Horarios que se crean solos al armar un torneo o una entrega nueva.
+model PlantillaHorario {
+  id          String           @id @default(cuid())
+  seccion     SeccionPlantilla
+  hora        String
+  grupoEdadId String?
+  createdAt   DateTime         @default(now())
+
+  grupoEdad GrupoEdad? @relation(fields: [grupoEdadId], references: [id])
 }

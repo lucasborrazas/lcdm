@@ -7,8 +7,23 @@ import { cn } from "@/lib/utils";
 import { INFO_SECCION, SECCIONES, seccionesActivas, type ConfigSecciones } from "@/lib/secciones";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { MobileHeader } from "@/components/mobile/MobileHeader";
-import { EtiquetaSeccion } from "@/components/mobile/ui";
 import { useConfiguracion } from "@/components/layout/ConfiguracionProvider";
+import { useFetchJson } from "@/components/shared/useFetchJson";
+import { FormPrecios } from "@/components/configuracion/PreciosConfig";
+import { GruposEdadConfig } from "@/components/configuracion/GruposEdadConfig";
+import { PlantillasConfig } from "@/components/configuracion/PlantillasConfig";
+import { PRECIOS_POR_DEFECTO, type PreciosConfig } from "@/lib/preciosConfig";
+
+function Bloque({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-[17px] font-bold">{titulo}</h2>
+      {children}
+    </section>
+  );
+}
+
+const CONFIG_INICIAL = { precios: PRECIOS_POR_DEFECTO };
 
 function Interruptor({ activo }: { activo: boolean }) {
   return (
@@ -29,6 +44,10 @@ function ConfiguracionContenido() {
   const router = useRouter();
   const seccionParam = useSearchParams().get("seccion");
   const { secciones, activas } = useConfiguracion();
+  const { data: config, loading: cargandoPrecios, recargar: recargarConfig } = useFetchJson<{ precios: PreciosConfig }>(
+    "/api/configuracion",
+    CONFIG_INICIAL
+  );
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const seccionHeader = activas.find((s) => s === seccionParam) ?? activas[0];
@@ -61,29 +80,56 @@ function ConfiguracionContenido() {
         <PageHeader title="Configuración" description="Ajustes generales de la app" />
       </div>
 
-      <div className="max-w-xl">
-        <EtiquetaSeccion>Secciones visibles</EtiquetaSeccion>
-        <p className="mb-3 text-sm text-muted-foreground">
-          Las secciones apagadas se ocultan del menú. Sus datos se conservan y vuelven al activarlas.
-        </p>
-        <div className="overflow-hidden rounded-[14px] border">
-          {SECCIONES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              disabled={guardando}
-              onClick={() => alternar(s)}
-              className="flex min-h-14 w-full items-center justify-between gap-3 border-b px-4 py-2 text-left last:border-b-0 disabled:opacity-60"
-            >
-              <div>
-                <div className="text-[15px] font-medium">{INFO_SECCION[s].nombre}</div>
-                <div className="text-xs text-muted-foreground">{INFO_SECCION[s].subtitulo}</div>
-              </div>
-              <Interruptor activo={secciones[s]} />
-            </button>
-          ))}
-        </div>
-        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+      <div className="max-w-2xl space-y-8">
+        <Bloque titulo="Secciones visibles">
+          <p className="text-sm text-muted-foreground">
+            Las secciones apagadas se ocultan del menú. Sus datos se conservan y vuelven al activarlas.
+          </p>
+          <div className="overflow-hidden rounded-[14px] border">
+            {SECCIONES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                disabled={guardando}
+                onClick={() => alternar(s)}
+                className="flex min-h-14 w-full items-center justify-between gap-3 border-b px-4 py-2 text-left last:border-b-0 disabled:opacity-60"
+              >
+                <div>
+                  <div className="text-[15px] font-medium">{INFO_SECCION[s].nombre}</div>
+                  <div className="text-xs text-muted-foreground">{INFO_SECCION[s].subtitulo}</div>
+                </div>
+                <Interruptor activo={secciones[s]} />
+              </button>
+            ))}
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </Bloque>
+
+        <Bloque titulo="Precios por defecto">
+          {cargandoPrecios ? (
+            <p className="text-sm text-muted-foreground">Cargando...</p>
+          ) : (
+            <FormPrecios key={JSON.stringify(config.precios)} precios={config.precios} onGuardado={recargarConfig} />
+          )}
+        </Bloque>
+
+        <Bloque titulo="Grupos de edad">
+          <GruposEdadConfig />
+        </Bloque>
+
+        <Bloque titulo="Horarios de torneo (plantilla)">
+          <PlantillasConfig
+            seccion="TORNEO"
+            descripcion="Se crean solos al armar un torneo nuevo sin duplicar otro. Cada horario lleva su grupo de edad."
+          />
+        </Bloque>
+
+        <Bloque titulo="Turnos de la entrega de premios (plantilla)">
+          <PlantillasConfig
+            seccion="PREMIOS"
+            descripcion="Se crean solos al armar una entrega nueva sin copiar la anterior."
+          />
+        </Bloque>
       </div>
     </div>
   );

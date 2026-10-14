@@ -100,7 +100,7 @@ function FormNuevoTorneo({
         <div>
           <EtiquetaSeccion>Duplicar horarios de</EtiquetaSeccion>
           <select className={campo} value={duplicarDesde} onChange={(e) => setDuplicarDesde(e.target.value)}>
-            <option value="ninguno">No duplicar (empezar vacío)</option>
+            <option value="ninguno">No duplicar (usar la plantilla de horarios)</option>
             {torneos.map((t) => (
               <option key={t.id} value={t.id}>{nombreTorneo(t.mes, t.anio)}</option>
             ))}

@@ -116,7 +116,7 @@ export function NuevoTorneoDialog({
               <Select value={duplicarDesde} onValueChange={setDuplicarDesde}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ninguno">No duplicar (empezar vacío)</SelectItem>
+                  <SelectItem value="ninguno">No duplicar (usar la plantilla de horarios)</SelectItem>
                   {torneos.map((t) => (
                     <SelectItem key={t.id} value={t.id}>{nombreTorneo(t.mes, t.anio)}</SelectItem>
                   ))}

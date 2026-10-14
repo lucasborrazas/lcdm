@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { BONO_POR_DEFECTO, TURNOS_POR_DEFECTO, precioEfectivoDesde, totalesEntrega } from "@/lib/premios";
+import { TURNOS_POR_DEFECTO, precioEfectivoDesde, totalesEntrega } from "@/lib/premios";
+import { leerConfiguracion } from "@/lib/configuracion";
 
 const entregaSchema = z.object({
   anio: z.number().int().min(2000),
@@ -61,17 +62,28 @@ export async function POST(req: NextRequest) {
       })
     : null;
 
-  const precioTransferencia = origen?.precioTransferencia ?? BONO_POR_DEFECTO.precioTransferencia;
+  // Sin duplicar: precio del bono y turnos de Configuracion.
+  const { precios } = await leerConfiguracion();
+  const plantillas = origen
+    ? []
+    : await prisma.plantillaHorario.findMany({
+        where: { seccion: "PREMIOS" },
+        orderBy: [{ hora: "asc" }, { createdAt: "asc" }],
+      });
+
+  const precioTransferencia = origen?.precioTransferencia ?? precios.bonoTransferencia;
+  const turnos = origen
+    ? origen.turnos.map((t) => ({ hora: t.hora, grupoEdadId: t.grupoEdadId, activo: t.activo }))
+    : plantillas.length > 0
+      ? plantillas.map((p) => ({ hora: p.hora, grupoEdadId: p.grupoEdadId }))
+      : TURNOS_POR_DEFECTO.map((hora) => ({ hora }));
+
   const entrega = await prisma.entregaPremios.create({
     data: {
       anio,
       precioTransferencia,
-      precioEfectivo: origen?.precioEfectivo ?? precioEfectivoDesde(precioTransferencia),
-      turnos: {
-        create: origen
-          ? origen.turnos.map((t) => ({ hora: t.hora, grupoEdadId: t.grupoEdadId, activo: t.activo }))
-          : TURNOS_POR_DEFECTO.map((hora) => ({ hora })),
-      },
+      precioEfectivo: origen?.precioEfectivo ?? precioEfectivoDesde(precioTransferencia, precios.bonoDescuentoEfectivoPct),
+      turnos: { create: turnos },
     },
   });
 

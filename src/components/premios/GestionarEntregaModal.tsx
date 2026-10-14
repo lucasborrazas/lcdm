@@ -7,9 +7,13 @@ import { useReportarCambios } from "@/components/shared/CierreProtegido";
 import { useEsDesktop } from "@/components/shared/useEsDesktop";
 import { useToast } from "@/components/mobile/ToastUndo";
 import { EtiquetaSeccion, SwitchGrande } from "@/components/mobile/ui";
-import { BONO_POR_DEFECTO, precioEfectivoDesde } from "@/lib/premios";
+import { useFetchJson } from "@/components/shared/useFetchJson";
+import { precioEfectivoDesde } from "@/lib/premios";
+import { PRECIOS_POR_DEFECTO, type PreciosConfig } from "@/lib/preciosConfig";
 import type { EntregaConResumen, TurnoConConteo } from "@/lib/types";
 import { btnPrimario, campo } from "./estilos";
+
+const CONFIG_INICIAL = { precios: PRECIOS_POR_DEFECTO };
 
 async function leerError(res: Response, porDefecto: string): Promise<string> {
   const data = await res.json().catch(() => null);
@@ -21,13 +25,15 @@ function Precios({ entrega, onUpdate }: { entrega: EntregaConResumen; onUpdate: 
   const [efectivo, setEfectivo] = useState(entrega.precioEfectivo.toString());
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { data: config } = useFetchJson<{ precios: PreciosConfig }>("/api/configuracion", CONFIG_INICIAL);
+  const descuento = config.precios.bonoDescuentoEfectivoPct;
 
   const cambiado =
     transferencia !== entrega.precioTransferencia.toString() || efectivo !== entrega.precioEfectivo.toString();
   useReportarCambios(cambiado);
 
   const calcularEfectivo = () =>
-    setEfectivo(precioEfectivoDesde(parseInt(transferencia) || 0).toString());
+    setEfectivo(precioEfectivoDesde(parseInt(transferencia) || 0, descuento).toString());
 
   const guardar = async () => {
     setGuardando(true);
@@ -62,7 +68,7 @@ function Precios({ entrega, onUpdate }: { entrega: EntregaConResumen; onUpdate: 
         </div>
       </div>
       <button type="button" onClick={calcularEfectivo} className="text-sm font-semibold text-primary">
-        Calcular efectivo ({BONO_POR_DEFECTO.descuentoEfectivoPct}% menos, redondeado al millar)
+        Calcular efectivo ({descuento}% menos, redondeado al millar)
       </button>
       <p className="text-xs text-muted-foreground">
         Los precios nuevos rigen para las próximas inscripciones; las familias ya cargadas conservan su monto.

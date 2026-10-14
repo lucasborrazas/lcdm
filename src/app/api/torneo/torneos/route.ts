@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { leerConfiguracion } from "@/lib/configuracion";
 
 const torneoSchema = z.object({
   mes: z.number().int().min(1).max(12),
@@ -62,8 +63,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ya existe un torneo para ese mes/año" }, { status: 409 });
   }
 
+  // Precios por defecto de Configuracion
+  const { precios } = await leerConfiguracion();
   const torneo = await prisma.torneo.create({
-    data: { mes: data.mes, anio: data.anio },
+    data: {
+      mes: data.mes,
+      anio: data.anio,
+      precioEfectivo: precios.torneoEfectivo,
+      precioTransferencia: precios.torneoTransferencia,
+    },
   });
 
   if (data.duplicarDesdeTorneoId) {
@@ -80,6 +88,24 @@ export async function POST(req: NextRequest) {
           cupoMaximo: h.cupoMaximo,
           orden: h.orden,
           activo: h.activo,
+        })),
+      });
+    }
+  }
+
+  // Sin duplicar: horarios de la plantilla de Configuracion (si hay).
+  if (!data.duplicarDesdeTorneoId) {
+    const plantillas = await prisma.plantillaHorario.findMany({
+      where: { seccion: "TORNEO", grupoEdadId: { not: null } },
+      orderBy: [{ hora: "asc" }, { createdAt: "asc" }],
+    });
+    if (plantillas.length > 0) {
+      await prisma.horario.createMany({
+        data: plantillas.map((p, orden) => ({
+          torneoId: torneo.id,
+          grupoEdadId: p.grupoEdadId!,
+          hora: p.hora,
+          orden,
         })),
       });
     }

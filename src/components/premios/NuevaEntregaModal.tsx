@@ -78,7 +78,7 @@ function FormNuevaEntrega({
           </div>
           {duplicarDesde === null && (
             <p className="mt-2 text-xs text-muted-foreground">
-              Se crean los 5 turnos de siempre (16:00 a 18:40) con el precio por defecto del bono.
+              Se crean los turnos y el precio del bono de la plantilla de Configuración.
             </p>
           )}
         </div>
