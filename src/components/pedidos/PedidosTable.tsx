@@ -179,7 +179,7 @@ export function PedidosTable({
           {indentado ? (
             <span className="text-muted-foreground">—</span>
           ) : (
-            <span className={saldoRestante > 0 ? "text-amber-600" : "text-green-600"}>
+            <span className={saldoRestante > 0 ? "text-[hsl(25_75%_32%)]" : "text-[hsl(152_55%_28%)]"}>
               <MonedaCell valor={saldoRestante} />
             </span>
           )}
@@ -315,7 +315,7 @@ export function PedidosTable({
                     <TableCell className="text-right text-sm font-medium"><MonedaCell valor={grupo.precioTotal} /></TableCell>
                     <TableCell className="text-right text-sm"><MonedaCell valor={grupo.sena > 0 ? grupo.sena : null} /></TableCell>
                     <TableCell className="text-right text-sm">
-                      <span className={grupo.saldoRestante > 0 ? "text-amber-600" : "text-green-600"}>
+                      <span className={grupo.saldoRestante > 0 ? "text-[hsl(25_75%_32%)]" : "text-[hsl(152_55%_28%)]"}>
                         <MonedaCell valor={grupo.saldoRestante} />
                       </span>
                     </TableCell>

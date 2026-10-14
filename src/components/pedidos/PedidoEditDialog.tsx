@@ -296,7 +296,7 @@ export function PedidoEditDialog({
               {!modoCliente && (
                 <div>
                   <p className="text-xs text-muted-foreground">Ganancia</p>
-                  <p className={ganancia >= 0 ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+                  <p className={ganancia >= 0 ? "text-[hsl(152_55%_28%)] font-medium" : "text-[hsl(0_70%_48%)] font-medium"}>
                     {formatearMoneda(ganancia)}
                   </p>
                 </div>
@@ -304,7 +304,7 @@ export function PedidoEditDialog({
               {!enGrupo && (
                 <div>
                   <p className="text-xs text-muted-foreground">Saldo restante</p>
-                  <p className={saldoRestante > 0 ? "text-amber-600 font-medium" : "text-green-600 font-medium"}>
+                  <p className={saldoRestante > 0 ? "text-[hsl(25_75%_32%)] font-medium" : "text-[hsl(152_55%_28%)] font-medium"}>
                     {formatearMoneda(saldoRestante)}
                   </p>
                 </div>
@@ -312,13 +312,13 @@ export function PedidoEditDialog({
             </div>
 
             {pedido.stockDescontado && (
-              <p className="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-md">
+              <p className="text-xs text-[hsl(152_55%_28%)] bg-[hsl(150_50%_94%)] px-3 py-2 rounded-md">
                 ✓ Stock ya descontado (pedido encargado o entregado)
               </p>
             )}
 
             <div className="flex justify-between gap-2">
-              <Button type="button" variant="ghost" className="text-red-500 hover:text-red-600" onClick={onDelete}>
+              <Button type="button" variant="ghost" className="text-[hsl(0_70%_48%)] hover:text-[hsl(0_70%_38%)]" onClick={onDelete}>
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                 Eliminar
               </Button>

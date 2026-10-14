@@ -72,7 +72,7 @@ export function HistorialPremios() {
                     <TableCell>{e.personas}</TableCell>
                     <TableCell><MonedaCell valor={e.cobrado} /></TableCell>
                     <TableCell><MonedaCell valor={e.totalGastos} /></TableCell>
-                    <TableCell className={e.ganancia >= 0 ? "font-medium text-green-600" : "font-medium text-destructive"}>
+                    <TableCell className={e.ganancia >= 0 ? "font-medium text-[hsl(152_55%_28%)]" : "font-medium text-destructive"}>
                       {e.ganancia >= 0 ? "+" : "-"}
                       <MonedaCell valor={Math.abs(e.ganancia)} />
                     </TableCell>
@@ -103,7 +103,7 @@ export function HistorialPremios() {
           <div key={e.id} className="rounded-[14px] border p-3.5">
             <div className="flex items-baseline justify-between">
               <span className="text-[17px] font-bold">{e.anio}</span>
-              <span className={cn("text-[15px] font-bold", e.ganancia >= 0 ? "text-green-600" : "text-destructive")}>
+              <span className={cn("text-[15px] font-bold", e.ganancia >= 0 ? "text-[hsl(152_55%_28%)]" : "text-destructive")}>
                 {e.ganancia >= 0 ? "+" : "-"}
                 {formatearMoneda(Math.abs(e.ganancia))}
               </span>

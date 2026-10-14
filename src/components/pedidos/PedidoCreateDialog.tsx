@@ -244,7 +244,7 @@ function LineaPedido({
           Total línea: <strong className="text-foreground">{formatearMoneda(precioTotal)}</strong>
           {!modoCliente && (
             <>
-              {" · "}Ganancia: <span className={ganancia >= 0 ? "text-green-600" : "text-red-500"}>{formatearMoneda(ganancia)}</span>
+              {" · "}Ganancia: <span className={ganancia >= 0 ? "text-[hsl(152_55%_28%)]" : "text-[hsl(0_70%_48%)]"}>{formatearMoneda(ganancia)}</span>
             </>
           )}
         </p>
@@ -271,7 +271,7 @@ function ResumenPedido({ control }: { control: Control<FormValues> }) {
         <div className="text-muted-foreground">
           Total pedido: <strong className="text-foreground">{formatearMoneda(precioTotal)}</strong>
           {sena > 0 && <> · Seña <strong className="text-foreground">{formatearMoneda(sena)}</strong></>}
-          {" · "}Saldo: <span className={saldoRestante > 0 ? "text-amber-600 font-medium" : "text-green-600 font-medium"}>{formatearMoneda(saldoRestante)}</span>
+          {" · "}Saldo: <span className={saldoRestante > 0 ? "text-[hsl(25_75%_32%)] font-medium" : "text-[hsl(152_55%_28%)] font-medium"}>{formatearMoneda(saldoRestante)}</span>
         </div>
       </div>
     </>

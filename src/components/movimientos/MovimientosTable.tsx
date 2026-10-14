@@ -200,7 +200,7 @@ export function MovimientosTable({
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditando(g.compraId)}>
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => setEliminando(g.compraId)}>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-[hsl(0_70%_48%)] hover:text-[hsl(0_70%_38%)]" onClick={() => setEliminando(g.compraId)}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>

@@ -189,7 +189,7 @@ function FilaGasto({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-red-500 hover:text-red-600"
+            className="h-7 w-7 text-[hsl(0_70%_48%)] hover:text-[hsl(0_70%_38%)]"
             onClick={() => confirm(`¿Eliminar el costo "${gasto.concepto}"?`) && onEliminar(gasto)}
           >
             <Trash2 className="h-3.5 w-3.5" />

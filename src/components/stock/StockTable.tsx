@@ -96,7 +96,7 @@ export function StockTable() {
   };
 
   const renderLinea = (s: StockResumen, indentado: boolean) => (
-    <TableRow key={s.productoId} className={s.stockBajo ? "bg-red-50" : s.archivado ? "opacity-50" : undefined}>
+    <TableRow key={s.productoId} className={s.stockBajo ? "bg-[hsl(0_80%_96%)]" : s.archivado ? "opacity-50" : undefined}>
       <TableCell>
         <Badge variant={s.temporada === "VERANO" ? "default" : "secondary"} className="text-xs">
           {s.temporada === "VERANO" ? "Verano" : "Invierno"}
@@ -106,11 +106,11 @@ export function StockTable() {
       <TableCell className={`font-medium text-sm ${indentado ? "pl-8" : ""}`}>{s.nombre}</TableCell>
       <TableCell className="text-sm">{s.talle}</TableCell>
       <TableCell className="text-right text-sm font-medium">{s.stockInicial}</TableCell>
-      <TableCell className="text-right text-sm text-green-600">{s.ingresos > 0 ? `+${s.ingresos}` : 0}</TableCell>
-      <TableCell className="text-right text-sm text-red-500">{s.egresos > 0 ? `-${s.egresos}` : 0}</TableCell>
+      <TableCell className="text-right text-sm text-[hsl(152_55%_28%)]">{s.ingresos > 0 ? `+${s.ingresos}` : 0}</TableCell>
+      <TableCell className="text-right text-sm text-[hsl(0_70%_48%)]">{s.egresos > 0 ? `-${s.egresos}` : 0}</TableCell>
       <TableCell className="text-right font-semibold">
-        <span className={s.stockBajo ? "text-red-600" : ""}>
-          {s.stockBajo && <AlertTriangle className="inline h-3 w-3 mr-1 text-red-500" />}
+        <span className={s.stockBajo ? "text-[hsl(0_70%_40%)]" : ""}>
+          {s.stockBajo && <AlertTriangle className="inline h-3 w-3 mr-1 text-[hsl(0_70%_48%)]" />}
           {s.stockActual}
         </span>
       </TableCell>
@@ -133,7 +133,7 @@ export function StockTable() {
   return (
     <div>
       {bajos.length > 0 && (
-        <div className="flex items-center gap-2 mb-4 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-md bg-[hsl(30_90%_94%)] border border-[hsl(30_80%_78%)] text-[hsl(25_75%_28%)] text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>{bajos.length} producto{bajos.length > 1 ? "s" : ""} con stock bajo el mínimo</span>
         </div>
@@ -260,8 +260,8 @@ export function StockTable() {
                     <TableCell className="text-right text-sm text-muted-foreground">—</TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground">—</TableCell>
                     <TableCell className="text-right font-semibold">
-                      <span className={algunoBajo ? "text-red-600" : ""}>
-                        {algunoBajo && <AlertTriangle className="inline h-3 w-3 mr-1 text-red-500" />}
+                      <span className={algunoBajo ? "text-[hsl(0_70%_40%)]" : ""}>
+                        {algunoBajo && <AlertTriangle className="inline h-3 w-3 mr-1 text-[hsl(0_70%_48%)]" />}
                         {stockActualTotal}
                       </span>
                     </TableCell>

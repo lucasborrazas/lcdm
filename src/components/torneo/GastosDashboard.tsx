@@ -127,7 +127,7 @@ function FilaGasto({
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={empezarEdicion}>
             <Pencil className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={eliminar}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-[hsl(0_70%_48%)] hover:text-[hsl(0_70%_38%)]" onClick={eliminar}>
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -220,10 +220,10 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
         <MetricaCard
           titulo={ganancia >= 0 ? "Ganancia" : "Pérdida"}
           valor={formatearMoneda(Math.abs(ganancia))}
-          color={ganancia >= 0 ? "text-green-600" : "text-destructive"}
+          color={ganancia >= 0 ? "text-[hsl(152_55%_28%)]" : "text-destructive"}
         />
-        <MetricaCard titulo="Ingresos" valor={formatearMoneda(recaudado)} className={cn("bg-green-500/10")} />
-        <MetricaCard titulo="Costos" valor={formatearMoneda(totalCostos)} className={cn("bg-red-500/10")} />
+        <MetricaCard titulo="Ingresos" valor={formatearMoneda(recaudado)} className={cn("bg-[hsl(150_50%_94%)]0/10")} />
+        <MetricaCard titulo="Costos" valor={formatearMoneda(totalCostos)} className={cn("bg-[hsl(0_80%_96%)]0/10")} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

@@ -173,7 +173,7 @@ export function ProductosTable() {
       {!modoCliente && (
         <TableCell className="text-right text-sm">
           {p.gananciaUnitaria != null ? (
-            <span className={p.gananciaUnitaria >= 0 ? "text-green-600" : "text-red-500"}>
+            <span className={p.gananciaUnitaria >= 0 ? "text-[hsl(152_55%_28%)]" : "text-[hsl(0_70%_48%)]"}>
               <MonedaCell valor={p.gananciaUnitaria} />
             </span>
           ) : (
@@ -185,7 +185,7 @@ export function ProductosTable() {
         <span
           className={
             p.stockMinimo != null && p.stockActual <= p.stockMinimo
-              ? "text-red-500 font-semibold"
+              ? "text-[hsl(0_70%_48%)] font-semibold"
               : ""
           }
         >

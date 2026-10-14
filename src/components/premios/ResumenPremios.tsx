@@ -246,10 +246,10 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
             <MetricaCard
               titulo={t.ganancia >= 0 ? "Ganancia" : "Pérdida"}
               valor={formatearMoneda(Math.abs(t.ganancia))}
-              color={t.ganancia >= 0 ? "text-green-600" : "text-destructive"}
+              color={t.ganancia >= 0 ? "text-[hsl(152_55%_28%)]" : "text-destructive"}
             />
-            <MetricaCard titulo="Ingresos" valor={formatearMoneda(t.cobrado)} className="bg-green-500/10" />
-            <MetricaCard titulo="Costos" valor={formatearMoneda(t.gastos)} className="bg-red-500/10" />
+            <MetricaCard titulo="Ingresos" valor={formatearMoneda(t.cobrado)} className="bg-[hsl(150_50%_94%)]0/10" />
+            <MetricaCard titulo="Costos" valor={formatearMoneda(t.gastos)} className="bg-[hsl(0_80%_96%)]0/10" />
           </div>
           )}
 
@@ -258,7 +258,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
               titulo="Falta cobrar"
               valor={formatearMoneda(t.pendiente)}
               detalle={`${t.familias - t.familiasPagaron} de ${t.familias} familias`}
-              className="bg-amber-500/10"
+              className="bg-[hsl(30_90%_94%)]0/10"
             />
             <Dato titulo="Cobrado en efectivo" valor={formatearMoneda(t.cobradoEfectivo)} />
             <Dato titulo="Cobrado por transferencia" valor={formatearMoneda(t.cobradoTransferencia)} />

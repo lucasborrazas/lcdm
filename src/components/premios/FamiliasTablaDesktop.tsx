@@ -24,9 +24,8 @@ import { PILL_PAGO, PILL_SIN_PAGAR } from "@/lib/estilosEstado";
 import type { EntregaConResumen, FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 
 function TurnoKpiCard({ turno, indice, alumnos, familias }: { turno: TurnoConConteo; indice: number; alumnos: number; familias: number }) {
-  const color = colorHorario(indice);
   return (
-    <Card className={color.kpi}>
+    <Card>
       <CardHeader className="pb-1">
         <CardTitle className="text-xs font-medium text-muted-foreground">
           {turno.hora}
@@ -291,7 +290,7 @@ export function FamiliasTablaDesktop({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-600"
+                          className="h-8 w-8 text-[hsl(0_70%_48%)] hover:text-[hsl(0_70%_38%)]"
                           onClick={() => confirm(`¿Eliminar a la familia ${f.nombre}?`) && onEliminar(f)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />

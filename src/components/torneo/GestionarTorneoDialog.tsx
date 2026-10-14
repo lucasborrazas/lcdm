@@ -92,7 +92,7 @@ function FilaHorario({
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 text-red-500 hover:text-red-600"
+        className="h-8 w-8 text-[hsl(0_70%_48%)] hover:text-[hsl(0_70%_38%)]"
         onClick={eliminar}
         title={horario.inscriptos > 0 ? `Tiene ${horario.inscriptos} inscripto(s)` : "Eliminar"}
       >
