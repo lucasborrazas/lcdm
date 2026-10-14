@@ -7,7 +7,7 @@ import { ModalResponsivo } from "@/components/shared/ModalResponsivo";
 import { useReportarCambios } from "@/components/shared/CierreProtegido";
 import { Chip, EtiquetaSeccion, Segmented } from "@/components/mobile/ui";
 import { formatearMoneda } from "@/lib/calculations";
-import { minimoPersonas, montoBono, sugerirFamilias, type Genero, type MetodoPago } from "@/lib/premios";
+import { montoBono, sugerirFamilias, type Genero, type MetodoPago } from "@/lib/premios";
 import type { EntregaConResumen, FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 import { btnPeligro, btnPrimario, campo } from "./estilos";
 
@@ -130,19 +130,13 @@ function FormFamilia({
     () => (familia ? [] : sugerirFamilias(familias, e.nombre)),
     [familia, familias, e.nombre]
   );
-  const minimo = minimoPersonas(e.chicos.length);
-
   const guardar = async () => {
     const personas = parseInt(e.personas);
     if (!e.turnoId) return setError("Elegí el turno.");
     if (!e.nombre.trim()) return setError("Escribí el nombre de la familia.");
     if (e.chicos.some((c) => !c.nombre.trim())) return setError("Completá el nombre de cada chico.");
     if (e.chicos.some((c) => !c.genero)) return setError("Elegí el género (M o F) de cada chico.");
-    if (!personas || personas < minimo) {
-      return setError(
-        `Indicá el total de personas que vienen (incluye a los chicos): mínimo ${minimo}.`
-      );
-    }
+    if (isNaN(personas) || personas < 0) return setError("Indicá el total de personas que vienen (con los chicos).");
     if (e.monto === "" || isNaN(parseInt(e.monto))) return setError("Indicá el monto del bono.");
 
     setGuardando(true);
@@ -269,8 +263,7 @@ function FormFamilia({
           className={campo}
           type="number"
           inputMode="numeric"
-          min={minimo}
-          placeholder={`Mínimo ${minimo}`}
+          min="0"
           value={e.personas}
           onChange={(ev) => cambiar({ personas: ev.target.value })}
         />

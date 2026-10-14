@@ -41,11 +41,6 @@ type FamiliaCalculo = {
 
 export const familiaPago = (f: { metodoPago: MetodoPago | null }) => f.metodoPago !== null;
 
-// El total de personas incluye a los chicos, asi que no puede ser menor.
-export function minimoPersonas(cantidadChicos: number): number {
-  return Math.max(1, cantidadChicos);
-}
-
 export function contarChicos(familias: { chicos: { genero: Genero }[] }[]) {
   let masculino = 0;
   let femenino = 0;

@@ -1,5 +1,4 @@
 import {
-  minimoPersonas,
   montoBono,
   precioEfectivoDesde,
   resumenPorTurno,
@@ -32,13 +31,6 @@ describe("montoBono", () => {
   });
   it("sin medio rige el precio de lista", () => {
     expect(montoBono(precios, null)).toBe(48000);
-  });
-});
-
-describe("minimoPersonas", () => {
-  it("nunca baja de la cantidad de chicos", () => {
-    expect(minimoPersonas(3)).toBe(3);
-    expect(minimoPersonas(0)).toBe(1);
   });
 });
 
