@@ -83,7 +83,7 @@ function MasContenido() {
           >
             <div>
               <div className="text-[15px] font-semibold">Configuración</div>
-              <div className="text-xs text-muted-foreground">Secciones visibles de la app</div>
+              <div className="text-xs text-muted-foreground">Qué secciones se muestran</div>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </Link>

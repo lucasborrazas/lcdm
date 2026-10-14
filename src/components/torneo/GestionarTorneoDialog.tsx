@@ -1,5 +1,6 @@
 "use client";
 
+import { AjustesNuevos } from "@/components/configuracion/AjustesNuevos";
 import { useState, useEffect } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -266,6 +267,7 @@ export function GestionarTorneoDialog({
             Agregar
           </Button>
         </div>
+        <AjustesNuevos seccion="TORNEO" />
         </ProtegerCierre>
       </DialogContent>
     </Dialog>

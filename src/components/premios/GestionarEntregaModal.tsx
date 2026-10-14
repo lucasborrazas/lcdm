@@ -8,6 +8,7 @@ import { useEsDesktop } from "@/components/shared/useEsDesktop";
 import { useToast } from "@/components/mobile/ToastUndo";
 import { EtiquetaSeccion, SwitchGrande } from "@/components/mobile/ui";
 import { useFetchJson } from "@/components/shared/useFetchJson";
+import { AjustesNuevos } from "@/components/configuracion/AjustesNuevos";
 import { precioEfectivoDesde } from "@/lib/premios";
 import { PRECIOS_POR_DEFECTO, type PreciosConfig } from "@/lib/preciosConfig";
 import type { EntregaConResumen, TurnoConConteo } from "@/lib/types";
@@ -239,6 +240,7 @@ export function GestionarEntregaModal({
             ))}
             <NuevoTurno entregaId={entrega.id} onUpdate={onUpdate} />
           </div>
+          <AjustesNuevos seccion="PREMIOS" />
         </div>
       )}
     </ModalResponsivo>

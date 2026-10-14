@@ -8,7 +8,15 @@ import type { PreciosConfig } from "@/lib/preciosConfig";
 
 const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
 
-export function FormPrecios({ precios, onGuardado }: { precios: PreciosConfig; onGuardado: () => void }) {
+export function FormPrecios({
+  seccion,
+  precios,
+  onGuardado,
+}: {
+  seccion: "TORNEO" | "PREMIOS";
+  precios: PreciosConfig;
+  onGuardado: () => void;
+}) {
   const [torneoEfectivo, setTorneoEfectivo] = useState(precios.torneoEfectivo.toString());
   const [torneoTransferencia, setTorneoTransferencia] = useState(precios.torneoTransferencia.toString());
   const [bonoTransferencia, setBonoTransferencia] = useState(precios.bonoTransferencia.toString());
@@ -43,7 +51,7 @@ export function FormPrecios({ precios, onGuardado }: { precios: PreciosConfig; o
       });
       if (!res.ok) throw new Error();
       onGuardado();
-      setMensaje({ texto: "Precios guardados", error: false });
+      setMensaje({ texto: "Valores guardados", error: false });
     } catch {
       setMensaje({ texto: "No se pudo guardar. Probá de nuevo.", error: true });
     }
@@ -52,8 +60,9 @@ export function FormPrecios({ precios, onGuardado }: { precios: PreciosConfig; o
 
   return (
     <div className="space-y-4">
+      {seccion === "TORNEO" && (
       <div>
-        <EtiquetaSeccion>Torneo</EtiquetaSeccion>
+        <EtiquetaSeccion>Precio de la inscripción</EtiquetaSeccion>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1 block text-xs text-muted-foreground">Efectivo ($)</label>
@@ -65,9 +74,11 @@ export function FormPrecios({ precios, onGuardado }: { precios: PreciosConfig; o
           </div>
         </div>
       </div>
+      )}
 
+      {seccion === "PREMIOS" && (
       <div>
-        <EtiquetaSeccion>Bono de la entrega de premios</EtiquetaSeccion>
+        <EtiquetaSeccion>Bono</EtiquetaSeccion>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1 block text-xs text-muted-foreground">Transferencia ($)</label>
@@ -83,9 +94,10 @@ export function FormPrecios({ precios, onGuardado }: { precios: PreciosConfig; o
           (se redondea hacia abajo al millar, a favor del cliente)
         </p>
       </div>
+      )}
 
       <p className="text-xs text-muted-foreground">
-        Estos precios se cargan al crear un torneo o una entrega nuevos. Los ya creados no cambian.
+        Estos precios se cargan al crear {seccion === "TORNEO" ? "un torneo nuevo" : "una entrega nueva"}. Los ya creados no cambian.
       </p>
       {mensaje && <p className={mensaje.error ? "text-sm text-destructive" : "text-sm text-green-600"}>{mensaje.texto}</p>}
       <button
@@ -94,7 +106,7 @@ export function FormPrecios({ precios, onGuardado }: { precios: PreciosConfig; o
         disabled={!cambiado || guardando}
         className="h-12 w-full rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground disabled:opacity-50"
       >
-        {guardando ? "Guardando..." : "Guardar precios"}
+        {guardando ? "Guardando..." : "Guardar valores"}
       </button>
     </div>
   );

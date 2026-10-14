@@ -1,5 +1,6 @@
 "use client";
 
+import { AjustesNuevos } from "@/components/configuracion/AjustesNuevos";
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -290,6 +291,7 @@ export function GestionarTorneoSheet({
             </div>
           </div>
           <NuevoHorario torneo={torneo} onUpdate={onUpdate} />
+          <AjustesNuevos seccion="TORNEO" />
         </div>
       )}
     </BottomSheet>

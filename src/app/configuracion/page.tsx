@@ -8,11 +8,6 @@ import { INFO_SECCION, SECCIONES, seccionesActivas, type ConfigSecciones } from 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { MobileHeader } from "@/components/mobile/MobileHeader";
 import { useConfiguracion } from "@/components/layout/ConfiguracionProvider";
-import { useFetchJson } from "@/components/shared/useFetchJson";
-import { FormPrecios } from "@/components/configuracion/PreciosConfig";
-import { GruposEdadConfig } from "@/components/configuracion/GruposEdadConfig";
-import { PlantillasConfig } from "@/components/configuracion/PlantillasConfig";
-import { PRECIOS_POR_DEFECTO, type PreciosConfig } from "@/lib/preciosConfig";
 
 function Bloque({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
@@ -22,8 +17,6 @@ function Bloque({ titulo, children }: { titulo: string; children: React.ReactNod
     </section>
   );
 }
-
-const CONFIG_INICIAL = { precios: PRECIOS_POR_DEFECTO };
 
 function Interruptor({ activo }: { activo: boolean }) {
   return (
@@ -44,10 +37,6 @@ function ConfiguracionContenido() {
   const router = useRouter();
   const seccionParam = useSearchParams().get("seccion");
   const { secciones, activas } = useConfiguracion();
-  const { data: config, loading: cargandoPrecios, recargar: recargarConfig } = useFetchJson<{ precios: PreciosConfig }>(
-    "/api/configuracion",
-    CONFIG_INICIAL
-  );
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const seccionHeader = activas.find((s) => s === seccionParam) ?? activas[0];
@@ -77,7 +66,7 @@ function ConfiguracionContenido() {
     <div>
       <MobileHeader seccion={seccionHeader} title="Configuración" />
       <div className="hidden md:block">
-        <PageHeader title="Configuración" description="Ajustes generales de la app" />
+        <PageHeader title="Configuración" description="Qué secciones se muestran en la app" />
       </div>
 
       <div className="max-w-2xl space-y-8">
@@ -103,32 +92,6 @@ function ConfiguracionContenido() {
             ))}
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-        </Bloque>
-
-        <Bloque titulo="Precios por defecto">
-          {cargandoPrecios ? (
-            <p className="text-sm text-muted-foreground">Cargando...</p>
-          ) : (
-            <FormPrecios key={JSON.stringify(config.precios)} precios={config.precios} onGuardado={recargarConfig} />
-          )}
-        </Bloque>
-
-        <Bloque titulo="Grupos de edad">
-          <GruposEdadConfig />
-        </Bloque>
-
-        <Bloque titulo="Horarios de torneo (plantilla)">
-          <PlantillasConfig
-            seccion="TORNEO"
-            descripcion="Se crean solos al armar un torneo nuevo sin duplicar otro. Cada horario lleva su grupo de edad."
-          />
-        </Bloque>
-
-        <Bloque titulo="Turnos de la entrega de premios (plantilla)">
-          <PlantillasConfig
-            seccion="PREMIOS"
-            descripcion="Se crean solos al armar una entrega nueva sin copiar la anterior."
-          />
         </Bloque>
       </div>
     </div>
