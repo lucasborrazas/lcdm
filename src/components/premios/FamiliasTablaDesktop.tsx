@@ -24,9 +24,8 @@ import { PILL_PAGO, PILL_SIN_PAGAR } from "@/lib/estilosEstado";
 import type { EntregaConResumen, FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 
 function TurnoKpiCard({ turno, indice, alumnos, familias }: { turno: TurnoConConteo; indice: number; alumnos: number; familias: number }) {
-  const color = colorHorario(indice);
   return (
-    <Card className={color.kpi}>
+    <Card>
       <CardHeader className="pb-1">
         <CardTitle className="text-xs font-medium text-muted-foreground">
           {turno.hora}
