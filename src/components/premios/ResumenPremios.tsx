@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useFetchJson } from "@/components/shared/useFetchJson";
 import { EtiquetaSeccion } from "@/components/mobile/ui";
@@ -15,13 +16,26 @@ const SIN_TURNOS: TurnoConConteo[] = [];
 const SIN_FAMILIAS: FamiliaConChicos[] = [];
 const SIN_GASTOS: GastoEntrega[] = [];
 
-function Dato({ titulo, valor, detalle, className }: { titulo: string; valor: string; detalle?: string; className?: string }) {
+function Dato({ titulo, valor, detalle, className, grande }: { titulo: string; valor: string; detalle?: string; className?: string; grande?: boolean }) {
   return (
     <div className={cn("rounded-[14px] bg-muted px-3.5 py-3", className)}>
       <div className="text-xs font-medium text-muted-foreground">{titulo}</div>
-      <div className="text-[22px] font-bold leading-tight">{valor}</div>
+      <div className={cn("font-bold leading-tight", grande ? "text-[34px]" : "text-[22px]")}>{valor}</div>
       {detalle && <div className="mt-0.5 text-xs text-muted-foreground">{detalle}</div>}
     </div>
+  );
+}
+
+function MetricaCard({ titulo, valor, color, className }: { titulo: string; valor: string; color?: string; className?: string }) {
+  return (
+    <Card className={className}>
+      <CardHeader className="pb-1">
+        <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{titulo}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className={cn("text-2xl font-bold", color)}>{valor}</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -83,46 +97,20 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
         <SinEntrega entregas={entregas} onCreada={onEntregaCreada} />
       ) : (
         <div className="space-y-5">
-          <div className="rounded-[18px] bg-primary p-4 text-primary-foreground">
-            <div className="text-xs font-semibold uppercase tracking-wide opacity-80">
-              {t.ganancia >= 0 ? "Ganancia" : "Pérdida"}
-            </div>
-            <div className="text-[30px] font-bold leading-tight">{formatearMoneda(Math.abs(t.ganancia))}</div>
-            <div className="mt-3 flex gap-2">
-              <div className="flex-1 rounded-xl bg-white/15 px-3 py-2">
-                <div className="text-[11px] opacity-80">Cobrado</div>
-                <div className="text-base font-bold">{formatearMoneda(t.cobrado)}</div>
-              </div>
-              <div className="flex-1 rounded-xl bg-white/15 px-3 py-2">
-                <div className="text-[11px] opacity-80">Gastos</div>
-                <div className="text-base font-bold">{formatearMoneda(t.gastos)}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-            <Dato
-              titulo="Falta cobrar"
-              valor={formatearMoneda(t.pendiente)}
-              detalle={`${t.familias - t.familiasPagaron} de ${t.familias} familias`}
-              className="bg-[hsl(30_90%_94%)]"
-            />
-            <Dato titulo="Cobrado en efectivo" valor={formatearMoneda(t.cobradoEfectivo)} />
-            <Dato titulo="Cobrado por transferencia" valor={formatearMoneda(t.cobradoTransferencia)} />
-          </div>
-
           <div>
             <EtiquetaSeccion>Cuánta gente viene</EtiquetaSeccion>
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
-              <Dato titulo="Familias" valor={t.familias.toString()} />
-              <Dato titulo="Personas en total" valor={t.personas.toString()} detalle="con los alumnos" />
-              <Dato titulo="Total alumnos" valor={t.chicos.toString()} detalle="una copa por alumno" />
+              <Dato grande titulo="Familias" valor={t.familias.toString()} />
+              <Dato grande titulo="Personas en total" valor={t.personas.toString()} detalle="con los alumnos" />
+              <Dato grande titulo="Total alumnos" valor={t.chicos.toString()} detalle="una copa por alumno" />
               <Dato
+                grande
                 titulo="Alumn. Masculinos"
                 valor={t.masculino.toString()}
                 className="bg-blue-500/10 text-blue-700"
               />
               <Dato
+                grande
                 titulo="Alumn. Femenino"
                 valor={t.femenino.toString()}
                 className="bg-pink-500/10 text-pink-700"
@@ -146,6 +134,44 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                 <GraficoChicos datos={datosGrafico} />
               )}
             </div>
+          </div>
+
+          <div className="md:hidden rounded-[18px] bg-primary p-4 text-primary-foreground">
+            <div className="text-xs font-semibold uppercase tracking-wide opacity-80">
+              {t.ganancia >= 0 ? "Ganancia" : "Pérdida"}
+            </div>
+            <div className="text-[30px] font-bold leading-tight">{formatearMoneda(Math.abs(t.ganancia))}</div>
+            <div className="mt-3 flex gap-2">
+              <div className="flex-1 rounded-xl bg-white/15 px-3 py-2">
+                <div className="text-[11px] opacity-80">Cobrado</div>
+                <div className="text-base font-bold">{formatearMoneda(t.cobrado)}</div>
+              </div>
+              <div className="flex-1 rounded-xl bg-white/15 px-3 py-2">
+                <div className="text-[11px] opacity-80">Gastos</div>
+                <div className="text-base font-bold">{formatearMoneda(t.gastos)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden grid-cols-3 gap-3 md:grid">
+            <MetricaCard
+              titulo={t.ganancia >= 0 ? "Ganancia" : "Pérdida"}
+              valor={formatearMoneda(Math.abs(t.ganancia))}
+              color={t.ganancia >= 0 ? "text-green-600" : "text-destructive"}
+            />
+            <MetricaCard titulo="Ingresos" valor={formatearMoneda(t.cobrado)} className="bg-green-500/10" />
+            <MetricaCard titulo="Costos" valor={formatearMoneda(t.gastos)} className="bg-red-500/10" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+            <Dato
+              titulo="Falta cobrar"
+              valor={formatearMoneda(t.pendiente)}
+              detalle={`${t.familias - t.familiasPagaron} de ${t.familias} familias`}
+              className="bg-[hsl(30_90%_94%)]"
+            />
+            <Dato titulo="Cobrado en efectivo" valor={formatearMoneda(t.cobradoEfectivo)} />
+            <Dato titulo="Cobrado por transferencia" valor={formatearMoneda(t.cobradoTransferencia)} />
           </div>
 
           <div>
