@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useFetchJson } from "@/components/shared/useFetchJson";
@@ -10,6 +12,7 @@ import { resumenPorTurno, totalesEntrega } from "@/lib/premios";
 import type { FamiliaConChicos, GastoEntrega, TurnoConConteo } from "@/lib/types";
 import { COLOR_FEMENINO, COLOR_MASCULINO, GraficoChicos } from "./GraficoChicos";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
+import { NuevaEntregaModal } from "./NuevaEntregaModal";
 import { useEntregaActual } from "./useEntregaActual";
 
 const SIN_TURNOS: TurnoConConteo[] = [];
@@ -63,6 +66,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
     SIN_GASTOS
   );
 
+  const [nuevaAbierta, setNuevaAbierta] = useState(false);
   const [filtro, setFiltro] = useState<string>("all");
 
   const turnosVisibles = useMemo(
@@ -103,6 +107,12 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
         entregas={entregas}
         entregaId={entregaId}
         onSelect={seleccionarEntrega}
+        acciones={
+          <Button onClick={() => setNuevaAbierta(true)}>
+            <Plus className="mr-1.5 h-4 w-4" />
+            Nueva entrega
+          </Button>
+        }
       />
 
       {!loading && entregas.length === 0 ? (
@@ -244,6 +254,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
           </div>
         </div>
       )}
+      <NuevaEntregaModal open={nuevaAbierta} onOpenChange={setNuevaAbierta} entregas={entregas} onCreada={onEntregaCreada} />
     </>
   );
 }

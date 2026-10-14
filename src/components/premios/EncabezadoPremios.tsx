@@ -18,7 +18,7 @@ type Selector = {
 function EntregaSwitcher({ entregas, entregaId, onSelect }: Selector) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-muted-foreground">Entrega</label>
+      <label className="mb-1 block text-xs text-muted-foreground">Año</label>
       <select
         value={entregaId ?? ""}
         onChange={(e) => onSelect(e.target.value)}
@@ -44,10 +44,10 @@ function EntregaPill({ entregas, entregaId, onSelect }: Selector) {
         onClick={() => setAbierto(true)}
         className="flex h-9 items-center gap-1.5 rounded-full bg-muted px-3 text-[13px] font-semibold"
       >
-        {actual ? actual.anio : "Entrega"}
+        {actual ? actual.anio : "Año"}
         <ChevronDown className="h-3.5 w-3.5" />
       </button>
-      <BottomSheet open={abierto} onOpenChange={setAbierto} title="Elegir entrega">
+      <BottomSheet open={abierto} onOpenChange={setAbierto} title="Elegir año">
         <div className="space-y-1.5">
           {entregas.map((e) => (
             <button
@@ -62,7 +62,7 @@ function EntregaPill({ entregas, entregaId, onSelect }: Selector) {
                 e.id === entregaId ? "bg-[hsl(209_65%_95%)] ring-2 ring-primary" : "bg-muted/60"
               )}
             >
-              Entrega {e.anio}
+              {e.anio}
             </button>
           ))}
         </div>
