@@ -213,13 +213,13 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
           <div>
             <EtiquetaSeccion>Detalle por turno</EtiquetaSeccion>
             <div className="overflow-hidden rounded-[14px] border">
-              <div className="grid grid-cols-[1fr_3.5rem_3.5rem_3rem_3rem_3.5rem] gap-x-2 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
+              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
                 <span>Turno</span>
                 <span className="text-right">Familias</span>
                 <span className="text-right">Alumnos</span>
-                <span className="text-right text-blue-700">Masc.</span>
-                <span className="text-right text-pink-700">Fem.</span>
-                <span className="text-right">Personas</span>
+                <span className="text-right text-blue-700">Masculino</span>
+                <span className="text-right text-pink-700">Femenino</span>
+                <span className="text-right">Total personas</span>
               </div>
               {turnosVisibles.map((x, i) => (
                 <button
@@ -227,7 +227,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                   type="button"
                   onClick={() => setFiltro(turnoFiltro === x.id ? "all" : x.id)}
                   className={cn(
-                    "grid w-full grid-cols-[1fr_3.5rem_3.5rem_3rem_3rem_3.5rem] gap-x-2 items-center border-b px-4 py-2.5 text-left text-[15px] last:border-b-0",
+                    "grid w-full grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] items-center border-b px-4 py-2.5 text-left text-[15px] last:border-b-0",
                     turnoFiltro === x.id ? "bg-[hsl(209_65%_95%)]" : "hover:bg-muted/40"
                   )}
                 >
@@ -242,7 +242,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                   <span className="text-right font-semibold">{porTurno[i].personas}</span>
                 </button>
               ))}
-              <div className="grid grid-cols-[1fr_3.5rem_3.5rem_3rem_3rem_3.5rem] gap-x-2 bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
+              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
                 <span>Total</span>
                 <span className="text-right">{totalGeneral.familias}</span>
                 <span className="text-right">{totalGeneral.chicos}</span>
