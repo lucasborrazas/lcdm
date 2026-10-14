@@ -124,8 +124,8 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
             <EtiquetaSeccion>Cuánta gente viene</EtiquetaSeccion>
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
               <Dato titulo="Familias" valor={t.familias.toString()} />
-              <Dato titulo="Personas en total" valor={t.personas.toString()} detalle="con los chicos" />
-              <Dato titulo="Chicos (copas)" valor={t.chicos.toString()} />
+              <Dato titulo="Personas en total" valor={t.personas.toString()} detalle="con los alumnos" />
+              <Dato titulo="Alumnos (copas)" valor={t.chicos.toString()} />
               <Dato
                 titulo="Masc. / Fem."
                 valor={`${t.masculino} / ${t.femenino}`}
@@ -134,7 +134,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
           </div>
 
           <div>
-            <EtiquetaSeccion>Chicos por turno</EtiquetaSeccion>
+            <EtiquetaSeccion>Alumnos por turno</EtiquetaSeccion>
             <div className="rounded-[14px] border p-3">
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex gap-4">
@@ -144,7 +144,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                 <span className="text-sm font-bold">Total {t.chicos}</span>
               </div>
               {t.chicos === 0 ? (
-                <p className="py-10 text-center text-sm text-muted-foreground">Todavía no hay chicos inscriptos</p>
+                <p className="py-10 text-center text-sm text-muted-foreground">Todavía no hay alumnos inscriptos</p>
               ) : (
                 <GraficoChicos datos={datosGrafico} />
               )}
@@ -157,7 +157,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
               <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
                 <span>Turno</span>
                 <span className="text-right">Familias</span>
-                <span className="text-right">Chicos</span>
+                <span className="text-right">Alumnos</span>
                 <span className="text-right">Personas</span>
               </div>
               {turnosVisibles.map((x, i) => (

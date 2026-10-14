@@ -49,7 +49,7 @@ export function HistorialPremios() {
               <TableRow>
                 <TableHead>Año</TableHead>
                 <TableHead>Familias</TableHead>
-                <TableHead>Chicos (M / F)</TableHead>
+                <TableHead>Alumnos (M / F)</TableHead>
                 <TableHead>Personas</TableHead>
                 <TableHead>Cobrado</TableHead>
                 <TableHead>Gastos</TableHead>
@@ -108,7 +108,7 @@ export function HistorialPremios() {
               </span>
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
-              {e.cantidadFamilias} familias · {e.cantidadChicos} chicos ({e.masculino} masc. / {e.femenino} fem.) · {e.personas} personas
+              {e.cantidadFamilias} familias · {e.cantidadChicos} alumnos ({e.masculino} masc. / {e.femenino} fem.) · {e.personas} personas
             </div>
             <div className="mt-0.5 text-xs text-muted-foreground">
               Cobrado {formatearMoneda(e.cobrado)} · Gastos {formatearMoneda(e.totalGastos)}

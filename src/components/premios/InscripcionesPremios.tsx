@@ -159,7 +159,7 @@ export function InscripcionesPremios({
     <>
       <EncabezadoPremios
         titulo="Inscripciones"
-        descripcion="Anotá a las familias por turno: chicos, personas y bono"
+        descripcion="Anotá a las familias por turno: alumnos, personas y bono"
         entregas={entregas}
         entregaId={entregaId}
         onSelect={seleccionarEntrega}
@@ -194,7 +194,7 @@ export function InscripcionesPremios({
                 className="bg-[hsl(30_90%_94%)] text-[hsl(25_75%_28%)]"
               />
               <Kpi
-                titulo="Chicos (copas)"
+                titulo="Alumnos (copas)"
                 valor={totales.chicos.toString()}
                 detalle={`${totales.masculino} masc. · ${totales.femenino} fem.`}
                 className="bg-[hsl(209_65%_95%)] text-primary"
@@ -212,7 +212,7 @@ export function InscripcionesPremios({
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Buscar familia o chico..."
+                placeholder="Buscar familia o alumno..."
                 className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
               />
             </div>
@@ -247,7 +247,7 @@ export function InscripcionesPremios({
                             {!t.activo && <span className="font-medium text-muted-foreground"> · inactivo</span>}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {r?.familias ?? 0} familia{r?.familias === 1 ? "" : "s"} · {r?.chicos ?? 0} chicos ({r?.masculino ?? 0} masc. / {r?.femenino ?? 0} fem.) · {r?.personas ?? 0} personas
+                            {r?.familias ?? 0} familia{r?.familias === 1 ? "" : "s"} · {r?.chicos ?? 0} alumnos ({r?.masculino ?? 0} masc. / {r?.femenino ?? 0} fem.) · {r?.personas ?? 0} personas
                           </div>
                         </div>
                         <button

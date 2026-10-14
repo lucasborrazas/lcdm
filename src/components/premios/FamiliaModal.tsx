@@ -134,9 +134,9 @@ function FormFamilia({
     const personas = parseInt(e.personas);
     if (!e.turnoId) return setError("Elegí el turno.");
     if (!e.nombre.trim()) return setError("Escribí el nombre de la familia.");
-    if (e.chicos.some((c) => !c.nombre.trim())) return setError("Completá el nombre de cada chico.");
-    if (e.chicos.some((c) => !c.genero)) return setError("Elegí el género (M o F) de cada chico.");
-    if (isNaN(personas) || personas < 0) return setError("Indicá el total de personas que vienen (con los chicos).");
+    if (e.chicos.some((c) => !c.nombre.trim())) return setError("Completá el nombre de cada alumno.");
+    if (e.chicos.some((c) => !c.genero)) return setError("Elegí el género (M o F) de cada alumno.");
+    if (isNaN(personas) || personas < 0) return setError("Indicá el total de personas que vienen (con los alumnos).");
     if (e.monto === "" || isNaN(parseInt(e.monto))) return setError("Indicá el monto del bono.");
 
     setGuardando(true);
@@ -189,7 +189,7 @@ function FormFamilia({
         {sugeridas.length > 0 && (
           <div className="mt-2 rounded-xl border border-dashed p-2.5">
             <p className="mb-1.5 text-xs text-muted-foreground">
-              ¿Ya está cargada? Agregá el chico ahí para no cobrar otro bono:
+              ¿Ya está cargada? Agregá el alumno ahí para no cobrar otro bono:
             </p>
             <div className="space-y-1.5">
               {sugeridas.map((f) => (
@@ -222,13 +222,13 @@ function FormFamilia({
       </div>
 
       <div>
-        <EtiquetaSeccion>Chicos que reciben premio</EtiquetaSeccion>
+        <EtiquetaSeccion>Alumnos que reciben premio</EtiquetaSeccion>
         <div className="space-y-2">
           {e.chicos.map((c, i) => (
             <div key={c.clave} className="flex items-center gap-2">
               <input
                 className={campo}
-                placeholder={`Chico ${i + 1}`}
+                placeholder={`Alumno ${i + 1}`}
                 value={c.nombre}
                 onChange={(ev) => cambiarChico(c.clave, { nombre: ev.target.value })}
               />
@@ -237,7 +237,7 @@ function FormFamilia({
               {e.chicos.length > 1 && (
                 <button
                   type="button"
-                  aria-label={`Quitar chico ${i + 1}`}
+                  aria-label={`Quitar alumno ${i + 1}`}
                   onClick={() => cambiar({ chicos: e.chicos.filter((x) => x.clave !== c.clave) })}
                   className="flex h-12 w-9 shrink-0 items-center justify-center text-muted-foreground"
                 >
@@ -253,12 +253,12 @@ function FormFamilia({
           className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed text-[15px] font-semibold text-muted-foreground"
         >
           <Plus className="h-4 w-4" />
-          Agregar chico (hermano)
+          Agregar alumno (hermano)
         </button>
       </div>
 
       <div>
-        <EtiquetaSeccion>Total de personas (con los chicos)</EtiquetaSeccion>
+        <EtiquetaSeccion>Total de personas (con los alumnos)</EtiquetaSeccion>
         <input
           className={campo}
           type="number"
