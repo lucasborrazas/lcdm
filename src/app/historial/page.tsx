@@ -92,7 +92,7 @@ export default function HistorialPage() {
                     <MonedaCell valor={h.costoAnterior} />
                   </TableCell>
                   <TableCell className="text-right text-sm font-medium">
-                    <span className={h.costoNuevo > h.costoAnterior ? "text-[hsl(0_70%_48%)]" : h.costoNuevo < h.costoAnterior ? "text-[hsl(152_55%_28%)]" : ""}>
+                    <span className={h.costoNuevo > h.costoAnterior ? "text-red-500" : h.costoNuevo < h.costoAnterior ? "text-green-600" : ""}>
                       <MonedaCell valor={h.costoNuevo} />
                     </span>
                   </TableCell>

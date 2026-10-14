@@ -92,7 +92,7 @@ export function HistorialTorneos() {
                   <TableCell>{t.cantidadInscriptos}</TableCell>
                   <TableCell><MonedaCell valor={t.recaudado} /></TableCell>
                   <TableCell><MonedaCell valor={t.totalGastos} /></TableCell>
-                  <TableCell className={t.ganancia >= 0 ? "text-[hsl(152_55%_28%)] font-medium" : "text-destructive font-medium"}>
+                  <TableCell className={t.ganancia >= 0 ? "text-green-600 font-medium" : "text-destructive font-medium"}>
                     {t.ganancia >= 0 ? "+" : "-"}
                     <MonedaCell valor={Math.abs(t.ganancia)} />
                   </TableCell>

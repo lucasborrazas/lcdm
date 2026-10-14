@@ -99,7 +99,7 @@ export function FormPrecios({
       <p className="text-xs text-muted-foreground">
         Estos precios se cargan al crear {seccion === "TORNEO" ? "un torneo nuevo" : "una entrega nueva"}. Los ya creados no cambian.
       </p>
-      {mensaje && <p className={mensaje.error ? "text-sm text-destructive" : "text-sm text-[hsl(152_55%_28%)]"}>{mensaje.texto}</p>}
+      {mensaje && <p className={mensaje.error ? "text-sm text-destructive" : "text-sm text-green-600"}>{mensaje.texto}</p>}
       <button
         type="button"
         onClick={guardar}

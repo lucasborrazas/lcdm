@@ -29,7 +29,7 @@ type Equipo = "ROJO" | "AMARILLO" | "NARANJA";
 const EQUIPOS: Equipo[] = ["ROJO", "AMARILLO", "NARANJA"];
 
 const EQUIPO_CONFIG: Record<Equipo, { titulo: string; circulo: string; header: string }> = {
-  ROJO: { titulo: "Rojo", circulo: "bg-red-600 text-white", header: "text-[hsl(0_70%_40%)]" },
+  ROJO: { titulo: "Rojo", circulo: "bg-red-600 text-white", header: "text-red-600" },
   AMARILLO: { titulo: "Amarillo", circulo: "bg-yellow-400 text-yellow-950", header: "text-yellow-600" },
   NARANJA: { titulo: "Naranja", circulo: "bg-orange-500 text-white", header: "text-orange-600" },
 };

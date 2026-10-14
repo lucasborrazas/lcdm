@@ -98,12 +98,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <MetricaCard titulo="Total vendido" valor={formatearMoneda(m.totalVendido)} />
             <MetricaCard titulo="Pedidos" valor={m.cantidadPedidos.toString()} subvalor={`${m.unidadesVendidas} unidades`} />
-            <MetricaCard titulo="Ganancia" valor={formatearMoneda(m.gananciaTotal)} subvalor={`Margen: ${m.margenPct}%`} color="text-[hsl(152_55%_28%)]" />
+            <MetricaCard titulo="Ganancia" valor={formatearMoneda(m.gananciaTotal)} subvalor={`Margen: ${m.margenPct}%`} color="text-green-600" />
             <MetricaCard titulo="Costo total" valor={formatearMoneda(m.costoTotal)} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <MetricaCard titulo="Total señas" valor={formatearMoneda(m.totalSenas)} />
-            <MetricaCard titulo="Saldo pendiente" valor={formatearMoneda(m.saldoPendiente)} color={m.saldoPendiente > 0 ? "text-[hsl(25_75%_32%)]" : undefined} />
+            <MetricaCard titulo="Saldo pendiente" valor={formatearMoneda(m.saldoPendiente)} color={m.saldoPendiente > 0 ? "text-amber-600" : undefined} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -135,7 +135,7 @@ export default function DashboardPage() {
                             <TableCell className="text-sm">{r.productoNombre} T.{r.talle}</TableCell>
                             <TableCell className="text-right text-sm">{r.unidadesVendidas}</TableCell>
                             <TableCell className="text-right text-sm"><MonedaCell valor={r.ventas} /></TableCell>
-                            <TableCell className="text-right text-sm text-[hsl(152_55%_28%)]"><MonedaCell valor={r.ganancia} /></TableCell>
+                            <TableCell className="text-right text-sm text-green-600"><MonedaCell valor={r.ganancia} /></TableCell>
                           </TableRow>
                         ))
                       )}

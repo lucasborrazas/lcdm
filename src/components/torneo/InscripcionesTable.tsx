@@ -411,7 +411,7 @@ export function InscripcionesTable({
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => abrirEditar(i)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-[hsl(0_70%_48%)] hover:text-[hsl(0_70%_38%)]" onClick={() => eliminar(i)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => eliminar(i)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
