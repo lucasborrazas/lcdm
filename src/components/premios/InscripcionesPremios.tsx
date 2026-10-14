@@ -267,43 +267,43 @@ export function InscripcionesPremios({
                       ) : (
                         <div className="grid gap-2 lg:grid-cols-2">
                           {delTurno.map((f) => (
-                            <div key={f.id} className="flex items-center gap-3 rounded-[14px] border px-3.5 py-3">
+                            <div key={f.id} className="flex items-center gap-3 rounded-[14px] border px-3 py-2">
                               <div className="min-w-0 flex-1">
-                              <button type="button" onClick={() => abrirEditar(f)} className="block w-full text-left">
-                                <span className="block truncate text-[15px] font-semibold">{f.nombre}</span>
-                                <span className="mt-1 flex flex-wrap gap-1">
-                                  {f.chicos.map((c) => (
+                                <button type="button" onClick={() => abrirEditar(f)} className="flex w-full items-baseline gap-2 text-left">
+                                  <span className="min-w-0 truncate text-[15px] font-semibold">{f.nombre}</span>
+                                  <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+                                    <Users className="h-3.5 w-3.5" />
+                                    {f.totalPersonas}
+                                  </span>
+                                  {f.telefono && <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{f.telefono}</span>}
+                                </button>
+                                <div className="mt-1 flex items-center gap-1.5">
+                                  <button type="button" onClick={() => abrirEditar(f)} className="flex min-w-0 flex-1 gap-1 overflow-hidden text-left">
+                                    {f.chicos.map((c) => (
+                                      <span
+                                        key={c.id}
+                                        className={cn(
+                                          "shrink-0 truncate rounded-full px-2 py-0.5 text-xs font-semibold",
+                                          c.genero === "MASCULINO" ? "bg-blue-500/15 text-blue-700" : "bg-pink-500/15 text-pink-700"
+                                        )}
+                                      >
+                                        {c.nombre}
+                                      </span>
+                                    ))}
+                                  </button>
+                                  <button type="button" onClick={() => setCobrando(f)} aria-label={`Cambiar el pago de ${f.nombre}`} className="shrink-0">
                                     <span
-                                      key={c.id}
                                       className={cn(
-                                        "rounded-full px-2 py-0.5 text-xs font-semibold",
-                                        c.genero === "MASCULINO" ? "bg-blue-500/15 text-blue-700" : "bg-pink-500/15 text-pink-700"
+                                        "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold",
+                                        f.metodoPago
+                                          ? "bg-[hsl(150_50%_92%)] text-[hsl(152_55%_24%)]"
+                                          : "border border-[hsl(30_80%_78%)] bg-background text-[hsl(25_75%_32%)]"
                                       )}
                                     >
-                                      {c.nombre}
+                                      {textoPago(f)}
                                     </span>
-                                  ))}
-                                </span>
-                                <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                                  <span className="inline-flex items-center gap-1">
-                                    <Users className="h-3.5 w-3.5" />
-                                    {f.totalPersonas} persona{f.totalPersonas === 1 ? "" : "s"}
-                                  </span>
-                                  {f.telefono && <span>{f.telefono}</span>}
-                                </span>
-                              </button>
-                              <button type="button" onClick={() => setCobrando(f)} aria-label={`Cambiar el pago de ${f.nombre}`} className="mt-1.5 text-left">
-                                <span
-                                  className={cn(
-                                    "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold",
-                                    f.metodoPago
-                                      ? "bg-[hsl(150_50%_92%)] text-[hsl(152_55%_24%)]"
-                                      : "border border-[hsl(30_80%_78%)] bg-background text-[hsl(25_75%_32%)]"
-                                  )}
-                                >
-                                  {textoPago(f)}
-                                </span>
-                              </button>
+                                  </button>
+                                </div>
                               </div>
                               <SwitchGrande
                                 checked={f.metodoPago !== null}
