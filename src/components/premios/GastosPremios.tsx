@@ -60,7 +60,13 @@ function FormGasto({
   };
 
   return (
-    <div className="space-y-4">
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        guardar();
+      }}
+    >
       <div>
         <EtiquetaSeccion>Concepto</EtiquetaSeccion>
         <input className={campo} placeholder="Ej: Copas" value={concepto} onChange={(e) => setConcepto(e.target.value)} />
@@ -70,7 +76,7 @@ function FormGasto({
         <input className={campo} type="number" inputMode="numeric" min="0" value={monto} onChange={(e) => setMonto(e.target.value)} />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <button type="button" onClick={guardar} disabled={guardando} className={btnPrimario}>
+      <button type="submit" disabled={guardando} className={btnPrimario}>
         {guardando ? "Guardando..." : gasto ? "Guardar" : "Agregar"}
       </button>
       {gasto &&
@@ -90,7 +96,7 @@ function FormGasto({
             Eliminar costo
           </button>
         ))}
-    </div>
+    </form>
   );
 }
 
@@ -150,10 +156,10 @@ function FilaGasto({
     return (
       <TableRow>
         <TableCell>
-          <Input value={concepto} onChange={(e) => setConcepto(e.target.value)} className="h-8 text-sm" autoFocus />
+          <Input value={concepto} onChange={(e) => setConcepto(e.target.value)} onKeyDown={(e) => e.key === "Enter" && cambiado && guardar()} className="h-8 text-sm" autoFocus />
         </TableCell>
         <TableCell className="text-right">
-          <Input type="number" min="0" value={monto} onChange={(e) => setMonto(e.target.value)} className="h-8 text-right text-sm" />
+          <Input type="number" min="0" value={monto} onChange={(e) => setMonto(e.target.value)} onKeyDown={(e) => e.key === "Enter" && cambiado && guardar()} className="h-8 text-right text-sm" />
         </TableCell>
         <TableCell>
           <div className="flex justify-end gap-1">
@@ -290,7 +296,13 @@ export function GastosPremios({ entregaIdInicial }: { entregaIdInicial?: string 
                   </TableBody>
                 </Table>
               </div>
-              <div className="flex gap-2">
+              <form
+                className="flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  agregar();
+                }}
+              >
                 <Input
                   placeholder="Concepto (ej: Copas)"
                   value={nuevoConcepto}
@@ -305,11 +317,11 @@ export function GastosPremios({ entregaIdInicial }: { entregaIdInicial?: string 
                   onChange={(e) => setNuevoMonto(e.target.value)}
                   className="w-32"
                 />
-                <Button onClick={agregar} disabled={!nuevoConcepto.trim() || nuevoMonto === "" || !entregaId}>
+                <Button type="submit" disabled={!nuevoConcepto.trim() || nuevoMonto === "" || !entregaId}>
                   <Plus className="mr-1 h-4 w-4" />
                   Agregar
                 </Button>
-              </div>
+              </form>
             </CardContent>
           </Card>
 
