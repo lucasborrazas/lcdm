@@ -215,11 +215,11 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
             <div className="overflow-hidden rounded-[14px] border">
               <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
                 <span>Turno</span>
-                <span className="text-right">Familias</span>
-                <span className="text-right">Alumnos</span>
-                <span className="text-right text-blue-700">Masculino</span>
-                <span className="text-right text-pink-700">Femenino</span>
-                <span className="text-right">Total personas</span>
+                <span className="text-center">Familias</span>
+                <span className="text-center">Alumnos</span>
+                <span className="text-center text-blue-700">Masculino</span>
+                <span className="text-center text-pink-700">Femenino</span>
+                <span className="text-center">Total personas</span>
               </div>
               {turnosVisibles.map((x, i) => (
                 <button
@@ -235,20 +235,20 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                     {x.hora}
                     {x.grupoEdad && <span className="font-normal text-muted-foreground"> · {x.grupoEdad.nombre}</span>}
                   </span>
-                  <span className="text-right">{porTurno[i].familias}</span>
-                  <span className="text-right">{porTurno[i].chicos}</span>
-                  <span className="text-right font-semibold text-blue-700">{porTurno[i].masculino}</span>
-                  <span className="text-right font-semibold text-pink-700">{porTurno[i].femenino}</span>
-                  <span className="text-right font-semibold">{porTurno[i].personas}</span>
+                  <span className="text-center">{porTurno[i].familias}</span>
+                  <span className="text-center">{porTurno[i].chicos}</span>
+                  <span className="text-center font-semibold text-blue-700">{porTurno[i].masculino}</span>
+                  <span className="text-center font-semibold text-pink-700">{porTurno[i].femenino}</span>
+                  <span className="text-center font-semibold">{porTurno[i].personas}</span>
                 </button>
               ))}
               <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 md:grid-cols-[1fr_8rem_8rem_9rem_9rem_10rem] bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
                 <span>Total</span>
-                <span className="text-right">{totalGeneral.familias}</span>
-                <span className="text-right">{totalGeneral.chicos}</span>
-                <span className="text-right text-blue-700">{totalGeneral.masculino}</span>
-                <span className="text-right text-pink-700">{totalGeneral.femenino}</span>
-                <span className="text-right">{totalGeneral.personas}</span>
+                <span className="text-center">{totalGeneral.familias}</span>
+                <span className="text-center">{totalGeneral.chicos}</span>
+                <span className="text-center text-blue-700">{totalGeneral.masculino}</span>
+                <span className="text-center text-pink-700">{totalGeneral.femenino}</span>
+                <span className="text-center">{totalGeneral.personas}</span>
               </div>
             </div>
           </div>
