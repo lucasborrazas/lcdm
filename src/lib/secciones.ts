@@ -30,7 +30,7 @@ export const INFO_SECCION: Record<Seccion, InfoSeccion> = {
   },
   pre: {
     nombre: "Entrega de premios",
-    subtitulo: "Familias, bonos y costos",
+    subtitulo: "Familias, bonos y gastos",
     inicio: "/premios/inscripciones",
     rutas: ["/premios"],
   },

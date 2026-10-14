@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Users,
   CalendarDays,
+  Receipt,
   Wallet,
   Menu,
   type LucideIcon,
@@ -35,6 +36,7 @@ export const NAV_ESCRITORIO: Record<Seccion, Item[]> = {
   pre: [
     { href: "/premios/resumen", label: "Resumen", icon: Wallet },
     { href: "/premios/inscripciones", label: "Inscripciones", icon: ClipboardList },
+    { href: "/premios/gastos", label: "Gastos", icon: Receipt },
     { href: "/premios/historial", label: "Historial", icon: CalendarDays },
   ],
 };
@@ -58,6 +60,7 @@ export const NAV_MOBILE: Record<Seccion, Item[]> = {
   pre: [
     { href: "/premios/resumen", label: "Resumen", icon: Wallet },
     { href: "/premios/inscripciones", label: "Inscrip.", icon: ClipboardList },
+    { href: "/premios/gastos", label: "Gastos", icon: Receipt },
     { href: "/premios/historial", label: "Historial", icon: CalendarDays },
     { href: "/mas?seccion=pre", label: "Más", icon: Menu },
   ],

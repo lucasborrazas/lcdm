@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ClipboardList, Plus, Wallet } from "lucide-react";
+import { ClipboardList, Plus, Receipt, Wallet } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ const SIN_ENTREGAS: EntregaConResumen[] = [];
 
 const ENLACES = (id: string) => [
   { href: `/premios/inscripciones?entregaId=${id}`, label: "Inscripciones", icon: ClipboardList },
+  { href: `/premios/gastos?entregaId=${id}`, label: "Gastos", icon: Receipt },
   { href: `/premios/resumen?entregaId=${id}`, label: "Resumen", icon: Wallet },
 ];
 
