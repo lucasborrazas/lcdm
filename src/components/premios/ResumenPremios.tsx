@@ -113,13 +113,19 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
 
           <div>
             <EtiquetaSeccion>Cuánta gente viene</EtiquetaSeccion>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
               <Dato titulo="Familias" valor={t.familias.toString()} />
               <Dato titulo="Personas en total" valor={t.personas.toString()} detalle="con los alumnos" />
-              <Dato titulo="Alumnos (copas)" valor={t.chicos.toString()} />
+              <Dato titulo="Total alumnos" valor={t.chicos.toString()} detalle="una copa por alumno" />
               <Dato
-                titulo="Masc. / Fem."
-                valor={`${t.masculino} / ${t.femenino}`}
+                titulo="Alumn. Masculinos"
+                valor={t.masculino.toString()}
+                className="bg-blue-500/10 text-blue-700"
+              />
+              <Dato
+                titulo="Alumn. Femenino"
+                valor={t.femenino.toString()}
+                className="bg-pink-500/10 text-pink-700"
               />
             </div>
           </div>

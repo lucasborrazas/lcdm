@@ -194,7 +194,7 @@ export function InscripcionesPremios({
                 className="bg-[hsl(30_90%_94%)] text-[hsl(25_75%_28%)]"
               />
               <Kpi
-                titulo="Alumnos (copas)"
+                titulo="Total alumnos"
                 valor={totales.chicos.toString()}
                 detalle={`${totales.masculino} masc. · ${totales.femenino} fem.`}
                 className="bg-[hsl(209_65%_95%)] text-primary"
