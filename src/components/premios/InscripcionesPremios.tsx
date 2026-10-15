@@ -13,6 +13,7 @@ import type { FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 import { ModalResponsivo } from "@/components/shared/ModalResponsivo";
 import { SearchSelectFilter } from "@/components/shared/SearchSelectFilter";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
+import { FamiliasTurnoTabla } from "./FamiliasTurnoTabla";
 import { FamiliaModal } from "./FamiliaModal";
 import { GestionarEntregaModal } from "./GestionarEntregaModal";
 import { useEntregaActual } from "./useEntregaActual";
@@ -130,6 +131,11 @@ export function InscripcionesPremios({
         await refrescar();
       }
     );
+  };
+
+  const editarMonto = async (f: FamiliaConChicos, monto: number) => {
+    if (!(await patchFamilia(f.id, { monto }))) return toast("No se pudo guardar el monto");
+    await refrescar();
   };
 
   const eliminar = async (f: FamiliaConChicos) => {
@@ -287,7 +293,18 @@ export function InscripcionesPremios({
                           {q ? "Sin coincidencias" : "Sin familias en este turno"}
                         </p>
                       ) : (
-                        <div className="grid gap-2 lg:grid-cols-2">
+                        <>
+                        <div className="hidden md:block">
+                          <FamiliasTurnoTabla
+                            entrega={entregaActual}
+                            familias={delTurno}
+                            onEditar={abrirEditar}
+                            onEliminar={eliminar}
+                            onCambiarPago={cambiarPago}
+                            onEditarMonto={editarMonto}
+                          />
+                        </div>
+                        <div className="grid gap-2 md:hidden">
                           {delTurno.map((f) => (
                             <div key={f.id} className="flex items-center gap-3 rounded-[14px] border px-3 py-2">
                               <div className="min-w-0 flex-1">
@@ -335,6 +352,7 @@ export function InscripcionesPremios({
                             </div>
                           ))}
                         </div>
+                        </>
                       )}
                     </section>
                   );
