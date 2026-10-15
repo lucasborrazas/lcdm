@@ -97,11 +97,9 @@ export type FamiliaConChicos = FamiliaEntrega & {
 
 export type EntregaConResumen = EntregaPremios & {
   cantidadTurnos: number;
-  cantidadFamilias: number;
   cantidadChicos: number;
   masculino: number;
   femenino: number;
-  personas: number;
   cobrado: number;
   pendiente: number;
   totalGastos: number;

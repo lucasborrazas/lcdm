@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Search, Settings2, Users } from "lucide-react";
+import { Plus, Search, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useFetchJson } from "@/components/shared/useFetchJson";
@@ -149,8 +149,6 @@ export function InscripcionesPremios({
         body: JSON.stringify({
           turnoId: f.turnoId,
           nombre: f.nombre,
-          telefono: f.telefono,
-          totalPersonas: f.totalPersonas,
           metodoPago: f.metodoPago,
           monto: f.monto,
           chicos: f.chicos.map((c) => ({ nombre: c.nombre, genero: c.genero })),
@@ -176,7 +174,7 @@ export function InscripcionesPremios({
     <>
       <EncabezadoPremios
         titulo="Inscripciones"
-        descripcion="Anotá a las familias por turno: alumnos, personas y bono"
+        descripcion="Anotá a las familias por turno: alumnos y bono"
         entregas={entregas}
         entregaId={entregaId}
         onSelect={seleccionarEntrega}
@@ -210,7 +208,7 @@ export function InscripcionesPremios({
       ) : (
         <>
           <div className="sticky top-0 z-10 -mx-4 border-b bg-background px-4 pb-2.5 pt-1 md:static md:mx-0 md:border-0 md:px-0">
-            <div className="mb-2 grid grid-cols-2 gap-2 md:grid-cols-4">
+            <div className="mb-2 grid grid-cols-2 gap-2 md:grid-cols-3">
               <Kpi
                 titulo={`Cobrado · ${totales.familiasPagaron} de ${totales.familias}`}
                 valor={formatearMoneda(totales.cobrado)}
@@ -225,13 +223,7 @@ export function InscripcionesPremios({
                 titulo="Total alumnos"
                 valor={totales.chicos.toString()}
                 detalle={`${totales.masculino} masc. · ${totales.femenino} fem.`}
-                className="bg-[hsl(209_65%_95%)] text-primary"
-              />
-              <Kpi
-                titulo="Personas"
-                valor={totales.personas.toString()}
-                detalle={`${totales.familias} familia${totales.familias === 1 ? "" : "s"}`}
-                className="bg-muted text-foreground"
+                className="col-span-2 bg-[hsl(209_65%_95%)] text-primary md:col-span-1"
               />
             </div>
 
@@ -275,7 +267,7 @@ export function InscripcionesPremios({
                             {!t.activo && <span className="font-medium text-muted-foreground"> · inactivo</span>}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {r?.familias ?? 0} familia{r?.familias === 1 ? "" : "s"} · {r?.chicos ?? 0} alumnos ({r?.masculino ?? 0} masc. / {r?.femenino ?? 0} fem.) · {r?.personas ?? 0} personas
+                            {r?.chicos ?? 0} alumnos ({r?.masculino ?? 0} masc. / {r?.femenino ?? 0} fem.)
                           </div>
                         </div>
                         <button
@@ -310,11 +302,6 @@ export function InscripcionesPremios({
                               <div className="min-w-0 flex-1">
                                 <button type="button" onClick={() => abrirEditar(f)} className="flex w-full items-baseline gap-2 text-left">
                                   <span className="min-w-0 truncate text-[15px] font-semibold">{f.nombre}</span>
-                                  <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-                                    <Users className="h-3.5 w-3.5" />
-                                    {f.totalPersonas}
-                                  </span>
-                                  {f.telefono && <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{f.telefono}</span>}
                                 </button>
                                 <div className="mt-1 flex items-center gap-1.5">
                                   <button type="button" onClick={() => abrirEditar(f)} className="flex min-w-0 flex-1 gap-1 overflow-hidden text-left">

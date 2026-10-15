@@ -152,10 +152,8 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
 
           <div>
             {!esDesktop && <EtiquetaSeccion>Cuánta gente viene</EtiquetaSeccion>}
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
-              <Dato grande titulo="Familias" valor={t.familias.toString()} />
-              <Dato grande titulo="Personas en total" valor={t.personas.toString()} detalle="con los alumnos" />
-              <Dato grande titulo="Total alumnos" valor={t.chicos.toString()} detalle="una copa por alumno" />
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+              <Dato grande titulo="Total alumnos" valor={t.chicos.toString()} detalle="una copa por alumno" className="col-span-2 sm:col-span-1" />
               <Dato
                 grande
                 titulo="Alumn. Masculinos"
@@ -257,11 +255,9 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                     <TableHeader>
                       <TableRow>
                         <TableHead>Turno</TableHead>
-                        <TableHead className="text-center">Familias</TableHead>
                         <TableHead className="text-center">Alumnos</TableHead>
                         <TableHead className="text-center text-blue-700">Masculino</TableHead>
                         <TableHead className="text-center text-pink-700">Femenino</TableHead>
-                        <TableHead className="text-center">Total personas</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -275,20 +271,16 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                             {x.hora}
                             {x.grupoEdad && <span className="font-normal text-muted-foreground"> · {x.grupoEdad.nombre}</span>}
                           </TableCell>
-                          <TableCell className="text-center">{porTurno[i].familias}</TableCell>
                           <TableCell className="text-center">{porTurno[i].chicos}</TableCell>
                           <TableCell className="text-center font-semibold text-blue-700">{porTurno[i].masculino}</TableCell>
                           <TableCell className="text-center font-semibold text-pink-700">{porTurno[i].femenino}</TableCell>
-                          <TableCell className="text-center font-semibold">{porTurno[i].personas}</TableCell>
                         </TableRow>
                       ))}
                       <TableRow className="bg-muted/40 font-bold hover:bg-muted/40">
                         <TableCell>Total</TableCell>
-                        <TableCell className="text-center">{totalGeneral.familias}</TableCell>
                         <TableCell className="text-center">{totalGeneral.chicos}</TableCell>
                         <TableCell className="text-center text-blue-700">{totalGeneral.masculino}</TableCell>
                         <TableCell className="text-center text-pink-700">{totalGeneral.femenino}</TableCell>
-                        <TableCell className="text-center">{totalGeneral.personas}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -299,13 +291,11 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
           <div>
             <EtiquetaSeccion>Detalle por turno</EtiquetaSeccion>
             <div className="overflow-hidden rounded-[14px] border">
-              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
+              <div className="grid grid-cols-[1fr_5.5rem_6.5rem_6.5rem] gap-x-4 border-b bg-muted/60 px-4 py-2 text-xs font-semibold text-muted-foreground">
                 <span>Turno</span>
-                <span className="text-center">Familias</span>
                 <span className="text-center">Alumnos</span>
                 <span className="text-center text-blue-700">Masculino</span>
                 <span className="text-center text-pink-700">Femenino</span>
-                <span className="text-center">Total personas</span>
               </div>
               {turnosVisibles.map((x, i) => (
                 <button
@@ -313,7 +303,7 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                   type="button"
                   onClick={() => setFiltro(turnoFiltro === x.id ? "all" : x.id)}
                   className={cn(
-                    "grid w-full grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 items-center border-b px-4 py-2.5 text-left text-[15px] last:border-b-0",
+                    "grid w-full grid-cols-[1fr_5.5rem_6.5rem_6.5rem] gap-x-4 items-center border-b px-4 py-2.5 text-left text-[15px] last:border-b-0",
                     turnoFiltro === x.id ? SELECCIONADO : "hover:bg-muted/40"
                   )}
                 >
@@ -321,20 +311,16 @@ export function ResumenPremios({ entregaIdInicial }: { entregaIdInicial?: string
                     {x.hora}
                     {x.grupoEdad && <span className="font-normal text-muted-foreground"> · {x.grupoEdad.nombre}</span>}
                   </span>
-                  <span className="text-center">{porTurno[i].familias}</span>
                   <span className="text-center">{porTurno[i].chicos}</span>
                   <span className="text-center font-semibold text-blue-700">{porTurno[i].masculino}</span>
                   <span className="text-center font-semibold text-pink-700">{porTurno[i].femenino}</span>
-                  <span className="text-center font-semibold">{porTurno[i].personas}</span>
                 </button>
               ))}
-              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_6.5rem_6.5rem_8rem] gap-x-4 bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
+              <div className="grid grid-cols-[1fr_5.5rem_6.5rem_6.5rem] gap-x-4 bg-muted/60 px-4 py-2.5 text-[15px] font-bold">
                 <span>Total</span>
-                <span className="text-center">{totalGeneral.familias}</span>
                 <span className="text-center">{totalGeneral.chicos}</span>
                 <span className="text-center text-blue-700">{totalGeneral.masculino}</span>
                 <span className="text-center text-pink-700">{totalGeneral.femenino}</span>
-                <span className="text-center">{totalGeneral.personas}</span>
               </div>
             </div>
           </div>

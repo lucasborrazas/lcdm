@@ -135,9 +135,7 @@ export function FamiliasTurnoTabla({
         <TableHeader>
           <TableRow>
             <TableHead>Familia</TableHead>
-            <TableHead>Teléfono</TableHead>
             <TableHead>Alumnos</TableHead>
-            <TableHead className="text-center">Personas</TableHead>
             <TableHead>Pago</TableHead>
             <TableHead className="w-24"></TableHead>
           </TableRow>
@@ -150,7 +148,6 @@ export function FamiliasTurnoTabla({
                   {f.nombre}
                 </button>
               </TableCell>
-              <TableCell className="text-muted-foreground">{f.telefono || "—"}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {f.chicos.map((c) => (
@@ -166,7 +163,6 @@ export function FamiliasTurnoTabla({
                   ))}
                 </div>
               </TableCell>
-              <TableCell className="text-center">{f.totalPersonas}</TableCell>
               <TableCell>
                 <CeldaPago
                   familia={f}

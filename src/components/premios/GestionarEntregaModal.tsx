@@ -140,7 +140,6 @@ function FilaTurno({ turno, onUpdate }: { turno: TurnoConConteo; onUpdate: () =>
         <label className="flex items-center gap-2 text-sm text-muted-foreground">
           <SwitchGrande checked={activo} onChange={() => setActivo(!activo)} label="Turno activo" />
           {activo ? "Activo" : "Inactivo"}
-          {turno.cantidadFamilias > 0 && <span>· {turno.cantidadFamilias} familia(s)</span>}
         </label>
         <div className="flex gap-2">
           <button

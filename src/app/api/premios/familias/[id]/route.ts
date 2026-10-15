@@ -38,7 +38,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     prisma.chicoEntrega.deleteMany({ where: { familiaId: params.id } }),
     prisma.familiaEntrega.update({
       where: { id: params.id },
-      data: { ...data, telefono: data.telefono || null, metodoPago: data.metodoPago ?? null, chicos: { create: chicos } },
+      data: { ...data, metodoPago: data.metodoPago ?? null, chicos: { create: chicos } },
       include: incluir,
     }),
   ]);

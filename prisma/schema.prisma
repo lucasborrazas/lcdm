@@ -361,8 +361,6 @@ model FamiliaEntrega {
   id            String            @id @default(cuid())
   turnoId       String
   nombre        String
-  telefono      String?
-  totalPersonas Int
   metodoPago    MetodoPagoTorneo?
   monto         Int
   createdAt     DateTime          @default(now())

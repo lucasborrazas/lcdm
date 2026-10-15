@@ -17,9 +17,7 @@ type Pago = "NO_PAGO" | MetodoPago;
 type Estado = {
   turnoId: string;
   nombre: string;
-  telefono: string;
   chicos: ChicoForm[];
-  personas: string;
   pago: Pago;
   monto: string;
   montoEditado: boolean;
@@ -37,9 +35,7 @@ function estadoInicial(
     return {
       turnoId: turnoInicialId,
       nombre: "",
-      telefono: "",
       chicos: [{ clave: nuevaClave(), nombre: "", genero: null }],
-      personas: "",
       pago: "NO_PAGO",
       monto: montoBono(entrega, null).toString(),
       montoEditado: false,
@@ -48,9 +44,7 @@ function estadoInicial(
   return {
     turnoId: familia.turnoId,
     nombre: familia.nombre,
-    telefono: familia.telefono ?? "",
     chicos: familia.chicos.map((c) => ({ clave: c.id, nombre: c.nombre, genero: c.genero })),
-    personas: familia.totalPersonas.toString(),
     pago: familia.metodoPago ?? "NO_PAGO",
     monto: familia.monto.toString(),
     // un monto distinto al de lista es una excepcion: no se recalcula solo
@@ -131,12 +125,10 @@ function FormFamilia({
     [familia, familias, e.nombre]
   );
   const guardar = async () => {
-    const personas = parseInt(e.personas);
     if (!e.turnoId) return setError("Elegí el turno.");
     if (!e.nombre.trim()) return setError("Escribí el nombre de la familia.");
     if (e.chicos.some((c) => !c.nombre.trim())) return setError("Completá el nombre de cada alumno.");
     if (e.chicos.some((c) => !c.genero)) return setError("Elegí el género (M o F) de cada alumno.");
-    if (isNaN(personas) || personas < 0) return setError("Indicá el total de personas que vienen (con los alumnos).");
     if (e.monto === "" || isNaN(parseInt(e.monto))) return setError("Indicá el monto del bono.");
 
     setGuardando(true);
@@ -148,8 +140,6 @@ function FormFamilia({
         body: JSON.stringify({
           turnoId: e.turnoId,
           nombre: e.nombre.trim(),
-          telefono: e.telefono.trim() || null,
-          totalPersonas: personas,
           metodoPago: e.pago === "NO_PAGO" ? null : e.pago,
           monto: parseInt(e.monto),
           chicos: e.chicos.map((c) => ({ nombre: c.nombre.trim(), genero: c.genero })),
@@ -211,17 +201,6 @@ function FormFamilia({
       </div>
 
       <div>
-        <EtiquetaSeccion>Teléfono (opcional)</EtiquetaSeccion>
-        <input
-          className={campo}
-          type="tel"
-          inputMode="tel"
-          value={e.telefono}
-          onChange={(ev) => cambiar({ telefono: ev.target.value })}
-        />
-      </div>
-
-      <div>
         <EtiquetaSeccion>Alumnos que reciben premio</EtiquetaSeccion>
         <div className="space-y-2">
           {e.chicos.map((c, i) => (
@@ -255,18 +234,6 @@ function FormFamilia({
           <Plus className="h-4 w-4" />
           Agregar alumno (hermano)
         </button>
-      </div>
-
-      <div>
-        <EtiquetaSeccion>Total de personas (con los alumnos)</EtiquetaSeccion>
-        <input
-          className={campo}
-          type="number"
-          inputMode="numeric"
-          min="0"
-          value={e.personas}
-          onChange={(ev) => cambiar({ personas: ev.target.value })}
-        />
       </div>
 
       <div>

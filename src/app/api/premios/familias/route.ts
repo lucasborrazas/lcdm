@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
 
   const familia = await prisma.familiaEntrega.create({
-    data: { ...data, telefono: data.telefono || null, metodoPago: data.metodoPago ?? null, chicos: { create: chicos } },
+    data: { ...data, metodoPago: data.metodoPago ?? null, chicos: { create: chicos } },
     include: incluir,
   });
 

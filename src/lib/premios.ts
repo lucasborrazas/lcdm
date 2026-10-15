@@ -33,7 +33,6 @@ export type Genero = "MASCULINO" | "FEMENINO";
 
 type FamiliaCalculo = {
   turnoId: string;
-  totalPersonas: number;
   metodoPago: MetodoPago | null;
   monto: number;
   chicos: { genero: Genero }[];
@@ -55,11 +54,9 @@ export function contarChicos(familias: { chicos: { genero: Genero }[] }[]) {
 
 export type ResumenTurno = {
   turnoId: string;
-  familias: number;
   chicos: number;
   masculino: number;
   femenino: number;
-  personas: number;
 };
 
 export function resumenPorTurno(turnoIds: string[], familias: FamiliaCalculo[]): ResumenTurno[] {
@@ -68,11 +65,9 @@ export function resumenPorTurno(turnoIds: string[], familias: FamiliaCalculo[]):
     const chicos = contarChicos(delTurno);
     return {
       turnoId,
-      familias: delTurno.length,
       chicos: chicos.total,
       masculino: chicos.masculino,
       femenino: chicos.femenino,
-      personas: delTurno.reduce((s, f) => s + f.totalPersonas, 0),
     };
   });
 }
@@ -85,7 +80,6 @@ export type TotalesEntrega = {
   femenino: number;
   // Una copa por chico inscripto.
   copas: number;
-  personas: number;
   cobrado: number;
   cobradoEfectivo: number;
   cobradoTransferencia: number;
@@ -112,7 +106,6 @@ export function totalesEntrega(familias: FamiliaCalculo[], gastos: { monto: numb
     masculino: chicos.masculino,
     femenino: chicos.femenino,
     copas: chicos.total,
-    personas: familias.reduce((s, f) => s + f.totalPersonas, 0),
     cobrado,
     cobradoEfectivo,
     cobradoTransferencia,

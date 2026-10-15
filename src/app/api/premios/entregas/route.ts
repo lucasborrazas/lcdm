@@ -28,11 +28,9 @@ export async function GET() {
     return {
       ...e,
       cantidadTurnos: turnos.length,
-      cantidadFamilias: totales.familias,
       cantidadChicos: totales.chicos,
       masculino: totales.masculino,
       femenino: totales.femenino,
-      personas: totales.personas,
       cobrado: totales.cobrado,
       pendiente: totales.pendiente,
       totalGastos: totales.gastos,

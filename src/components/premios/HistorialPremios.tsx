@@ -49,9 +49,7 @@ export function HistorialPremios() {
             <TableHeader>
               <TableRow>
                 <TableHead>Año</TableHead>
-                <TableHead>Familias</TableHead>
                 <TableHead>Alumnos (M / F)</TableHead>
-                <TableHead>Personas</TableHead>
                 <TableHead>Cobrado</TableHead>
                 <TableHead>Gastos</TableHead>
                 <TableHead>Resultado</TableHead>
@@ -60,16 +58,14 @@ export function HistorialPremios() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Cargando...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">Cargando...</TableCell></TableRow>
               ) : entregas.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Todavía no hay entregas cargadas</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">Todavía no hay entregas cargadas</TableCell></TableRow>
               ) : (
                 entregas.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell className="font-medium">{e.anio}</TableCell>
-                    <TableCell>{e.cantidadFamilias}</TableCell>
                     <TableCell>{e.cantidadChicos} ({e.masculino} / {e.femenino})</TableCell>
-                    <TableCell>{e.personas}</TableCell>
                     <TableCell><MonedaCell valor={e.cobrado} /></TableCell>
                     <TableCell><MonedaCell valor={e.totalGastos} /></TableCell>
                     <TableCell className={e.ganancia >= 0 ? "font-medium text-green-600" : "font-medium text-destructive"}>
@@ -109,7 +105,7 @@ export function HistorialPremios() {
               </span>
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
-              {e.cantidadFamilias} familias · {e.cantidadChicos} alumnos ({e.masculino} masc. / {e.femenino} fem.) · {e.personas} personas
+              {e.cantidadChicos} alumnos ({e.masculino} masc. / {e.femenino} fem.)
             </div>
             <div className="mt-0.5 text-xs text-muted-foreground">
               Cobrado {formatearMoneda(e.cobrado)} · Gastos {formatearMoneda(e.totalGastos)}

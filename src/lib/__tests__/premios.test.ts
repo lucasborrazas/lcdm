@@ -36,33 +36,32 @@ describe("montoBono", () => {
 
 const fam = (
   turnoId: string,
-  personas: number,
   metodoPago: "EFECTIVO" | "TRANSFERENCIA" | null,
   monto: number,
   generos: ("MASCULINO" | "FEMENINO")[]
-) => ({ turnoId, totalPersonas: personas, metodoPago, monto, chicos: generos.map((genero) => ({ genero })) });
+) => ({ turnoId, metodoPago, monto, chicos: generos.map((genero) => ({ genero })) });
 
 describe("resumenPorTurno", () => {
-  it("cuenta familias, chicos por genero y personas de cada turno", () => {
+  it("cuenta chicos por genero de cada turno", () => {
     const familias = [
-      fam("a", 5, "EFECTIVO", 40000, ["MASCULINO", "FEMENINO"]), // hermanos, un bono
-      fam("a", 3, null, 48000, ["FEMENINO"]),
-      fam("b", 4, "TRANSFERENCIA", 48000, ["MASCULINO"]),
+      fam("a", "EFECTIVO", 40000, ["MASCULINO", "FEMENINO"]), // hermanos, un bono
+      fam("a", null, 48000, ["FEMENINO"]),
+      fam("b", "TRANSFERENCIA", 48000, ["MASCULINO"]),
     ];
     expect(resumenPorTurno(["a", "b", "c"], familias)).toEqual([
-      { turnoId: "a", familias: 2, chicos: 3, masculino: 1, femenino: 2, personas: 8 },
-      { turnoId: "b", familias: 1, chicos: 1, masculino: 1, femenino: 0, personas: 4 },
-      { turnoId: "c", familias: 0, chicos: 0, masculino: 0, femenino: 0, personas: 0 },
+      { turnoId: "a", chicos: 3, masculino: 1, femenino: 2 },
+      { turnoId: "b", chicos: 1, masculino: 1, femenino: 0 },
+      { turnoId: "c", chicos: 0, masculino: 0, femenino: 0 },
     ]);
   });
 });
 
 describe("totalesEntrega", () => {
   const familias = [
-    fam("a", 5, "EFECTIVO", 40000, ["MASCULINO", "FEMENINO"]),
-    fam("a", 3, null, 48000, ["FEMENINO"]),
-    fam("b", 4, "TRANSFERENCIA", 48000, ["MASCULINO"]),
-    fam("b", 2, "EFECTIVO", 35000, ["FEMENINO"]), // bono con excepcion
+    fam("a", "EFECTIVO", 40000, ["MASCULINO", "FEMENINO"]),
+    fam("a", null, 48000, ["FEMENINO"]),
+    fam("b", "TRANSFERENCIA", 48000, ["MASCULINO"]),
+    fam("b", "EFECTIVO", 35000, ["FEMENINO"]), // bono con excepcion
   ];
   const t = totalesEntrega(familias, [{ monto: 30000 }, { monto: 10000 }]);
 
@@ -80,12 +79,11 @@ describe("totalesEntrega", () => {
     expect(t.gastos).toBe(40000);
     expect(t.ganancia).toBe(123000 - 40000);
   });
-  it("copas = chicos, segmentados por genero; personas incluye a todos", () => {
+  it("copas = chicos, segmentados por genero", () => {
     expect(t.chicos).toBe(5);
     expect(t.copas).toBe(5);
     expect(t.masculino).toBe(2);
     expect(t.femenino).toBe(3);
-    expect(t.personas).toBe(14);
   });
   it("sin datos da todo en cero", () => {
     expect(totalesEntrega([], [])).toMatchObject({ familias: 0, cobrado: 0, ganancia: 0, chicos: 0 });
