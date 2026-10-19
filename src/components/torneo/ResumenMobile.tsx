@@ -9,9 +9,11 @@ import type { GastoTorneo, HorarioConCupo, InscripcionConHorario, TorneoConResum
 import { BottomSheet } from "@/components/mobile/BottomSheet";
 import { MobileHeader, TorneoPill } from "@/components/mobile/MobileHeader";
 import { useToast } from "@/components/mobile/ToastUndo";
-import { EtiquetaSeccion } from "@/components/mobile/ui";
+import { EtiquetaSeccion, Segmented } from "@/components/mobile/ui";
 import { NuevoTorneoSheet } from "./NuevoTorneoSheet";
 import { useReportarCambios } from "@/components/shared/CierreProtegido";
+import { SimulacionMobile } from "./SimulacionMobile";
+import type { SimulacionHook } from "./SimulacionResumen";
 
 const campo = "h-12 w-full rounded-xl bg-muted px-3 text-[15px] outline-none";
 
@@ -117,6 +119,9 @@ export function ResumenMobile({
   loading,
   onActualizar,
   onTorneoCreado,
+  modoSimulacion,
+  setModoSimulacion,
+  simulacion,
 }: {
   torneos: TorneoConResumen[];
   torneoId: string | undefined;
@@ -128,6 +133,9 @@ export function ResumenMobile({
   loading: boolean;
   onActualizar: () => Promise<void>;
   onTorneoCreado: (id: string) => void;
+  modoSimulacion: boolean;
+  setModoSimulacion: (v: boolean) => void;
+  simulacion: SimulacionHook;
 }) {
   const [costoAbierto, setCostoAbierto] = useState(false);
   const [costoId, setCostoId] = useState<string | null>(null);
@@ -151,6 +159,31 @@ export function ResumenMobile({
         pill={<TorneoPill torneos={torneos} torneoId={torneoId} onSelect={seleccionarTorneo} />}
       />
 
+      <div className="mb-3">
+        <Segmented
+          value={modoSimulacion ? "sim" : "real"}
+          onChange={(v) => setModoSimulacion(v === "sim")}
+          options={[
+            { value: "real", label: "Real" },
+            { value: "sim", label: "Simulación" },
+          ]}
+        />
+      </div>
+
+      {modoSimulacion ? (
+        loading ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">Cargando...</p>
+        ) : (
+          <SimulacionMobile
+            torneo={torneoActual}
+            horarios={horarios}
+            inscripciones={inscripciones}
+            gastos={gastos}
+            simulacion={simulacion}
+          />
+        )
+      ) : (
+      <>
       <div className="rounded-[18px] bg-primary p-4 text-primary-foreground">
         <div className="text-xs font-semibold uppercase tracking-wide opacity-80">
           {ganancia >= 0 ? "Ganancia estimada" : "Pérdida estimada"}
@@ -248,6 +281,8 @@ export function ResumenMobile({
           Nuevo torneo
         </button>
       </div>
+      </>
+      )}
 
       <BottomSheet open={costoAbierto} onOpenChange={setCostoAbierto} title={gasto ? "Editar costo" : "Nuevo costo"}>
         <FormCosto

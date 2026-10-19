@@ -37,6 +37,7 @@ export function InscripcionDialog({
   inscripcion,
   horarios,
   torneo,
+  horarioInicialId,
   onSuccess,
 }: {
   open: boolean;
@@ -44,6 +45,7 @@ export function InscripcionDialog({
   inscripcion: InscripcionConHorario | null;
   horarios: HorarioConCupo[];
   torneo: TorneoConResumen | null;
+  horarioInicialId?: string;
   onSuccess: () => void;
 }) {
   const form = useForm<FormValues>({
@@ -63,9 +65,9 @@ export function InscripcionDialog({
         monto: inscripcion.monto?.toString() ?? "",
       });
     } else {
-      form.reset({ nombre: "", edad: SIN_EDAD, horarioId: "", metodoPago: "NO_PAGO", monto: "" });
+      form.reset({ nombre: "", edad: SIN_EDAD, horarioId: horarioInicialId ?? "", metodoPago: "NO_PAGO", monto: "" });
     }
-  }, [inscripcion, open]);
+  }, [inscripcion, open, horarioInicialId]);
 
   const onMetodoPagoChange = (valor: string, onChange: (v: string) => void) => {
     onChange(valor);

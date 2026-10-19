@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Search, Settings2 } from "lucide-react";
+import { ChevronDown, ChevronsDownUp, ChevronsUpDown, Plus, Search, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useFetchJson } from "@/components/shared/useFetchJson";
@@ -12,6 +12,7 @@ import { montoBono, normalizarNombre, resumenPorTurno, totalesEntrega, type Meto
 import type { FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 import { ModalResponsivo } from "@/components/shared/ModalResponsivo";
 import { SearchSelectFilter } from "@/components/shared/SearchSelectFilter";
+import { usePlegados } from "@/components/shared/usePlegados";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
 import { FamiliasTurnoTabla } from "./FamiliasTurnoTabla";
 import { FamiliaModal } from "./FamiliaModal";
@@ -64,6 +65,7 @@ export function InscripcionesPremios({
   const [q, setQ] = useState("");
   const [filtroTurno, setFiltroTurno] = useState<string>("all");
   const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
+  const { plegados, alternar: alternarPlegado, plegarTodos, desplegarTodos } = usePlegados("premios-inscripciones-plegados");
 
   const totales = useMemo(() => totalesEntrega(familias, []), [familias]);
   const porTurno = useMemo(
@@ -88,6 +90,10 @@ export function InscripcionesPremios({
       return [f.nombre, ...f.chicos.map((c) => c.nombre)].some((n) => normalizarNombre(n).includes(busqueda));
     });
   }, [familias, q, filtroTurno, filtroNombre]);
+
+  const turnosVisibles = turnos.filter((t) =>
+    filtroTurno === "all" ? t.activo || visibles.some((f) => f.turnoId === t.id) : t.id === filtroTurno
+  );
 
   const refrescar = async () => {
     await Promise.all([recargarFamilias(), recargarTurnos(), recargarEntregas()]);
@@ -252,14 +258,46 @@ export function InscripcionesPremios({
             {loading || cargandoFamilias ? (
               <p className="py-10 text-center text-sm text-muted-foreground">Cargando...</p>
             ) : (
-              turnos
-                .filter((t) => (filtroTurno === "all" ? t.activo || visibles.some((f) => f.turnoId === t.id) : t.id === filtroTurno))
-                .map((t) => {
+              <>
+              <div className="-mb-2 -ml-2 flex justify-start">
+                <button
+                  type="button"
+                  onClick={() =>
+                    turnosVisibles.every((t) => plegados.includes(t.id))
+                      ? desplegarTodos()
+                      : plegarTodos(turnosVisibles.map((t) => t.id))
+                  }
+                  className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[13px] font-medium text-muted-foreground hover:bg-muted"
+                >
+                  {turnosVisibles.every((t) => plegados.includes(t.id)) ? (
+                    <>
+                      <ChevronsUpDown className="h-3.5 w-3.5" />
+                      Desplegar todos
+                    </>
+                  ) : (
+                    <>
+                      <ChevronsDownUp className="h-3.5 w-3.5" />
+                      Plegar todos
+                    </>
+                  )}
+                </button>
+              </div>
+              {turnosVisibles.map((t) => {
+                  const plegado = plegados.includes(t.id);
                   const delTurno = visibles.filter((f) => f.turnoId === t.id);
                   const r = porTurno.find((x) => x.turnoId === t.id);
                   return (
                     <section key={t.id}>
-                      <div className="mb-2 flex items-center justify-between gap-2">
+                      <div className={cn("flex items-center justify-between gap-2", !plegado && "mb-2")}>
+                        <button
+                          type="button"
+                          onClick={() => alternarPlegado(t.id)}
+                          aria-expanded={!plegado}
+                          className="-ml-2 flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-muted/60"
+                        >
+                        <ChevronDown
+                          className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", plegado && "-rotate-90")}
+                        />
                         <div className="min-w-0">
                           <div className="text-[15px] font-bold">
                             {t.hora}
@@ -270,6 +308,7 @@ export function InscripcionesPremios({
                             {r?.chicos ?? 0} alumnos ({r?.masculino ?? 0} masc. / {r?.femenino ?? 0} fem.)
                           </div>
                         </div>
+                        </button>
                         <button
                           type="button"
                           onClick={() => abrirNueva(t.id)}
@@ -280,7 +319,7 @@ export function InscripcionesPremios({
                         </button>
                       </div>
 
-                      {delTurno.length === 0 ? (
+                      {plegado ? null : delTurno.length === 0 ? (
                         <p className="rounded-xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
                           {q ? "Sin coincidencias" : "Sin familias en este turno"}
                         </p>
@@ -343,7 +382,8 @@ export function InscripcionesPremios({
                       )}
                     </section>
                   );
-                })
+                })}
+              </>
             )}
           </div>
         </>

@@ -16,10 +16,11 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuRadioGroup, DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Pencil, Trash2, Settings2, ChevronDown, Save, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Settings2, ChevronDown, Save, X, ArrowRightLeft, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { SearchSelectFilter } from "@/components/shared/SearchSelectFilter";
+import { usePlegados } from "@/components/shared/usePlegados";
 import { InscripcionDialog } from "./InscripcionDialog";
 import { GestionarTorneoDialog } from "./GestionarTorneoDialog";
 import { TorneoSwitcher } from "./TorneoSwitcher";
@@ -129,7 +130,8 @@ function CeldaPago({
   );
 }
 
-function HorarioDropdown({
+// Pasa la inscripcion a otro horario sin abrir la edicion.
+function MoverHorario({
   inscripcion,
   horarios,
   onChange,
@@ -138,26 +140,18 @@ function HorarioDropdown({
   horarios: HorarioConCupo[];
   onChange: (horarioId: string) => void;
 }) {
-  const color = colorHorario(inscripcion.horario.orden);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded -mx-1 px-1 py-0.5 hover:bg-muted"
-          >
-            <Badge className={cn("text-xs font-normal border-transparent", color.pill)}>
-              {inscripcion.horario.hora} — {inscripcion.horario.grupoEdad.nombre}
-            </Badge>
-            <ChevronDown className="h-3 w-3 text-muted-foreground" />
-          </button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Mover a otro horario">
+            <ArrowRightLeft className="h-3.5 w-3.5" />
+          </Button>
         }
       />
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup value={inscripcion.horarioId} onValueChange={onChange}>
-          {horarios.filter((h) => h.activo).map((h) => (
+          {horarios.filter((h) => h.activo || h.id === inscripcion.horarioId).map((h) => (
             <DropdownMenuRadioItem key={h.id} value={h.id} closeOnClick>
               {h.hora} — {h.grupoEdad.nombre}
             </DropdownMenuRadioItem>
@@ -209,6 +203,10 @@ export function InscripcionesTable({
   const [gestionarOpen, setGestionarOpen] = useState(false);
   const [gestionarMobileOpen, setGestionarMobileOpen] = useState(false);
   const [editando, setEditando] = useState<InscripcionConHorario | null>(null);
+  const [horarioNuevaId, setHorarioNuevaId] = useState<string | undefined>();
+  const { plegados, alternar: alternarPlegado, plegarTodos, desplegarTodos } = usePlegados(
+    "torneo-inscripciones-plegados"
+  );
   const [filtroHorario, setFiltroHorario] = useState<string[]>([]);
   const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
 
@@ -264,8 +262,20 @@ export function InscripcionesTable({
     });
   }, [inscripciones, filtroHorario, filtroNombre]);
 
-  const abrirNueva = () => {
+  // Un bloque por horario. Con filtro de nombre solo quedan los que tienen coincidencias.
+  const horariosVisibles = useMemo(
+    () =>
+      horarios.filter((h) => {
+        if (filtroHorario.length > 0) return filtroHorario.includes(h.id);
+        if (filtroNombre.length > 0) return inscripcionesFiltradas.some((i) => i.horarioId === h.id);
+        return h.activo || h.inscriptos > 0;
+      }),
+    [horarios, filtroHorario, filtroNombre, inscripcionesFiltradas]
+  );
+
+  const abrirNueva = (horarioId?: string) => {
     setEditando(null);
+    setHorarioNuevaId(horarioId);
     setDialogOpen(true);
   };
 
@@ -350,7 +360,7 @@ export function InscripcionesTable({
             <Settings2 className="h-4 w-4 mr-1.5" />
             Gestionar torneo
           </Button>
-          <Button onClick={abrirNueva} disabled={!torneoId}>
+          <Button onClick={() => abrirNueva()} disabled={!torneoId}>
             <Plus className="h-4 w-4 mr-1.5" />
             Nueva inscripción
           </Button>
@@ -363,65 +373,137 @@ export function InscripcionesTable({
         ))}
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Edad</TableHead>
-              <TableHead>Horario</TableHead>
-              <TableHead>Pago</TableHead>
-              <TableHead>Equipo</TableHead>
-              <TableHead className="w-24"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Cargando...</TableCell></TableRow>
-            ) : inscripcionesFiltradas.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Sin inscripciones</TableCell></TableRow>
+      {loading ? (
+        <p className="py-8 text-center text-muted-foreground">Cargando...</p>
+      ) : horariosVisibles.length === 0 ? (
+        <p className="rounded-md border py-8 text-center text-muted-foreground">Sin inscripciones</p>
+      ) : (
+        <div className="space-y-6">
+          <div className="-mb-3 -ml-2 flex justify-start">
+            {horariosVisibles.every((h) => plegados.includes(h.id)) ? (
+              <Button variant="ghost" size="sm" onClick={desplegarTodos}>
+                <ChevronsUpDown className="mr-1 h-3.5 w-3.5" />
+                Desplegar todos
+              </Button>
             ) : (
-              inscripcionesFiltradas.map((i) => (
-                <TableRow key={i.id}>
-                  <TableCell className="font-medium">{i.nombre}</TableCell>
-                  <TableCell>{i.edad || <span className="text-muted-foreground">—</span>}</TableCell>
-                  <TableCell>
-                    <HorarioDropdown
-                      inscripcion={i}
-                      horarios={horarios}
-                      onChange={(horarioId) => cambiarHorario(i, horarioId)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <CeldaPago
-                      inscripcion={i}
-                      torneo={torneoActual}
-                      onChange={(pago, metodoPago, monto) => cambiarPago(i, pago, metodoPago, monto)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {i.equipo ? (
-                      <Badge variant="outline" className="capitalize">{i.equipo.toLowerCase()}</Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">Sin asignar</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 justify-end">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => abrirEditar(i)}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => eliminar(i)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              <Button variant="ghost" size="sm" onClick={() => plegarTodos(horariosVisibles.map((h) => h.id))}>
+                <ChevronsDownUp className="mr-1 h-3.5 w-3.5" />
+                Plegar todos
+              </Button>
             )}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+          {horariosVisibles.map((h) => {
+            const plegado = plegados.includes(h.id);
+            const delHorario = inscripcionesFiltradas.filter((i) => i.horarioId === h.id);
+            const todas = inscripciones.filter((i) => i.horarioId === h.id);
+            const pagaron = todas.filter((i) => i.pago);
+            const cobrado = pagaron.reduce((s, i) => s + (i.monto ?? 0), 0);
+            const lleno = h.cupoMaximo != null && h.inscriptos >= h.cupoMaximo;
+            return (
+              <section key={h.id}>
+                <div className={cn("flex items-center justify-between gap-2", !plegado && "mb-2")}>
+                  <button
+                    type="button"
+                    onClick={() => alternarPlegado(h.id)}
+                    aria-expanded={!plegado}
+                    className="-ml-2 flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-2 py-1 text-left hover:bg-muted/60"
+                  >
+                    <ChevronDown
+                      className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", plegado && "-rotate-90")}
+                    />
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: colorHorario(h.orden).hex }} />
+                    <div className="min-w-0">
+                      <div className="text-[15px] font-bold">
+                        {h.hora}
+                        <span className="font-medium text-muted-foreground"> · {h.grupoEdad.nombre}</span>
+                        {!h.activo && <span className="font-medium text-muted-foreground"> · inactivo</span>}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        <span className={cn(lleno && "font-semibold text-destructive")}>
+                          {h.inscriptos}
+                          {h.cupoMaximo != null && `/${h.cupoMaximo}`} inscriptos
+                        </span>
+                        {" · "}
+                        {pagaron.length} pagaron · cobrado {formatearMoneda(cobrado)}
+                      </div>
+                    </div>
+                  </button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    onClick={() => abrirNueva(h.id)}
+                    title={`Inscribir en el horario de las ${h.hora}`}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {plegado ? null : delHorario.length === 0 ? (
+                  <p className="rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground">
+                    Sin inscripciones en este horario
+                  </p>
+                ) : (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nombre</TableHead>
+                          <TableHead>Edad</TableHead>
+                          <TableHead>Pago</TableHead>
+                          <TableHead>Equipo</TableHead>
+                          <TableHead className="w-32"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {delHorario.map((i) => (
+                          <TableRow key={i.id}>
+                            <TableCell className="font-medium">
+                              <button type="button" onClick={() => abrirEditar(i)} className="text-left hover:underline">
+                                {i.nombre}
+                              </button>
+                            </TableCell>
+                            <TableCell>{i.edad || <span className="text-muted-foreground">—</span>}</TableCell>
+                            <TableCell>
+                              <CeldaPago
+                                inscripcion={i}
+                                torneo={torneoActual}
+                                onChange={(pago, metodoPago, monto) => cambiarPago(i, pago, metodoPago, monto)}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {i.equipo ? (
+                                <Badge variant="outline" className="capitalize">{i.equipo.toLowerCase()}</Badge>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">Sin asignar</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1 justify-end">
+                                <MoverHorario
+                                  inscripcion={i}
+                                  horarios={horarios}
+                                  onChange={(horarioId) => cambiarHorario(i, horarioId)}
+                                />
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => abrirEditar(i)} title="Editar">
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => eliminar(i)} title="Eliminar">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      )}
     </div>
 
     <div className="md:hidden">
@@ -447,6 +529,7 @@ export function InscripcionesTable({
         inscripcion={editando}
         horarios={horarios}
         torneo={torneoActual}
+        horarioInicialId={horarioNuevaId}
         onSuccess={() => { setDialogOpen(false); cargar(); recargarTorneos(); }}
       />
       <GestionarTorneoSheet

@@ -211,10 +211,23 @@ model Torneo {
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 
-  horarios Horario[]
-  gastos   GastoTorneo[]
+  horarios   Horario[]
+  gastos     GastoTorneo[]
+  simulacion SimulacionTorneo?
 
   @@unique([mes, anio])
+}
+
+// Escenario hipotetico del Resumen (gente extra, horarios y costos simulados).
+// No toca los datos reales; datos es un JSON validado en la API.
+model SimulacionTorneo {
+  id        String   @id @default(cuid())
+  torneoId  String   @unique
+  datos     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  torneo Torneo @relation(fields: [torneoId], references: [id], onDelete: Cascade)
 }
 
 model GastoTorneo {

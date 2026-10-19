@@ -15,6 +15,8 @@ import { NuevoTorneoButton } from "./NuevoTorneoButton";
 import { EstadoTorneoBadge } from "./EstadoTorneoBadge";
 import { useTorneoActual } from "./useTorneoActual";
 import { ResumenMobile } from "./ResumenMobile";
+import { SimulacionResumen } from "./SimulacionResumen";
+import { useModoSimulacion, useSimulacion } from "./useSimulacion";
 import { formatearMoneda } from "@/lib/calculations";
 import { colorHorario } from "@/lib/torneo";
 import { cn } from "@/lib/utils";
@@ -40,6 +42,35 @@ function MetricaCard({
         <p className={`text-2xl font-bold ${color ?? ""}`}>{valor}</p>
       </CardContent>
     </Card>
+  );
+}
+
+// Real / Simulacion: el modo se recuerda en este navegador.
+export function ToggleSimulacion({ activo, onChange }: { activo: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="inline-flex h-9 items-center rounded-lg border bg-muted/50 p-0.5 text-sm">
+      {[
+        { valor: false, label: "Real" },
+        { valor: true, label: "Simulación" },
+      ].map((o) => (
+        <button
+          key={o.label}
+          type="button"
+          onClick={() => onChange(o.valor)}
+          aria-pressed={activo === o.valor}
+          className={cn(
+            "h-full rounded-md px-3 font-medium transition-colors",
+            activo === o.valor
+              ? o.valor
+                ? "bg-amber-500/15 text-amber-800 shadow-sm"
+                : "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -145,6 +176,8 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
   const [loading, setLoading] = useState(true);
   const [nuevoConcepto, setNuevoConcepto] = useState("");
   const [nuevoMonto, setNuevoMonto] = useState("");
+  const [modoSimulacion, setModoSimulacion] = useModoSimulacion();
+  const simulacion = useSimulacion(torneoId);
 
   const cargar = useCallback(async () => {
     if (!torneoId) return;
@@ -213,8 +246,26 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
           />
           <EstadoTorneoBadge torneo={torneoActual} />
         </div>
-        <NuevoTorneoButton torneos={torneos} onCreated={onTorneoCreado} />
+        <div className="flex items-center gap-2">
+          <ToggleSimulacion activo={modoSimulacion} onChange={setModoSimulacion} />
+          <NuevoTorneoButton torneos={torneos} onCreated={onTorneoCreado} />
+        </div>
       </div>
+
+      {modoSimulacion ? (
+        loading ? (
+          <p className="py-8 text-center text-muted-foreground">Cargando...</p>
+        ) : (
+          <SimulacionResumen
+            torneo={torneoActual}
+            horarios={horarios}
+            inscripciones={inscripciones}
+            gastos={gastos}
+            simulacion={simulacion}
+          />
+        )
+      ) : (
+      <>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
         <MetricaCard
@@ -324,6 +375,8 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
           </div>
         </CardContent>
       </Card>
+      </>
+      )}
     </div>
 
     <div className="md:hidden">
@@ -338,6 +391,9 @@ export function GastosDashboard({ torneoIdInicial }: { torneoIdInicial?: string 
         loading={loading}
         onActualizar={actualizar}
         onTorneoCreado={onTorneoCreado}
+        modoSimulacion={modoSimulacion}
+        setModoSimulacion={setModoSimulacion}
+        simulacion={simulacion}
       />
     </div>
     </>
