@@ -11,13 +11,15 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuRadioGroup, DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { Pencil, ChevronDown, ChevronRight } from "lucide-react";
+import { Pencil, ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { MonedaCell } from "@/components/shared/MonedaCell";
 import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { BadgeEstadoPedido, BadgeEstadoPago } from "@/components/shared/BadgeEstado";
 import { formatearFecha } from "@/lib/calculations";
 import { PedidoEditDialog } from "./PedidoEditDialog";
+import { AgregarProductoDialog } from "./AgregarProductoDialog";
 import type { PedidoConProducto } from "@/lib/types";
+import type { PedidoGrupo } from "@/generated/prisma/client";
 
 const ESTADOS_PEDIDO = [
   { value: "POR_PEDIR", label: "Por pedir" },
@@ -99,6 +101,14 @@ function esGrupo(item: PedidoConProducto | Grupo): item is Grupo {
   return "lineas" in item;
 }
 
+function BotonAgregar({ onClick }: { onClick: () => void }) {
+  return (
+    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClick} title="Agregar producto al pedido">
+      <Plus className="h-3.5 w-3.5" />
+    </Button>
+  );
+}
+
 export function PedidosTable({
   pedidos,
   onUpdate,
@@ -110,6 +120,7 @@ export function PedidosTable({
   const [filtroEstadoPedido, setFiltroEstadoPedido] = useState<string[]>([]);
   const [filtroEstadoPago, setFiltroEstadoPago] = useState<string[]>([]);
   const [editando, setEditando] = useState<PedidoConProducto | null>(null);
+  const [agregandoA, setAgregandoA] = useState<PedidoGrupo | null>(null);
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set());
 
   const cambiarEstadoPedido = async (id: string, valor: string) => {
@@ -205,15 +216,20 @@ export function PedidosTable({
           )}
         </TableCell>
         <TableCell>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setEditando(p)}
-            title="Editar"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
+          <div className="flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setEditando(p)}
+              title="Editar"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            {!indentado && p.pedidoGrupo && (
+              <BotonAgregar onClick={() => setAgregandoA(p.pedidoGrupo)} />
+            )}
+          </div>
         </TableCell>
       </TableRow>
     );
@@ -264,7 +280,7 @@ export function PedidosTable({
               <TableHead className="text-right">Saldo</TableHead>
               <TableHead>Est. pedido</TableHead>
               <TableHead>Est. pago</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[80px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -328,7 +344,9 @@ export function PedidosTable({
                         onSelect={(v) => cambiarEstadoPago(primera, v)}
                       />
                     </TableCell>
-                    <TableCell></TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <BotonAgregar onClick={() => setAgregandoA(grupo)} />
+                    </TableCell>
                   </TableRow>
                 );
 
@@ -345,6 +363,12 @@ export function PedidosTable({
         onOpenChange={(v) => { if (!v) setEditando(null); }}
         pedido={editando}
         onSuccess={() => { setEditando(null); onUpdate(); }}
+      />
+      <AgregarProductoDialog
+        key={agregandoA?.id ?? "cerrado"}
+        grupo={agregandoA}
+        onOpenChange={(v) => { if (!v) setAgregandoA(null); }}
+        onSuccess={() => { setAgregandoA(null); onUpdate(); }}
       />
     </div>
   );

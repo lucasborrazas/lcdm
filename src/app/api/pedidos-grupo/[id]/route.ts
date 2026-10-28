@@ -27,13 +27,24 @@ export async function PUT(
   const sena = data.sena ?? grupoActual.sena;
   const saldoRestante = grupoActual.precioTotal - sena;
 
-  const grupo = await prisma.pedidoGrupo.update({
-    where: { id: params.id },
-    data: {
-      ...data,
-      saldoRestante,
-    },
-  });
+  // Las lineas guardan una copia del cliente y del estado de pago: se
+  // mantienen iguales a las del pedido para que filtros y resumen coincidan.
+  const copia = {
+    ...(data.cliente !== undefined ? { cliente: data.cliente } : {}),
+    ...(data.estadoPago !== undefined ? { estadoPago: data.estadoPago } : {}),
+  };
+  const [grupo] = await prisma.$transaction([
+    prisma.pedidoGrupo.update({
+      where: { id: params.id },
+      data: {
+        ...data,
+        saldoRestante,
+      },
+    }),
+    ...(Object.keys(copia).length > 0
+      ? [prisma.pedido.updateMany({ where: { pedidoGrupoId: params.id }, data: copia })]
+      : []),
+  ]);
 
   return NextResponse.json(grupo);
 }

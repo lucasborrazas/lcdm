@@ -18,19 +18,20 @@ export async function GET(req: NextRequest) {
   const where: any = {
     periodo,
     ...(estadoPedido ? { estadoPedido } : {}),
-    ...(estadoPago ? { estadoPago } : {}),
+    // El estado de pago es del pedido (grupo); la copia en cada linea puede estar vieja.
+    ...(estadoPago
+      ? { OR: [{ pedidoGrupo: { estadoPago } }, { pedidoGrupoId: null, estadoPago }] }
+      : {}),
     ...(temporada ? { temporada } : {}),
     ...(genero ? { genero } : {}),
     ...(productoNombre ? { productoNombre: { contains: productoNombre } } : {}),
   };
 
-  const pedidos = await prisma.pedido.findMany({ where });
+  const pedidos = await prisma.pedido.findMany({ where, include: { pedidoGrupo: true } });
 
   const totalVendido = pedidos.reduce((s: number, p) => s + p.precioTotal, 0);
   const costoTotal = pedidos.reduce((s: number, p) => s + p.costoTotal, 0);
   const gananciaTotal = pedidos.reduce((s: number, p) => s + p.ganancia, 0);
-  const totalSenas = pedidos.reduce((s: number, p) => s + p.sena, 0);
-  const saldoPendiente = pedidos.reduce((s: number, p) => s + p.saldoRestante, 0);
   const unidadesVendidas = pedidos.reduce((s: number, p) => s + p.cantidad, 0);
 
   const metricas = {
@@ -40,8 +41,6 @@ export async function GET(req: NextRequest) {
     costoTotal,
     gananciaTotal,
     margenPct: calcularMargen(gananciaTotal, totalVendido),
-    totalSenas,
-    saldoPendiente,
   };
 
   // Ranking de productos
@@ -77,11 +76,21 @@ export async function GET(req: NextRequest) {
   // Cobranza por estado de pago
   const cobranzaMap = new Map<string, { cantidadPedidos: number; total: number; saldo: number }>();
   for (const p of pedidos) {
-    const ep = p.estadoPago;
+    const g = p.pedidoGrupo;
+    const ep = g?.estadoPago ?? p.estadoPago;
+    // La seña es del pedido entero: cada linea carga con su parte del saldo.
+    const saldo =
+      ep === "PAGO"
+        ? 0
+        : g
+          ? g.precioTotal > 0
+            ? Math.round((p.precioTotal * g.saldoRestante) / g.precioTotal)
+            : 0
+          : p.saldoRestante;
     const existing = cobranzaMap.get(ep) ?? { cantidadPedidos: 0, total: 0, saldo: 0 };
     existing.cantidadPedidos += 1;
     existing.total += p.precioTotal;
-    existing.saldo += p.saldoRestante;
+    existing.saldo += saldo;
     cobranzaMap.set(ep, existing);
   }
   const cobranza = Array.from(cobranzaMap.entries()).map(([estadoPago, v]) => ({

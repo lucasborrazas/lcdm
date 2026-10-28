@@ -34,8 +34,6 @@ type DashboardData = {
     costoTotal: number;
     gananciaTotal: number;
     margenPct: number;
-    totalSenas: number;
-    saldoPendiente: number;
   };
   ranking: Array<{ productoNombre: string; talle: string; unidadesVendidas: number; ventas: number; ganancia: number }>;
   cobranza: Array<{ estadoPago: string; cantidadPedidos: number; total: number; saldo: number }>;
@@ -100,10 +98,6 @@ export default function DashboardPage() {
             <MetricaCard titulo="Pedidos" valor={m.cantidadPedidos.toString()} subvalor={`${m.unidadesVendidas} unidades`} />
             <MetricaCard titulo="Ganancia" valor={formatearMoneda(m.gananciaTotal)} subvalor={`Margen: ${m.margenPct}%`} color="text-green-600" />
             <MetricaCard titulo="Costo total" valor={formatearMoneda(m.costoTotal)} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <MetricaCard titulo="Total señas" valor={formatearMoneda(m.totalSenas)} />
-            <MetricaCard titulo="Saldo pendiente" valor={formatearMoneda(m.saldoPendiente)} color={m.saldoPendiente > 0 ? "text-amber-600" : undefined} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

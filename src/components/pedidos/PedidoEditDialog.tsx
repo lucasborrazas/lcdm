@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,13 +19,16 @@ import { Separator } from "@/components/ui/separator";
 import { Trash2 } from "lucide-react";
 import {
   calcularPrecioUnitario, calcularPrecioConDescuento, calcularCostoTotal,
-  calcularPrecioTotal, calcularGanancia, calcularSaldoRestante, formatearMoneda,
+  calcularPrecioTotal, calcularGanancia, calcularSaldoRestante, formatearMoneda, compararTalles,
 } from "@/lib/calculations";
-import type { PedidoConProducto } from "@/lib/types";
+import type { PedidoConProducto, ProductoConStock } from "@/lib/types";
 import { useModoCliente } from "@/components/layout/ModoClienteProvider";
 import { useCierreProtegido, ProtegerCierre } from "@/components/shared/CierreProtegido";
 
 const schema = z.object({
+  nombre: z.string(),
+  genero: z.string(),
+  productoId: z.string().min(1, "Elegí el talle"),
   cliente: z.string().min(1),
   metodoPago: z.enum(["EFECTIVO", "TRANSFERENCIA"]),
   cantidad: z.string().min(1),
@@ -53,6 +56,9 @@ export function PedidoEditDialog({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      nombre: "",
+      genero: "",
+      productoId: "",
       cliente: "",
       metodoPago: "TRANSFERENCIA",
       cantidad: "1",
@@ -68,6 +74,9 @@ export function PedidoEditDialog({
   useEffect(() => {
     if (pedido) {
       form.reset({
+        nombre: pedido.producto.nombre,
+        genero: pedido.producto.genero,
+        productoId: pedido.productoId,
         cliente: pedido.cliente,
         metodoPago: pedido.metodoPago,
         cantidad: pedido.cantidad.toString(),
@@ -80,15 +89,40 @@ export function PedidoEditDialog({
     }
   }, [pedido, open]);
 
+  // Productos para cambiar producto o talle: los activos, mas el actual aunque este archivado.
+  const [productos, setProductos] = useState<ProductoConStock[]>([]);
+  useEffect(() => {
+    if (open) fetch("/api/productos").then((r) => r.json()).then(setProductos);
+  }, [open]);
+
   const metodoPago = form.watch("metodoPago");
+  const selNombre = form.watch("nombre");
+  const selGenero = form.watch("genero");
+  const productoId = form.watch("productoId");
+  const elegibles = productos.filter((p) => !p.archivado || p.id === pedido?.productoId);
+  const nombres = Array.from(new Set(elegibles.map((p) => p.nombre))).sort();
+  const generos = Array.from(new Set(elegibles.filter((p) => p.nombre === selNombre).map((p) => p.genero))).sort();
+  const talles = elegibles
+    .filter((p) => p.nombre === selNombre && p.genero === selGenero)
+    .sort((a, b) => compararTalles(a.talle, b.talle));
+  const productoSel = productos.find((p) => p.id === productoId) ?? (productoId === pedido?.productoId ? pedido?.producto : undefined);
+  const cambioProducto = !!pedido && productoId !== "" && productoId !== pedido.productoId;
+
+  const elegirTalle = (id: string) => {
+    form.setValue("productoId", id, { shouldDirty: true, shouldValidate: true });
+    const p = productos.find((x) => x.id === id);
+    // Producto nuevo: el precio vuelve al de lista para ese producto.
+    if (p && id !== pedido?.productoId) {
+      form.setValue("precioUnitario", calcularPrecioUnitario(p.precioVenta, metodoPago).toString(), { shouldDirty: true });
+      form.setValue("descuentoPct", "0");
+    }
+  };
   const cantidad = parseInt(form.watch("cantidad") || "1") || 1;
   const precioUnitario = parseInt(form.watch("precioUnitario") || "0") || 0;
   const sena = parseInt(form.watch("sena") || "0") || 0;
 
-  const precioBase = pedido
-    ? calcularPrecioUnitario(pedido.producto.precioVenta, metodoPago as any)
-    : 0;
-  const costoUnitario = pedido?.producto.costoActual ?? 0;
+  const precioBase = productoSel ? calcularPrecioUnitario(productoSel.precioVenta, metodoPago) : 0;
+  const costoUnitario = productoSel?.costoActual ?? 0;
   const costoTotal = calcularCostoTotal(cantidad, costoUnitario);
   const precioTotal = calcularPrecioTotal(cantidad, precioUnitario);
   const ganancia = calcularGanancia(precioTotal, costoTotal);
@@ -102,6 +136,7 @@ export function PedidoEditDialog({
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        productoId: values.productoId,
         cliente: values.cliente,
         metodoPago: values.metodoPago,
         cantidad: parseInt(values.cantidad),
@@ -128,9 +163,6 @@ export function PedidoEditDialog({
         <DialogHeader>
           <DialogTitle>Editar pedido</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground -mt-2">
-          {pedido.productoNombre} — Talle {pedido.talle}
-        </p>
         {enGrupo && (
           <p className="text-xs text-muted-foreground bg-muted px-3 py-2 rounded-md -mt-2">
             Este producto es parte de un pedido con varios productos. La seña y el estado de
@@ -139,6 +171,89 @@ export function PedidoEditDialog({
         )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              <FormField
+                control={form.control}
+                name="nombre"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Producto</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(v) => {
+                        field.onChange(v);
+                        form.setValue("genero", "");
+                        form.setValue("productoId", "");
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Elegir..." /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {nombres.map((n) => (
+                          <SelectItem key={n} value={n}>{n}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="genero"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Género</FormLabel>
+                    <Select
+                      value={field.value}
+                      disabled={!selNombre}
+                      onValueChange={(v) => {
+                        field.onChange(v);
+                        form.setValue("productoId", "");
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Elegir..." /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {generos.map((g) => (
+                          <SelectItem key={g} value={g}>{g === "MASCULINO" ? "Masculino" : "Femenino"}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="productoId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Talle</FormLabel>
+                    <Select value={field.value} disabled={!selGenero} onValueChange={(v) => v && elegirTalle(v)}>
+                      <FormControl>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Elegir..." /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {talles.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.talle} (stock: {p.stockActual})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {cambioProducto && (
+              <p className="-mt-2 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
+                Antes: {pedido.productoNombre} — Talle {pedido.talle}. El precio se recalculó para el producto nuevo
+                {pedido.stockDescontado && " y el stock descontado pasa a este producto"}.
+              </p>
+            )}
+
             <FormField
               control={form.control}
               name="cliente"

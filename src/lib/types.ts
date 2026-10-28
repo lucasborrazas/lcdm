@@ -30,8 +30,6 @@ export type DashboardMetricas = {
   costoTotal: number;
   gananciaTotal: number;
   margenPct: number;
-  totalSenas: number;
-  saldoPendiente: number;
 };
 
 export type RankingProducto = {
