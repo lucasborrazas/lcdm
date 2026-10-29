@@ -1,4 +1,6 @@
-export type FiltroPago = "todos" | "sin" | "pagaron";
+import { contarPorPago, filtrarPorPago, type FiltroPago } from "./filtroPago";
+
+export type { FiltroPago };
 
 type InscripcionBase = {
   nombre: string;
@@ -25,14 +27,11 @@ export function aplicarFiltroPago<T extends InscripcionBase>(
   inscripciones: T[],
   filtro: FiltroPago
 ): T[] {
-  if (filtro === "sin") return inscripciones.filter((i) => !i.pago);
-  if (filtro === "pagaron") return inscripciones.filter((i) => i.pago);
-  return inscripciones;
+  return filtrarPorPago(inscripciones, filtro, (i) => i.pago);
 }
 
 export function contadoresPago<T extends InscripcionBase>(base: T[]) {
-  const pagaron = base.filter((i) => i.pago).length;
-  return { todos: base.length, sin: base.length - pagaron, pagaron };
+  return contarPorPago(base, (i) => i.pago);
 }
 
 // "Falta cobrar" estima el monto pendiente al precio en efectivo del torneo.

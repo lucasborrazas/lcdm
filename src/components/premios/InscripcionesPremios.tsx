@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useFetchJson } from "@/components/shared/useFetchJson";
 import { useToast } from "@/components/mobile/ToastUndo";
-import { Chip, Fab, SwitchGrande } from "@/components/mobile/ui";
+import { Chip, Fab, Segmented, SwitchGrande } from "@/components/mobile/ui";
 import { formatearMoneda } from "@/lib/calculations";
-import { montoBono, normalizarNombre, resumenPorTurno, totalesEntrega, type MetodoPago } from "@/lib/premios";
+import { familiaPago, montoBono, normalizarNombre, resumenPorTurno, totalesEntrega, type MetodoPago } from "@/lib/premios";
 import type { FamiliaConChicos, TurnoConConteo } from "@/lib/types";
 import { ModalResponsivo } from "@/components/shared/ModalResponsivo";
 import { SearchSelectFilter } from "@/components/shared/SearchSelectFilter";
 import { usePlegados } from "@/components/shared/usePlegados";
+import { FiltroPagoSelect } from "@/components/shared/FiltroPagoSelect";
+import { OPCIONES_FILTRO_PAGO, contarPorPago, filtrarPorPago, type FiltroPago } from "@/lib/filtroPago";
 import { EncabezadoPremios, SinEntrega } from "./EncabezadoPremios";
 import { FamiliasTurnoTabla } from "./FamiliasTurnoTabla";
 import { FamiliaModal } from "./FamiliaModal";
@@ -65,6 +67,7 @@ export function InscripcionesPremios({
   const [q, setQ] = useState("");
   const [filtroTurno, setFiltroTurno] = useState<string>("all");
   const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
+  const [filtroPago, setFiltroPago] = useState<FiltroPago>("todos");
   const { plegados, alternar: alternarPlegado, plegarTodos, desplegarTodos } = usePlegados("premios-inscripciones-plegados");
 
   const totales = useMemo(() => totalesEntrega(familias, []), [familias]);
@@ -81,7 +84,8 @@ export function InscripcionesPremios({
     [familias]
   );
 
-  const visibles = useMemo(() => {
+  // Turno, nombre y busqueda primero: sobre eso se cuentan las opciones del filtro de pago.
+  const sinFiltroPago = useMemo(() => {
     const busqueda = normalizarNombre(q);
     return familias.filter((f) => {
       if (filtroTurno !== "all" && f.turnoId !== filtroTurno) return false;
@@ -90,10 +94,16 @@ export function InscripcionesPremios({
       return [f.nombre, ...f.chicos.map((c) => c.nombre)].some((n) => normalizarNombre(n).includes(busqueda));
     });
   }, [familias, q, filtroTurno, filtroNombre]);
+  const contadoresPago = useMemo(() => contarPorPago(sinFiltroPago, familiaPago), [sinFiltroPago]);
+  const visibles = useMemo(() => filtrarPorPago(sinFiltroPago, filtroPago, familiaPago), [sinFiltroPago, filtroPago]);
+  const hayFiltroDeLista = !!q.trim() || filtroNombre.length > 0 || filtroPago !== "todos";
 
-  const turnosVisibles = turnos.filter((t) =>
-    filtroTurno === "all" ? t.activo || visibles.some((f) => f.turnoId === t.id) : t.id === filtroTurno
-  );
+  // Con el filtro de pago se ocultan los turnos sin familias que coincidan.
+  const turnosVisibles = turnos.filter((t) => {
+    if (filtroTurno !== "all") return t.id === filtroTurno;
+    if (filtroPago !== "todos") return visibles.some((f) => f.turnoId === t.id);
+    return t.activo || visibles.some((f) => f.turnoId === t.id);
+  });
 
   const refrescar = async () => {
     await Promise.all([recargarFamilias(), recargarTurnos(), recargarEntregas()]);
@@ -186,6 +196,8 @@ export function InscripcionesPremios({
         onSelect={seleccionarEntrega}
         filtroTurno={{ turnos: turnos.filter((t) => t.activo), value: filtroTurno, onChange: setFiltroTurno }}
         filtros={
+          <>
+          <FiltroPagoSelect value={filtroPago} onChange={setFiltroPago} contadores={contadoresPago} />
           <SearchSelectFilter
             label="Familia o alumno"
             placeholder="Buscar..."
@@ -194,16 +206,28 @@ export function InscripcionesPremios({
             onChange={setFiltroNombre}
             className="w-56"
           />
+          </>
         }
         acciones={
           <>
-            <Button variant="outline" onClick={() => setGestionarOpen(true)} disabled={!entregaId}>
-              <Settings2 className="mr-1.5 h-4 w-4" />
-              Gestionar entrega
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setGestionarOpen(true)}
+              disabled={!entregaId}
+              title="Gestionar entrega"
+              aria-label="Gestionar entrega"
+            >
+              <Settings2 className="h-4 w-4" />
             </Button>
-            <Button onClick={() => abrirNueva()} disabled={!entregaId}>
-              <Plus className="mr-1.5 h-4 w-4" />
-              Nueva inscripción
+            <Button
+              size="icon"
+              onClick={() => abrirNueva()}
+              disabled={!entregaId}
+              title="Nueva inscripción"
+              aria-label="Nueva inscripción"
+            >
+              <Plus className="h-4 w-4" />
             </Button>
           </>
         }
@@ -240,6 +264,14 @@ export function InscripcionesPremios({
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Buscar familia o alumno..."
                 className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+              />
+            </div>
+
+            <div className="mb-2 md:hidden">
+              <Segmented<FiltroPago>
+                value={filtroPago}
+                onChange={setFiltroPago}
+                options={OPCIONES_FILTRO_PAGO.map((o) => ({ ...o, count: contadoresPago[o.value] }))}
               />
             </div>
 
@@ -321,7 +353,7 @@ export function InscripcionesPremios({
 
                       {plegado ? null : delTurno.length === 0 ? (
                         <p className="rounded-xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
-                          {q ? "Sin coincidencias" : "Sin familias en este turno"}
+                          {hayFiltroDeLista ? "Sin coincidencias" : "Sin familias en este turno"}
                         </p>
                       ) : (
                         <>

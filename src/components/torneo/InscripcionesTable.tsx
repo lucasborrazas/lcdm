@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { MultiSelectFilter } from "@/components/shared/MultiSelectFilter";
 import { SearchSelectFilter } from "@/components/shared/SearchSelectFilter";
 import { usePlegados } from "@/components/shared/usePlegados";
+import { FiltroPagoSelect } from "@/components/shared/FiltroPagoSelect";
+import { contarPorPago, filtrarPorPago, type FiltroPago } from "@/lib/filtroPago";
 import { InscripcionDialog } from "./InscripcionDialog";
 import { GestionarTorneoDialog } from "./GestionarTorneoDialog";
 import { TorneoSwitcher } from "./TorneoSwitcher";
@@ -209,6 +211,7 @@ export function InscripcionesTable({
   );
   const [filtroHorario, setFiltroHorario] = useState<string[]>([]);
   const [filtroNombre, setFiltroNombre] = useState<string[]>([]);
+  const [filtroPago, setFiltroPago] = useState<FiltroPago>("todos");
 
   // "Gestionar torneo" desde Mas (mobile): /torneo/inscripciones?gestionar=1
   useEffect(() => {
@@ -233,6 +236,7 @@ export function InscripcionesTable({
   useEffect(() => {
     setFiltroHorario([]);
     setFiltroNombre([]);
+    setFiltroPago("todos");
     cargar();
   }, [cargar]);
 
@@ -254,23 +258,32 @@ export function InscripcionesTable({
     [inscripciones]
   );
 
-  const inscripcionesFiltradas = useMemo(() => {
+  // Horario y nombre primero: sobre eso se cuentan las opciones del filtro de pago.
+  const sinFiltroPago = useMemo(() => {
     return inscripciones.filter((i) => {
       const pasaHorario = filtroHorario.length === 0 || filtroHorario.includes(i.horarioId);
       const pasaNombre = filtroNombre.length === 0 || filtroNombre.includes(i.nombre);
       return pasaHorario && pasaNombre;
     });
   }, [inscripciones, filtroHorario, filtroNombre]);
+  const hayFiltroDeLista = filtroNombre.length > 0 || filtroPago !== "todos";
+  const contadoresPago = useMemo(() => contarPorPago(sinFiltroPago, (i) => i.pago), [sinFiltroPago]);
+  const inscripcionesFiltradas = useMemo(
+    () => filtrarPorPago(sinFiltroPago, filtroPago, (i) => i.pago),
+    [sinFiltroPago, filtroPago]
+  );
 
   // Un bloque por horario. Con filtro de nombre solo quedan los que tienen coincidencias.
   const horariosVisibles = useMemo(
     () =>
       horarios.filter((h) => {
         if (filtroHorario.length > 0) return filtroHorario.includes(h.id);
-        if (filtroNombre.length > 0) return inscripcionesFiltradas.some((i) => i.horarioId === h.id);
+        if (filtroNombre.length > 0 || filtroPago !== "todos") {
+          return inscripcionesFiltradas.some((i) => i.horarioId === h.id);
+        }
         return h.activo || h.inscriptos > 0;
       }),
-    [horarios, filtroHorario, filtroNombre, inscripcionesFiltradas]
+    [horarios, filtroHorario, filtroNombre, filtroPago, inscripcionesFiltradas]
   );
 
   const abrirNueva = (horarioId?: string) => {
@@ -353,16 +366,28 @@ export function InscripcionesTable({
             onChange={setFiltroHorario}
             className="w-56"
           />
+          <FiltroPagoSelect value={filtroPago} onChange={setFiltroPago} contadores={contadoresPago} />
           <EstadoTorneoBadge torneo={torneoActual} />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setGestionarOpen(true)} disabled={!torneoId}>
-            <Settings2 className="h-4 w-4 mr-1.5" />
-            Gestionar torneo
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setGestionarOpen(true)}
+            disabled={!torneoId}
+            title="Gestionar torneo"
+            aria-label="Gestionar torneo"
+          >
+            <Settings2 className="h-4 w-4" />
           </Button>
-          <Button onClick={() => abrirNueva()} disabled={!torneoId}>
-            <Plus className="h-4 w-4 mr-1.5" />
-            Nueva inscripción
+          <Button
+            size="icon"
+            onClick={() => abrirNueva()}
+            disabled={!torneoId}
+            title="Nueva inscripción"
+            aria-label="Nueva inscripción"
+          >
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -376,7 +401,9 @@ export function InscripcionesTable({
       {loading ? (
         <p className="py-8 text-center text-muted-foreground">Cargando...</p>
       ) : horariosVisibles.length === 0 ? (
-        <p className="rounded-md border py-8 text-center text-muted-foreground">Sin inscripciones</p>
+        <p className="rounded-md border py-8 text-center text-muted-foreground">
+          {hayFiltroDeLista ? "Sin coincidencias" : "Sin inscripciones"}
+        </p>
       ) : (
         <div className="space-y-6">
           <div className="-mb-3 -ml-2 flex justify-start">
@@ -441,7 +468,7 @@ export function InscripcionesTable({
 
                 {plegado ? null : delHorario.length === 0 ? (
                   <p className="rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground">
-                    Sin inscripciones en este horario
+                    {hayFiltroDeLista ? "Sin coincidencias en este horario" : "Sin inscripciones en este horario"}
                   </p>
                 ) : (
                   <div className="rounded-md border">
