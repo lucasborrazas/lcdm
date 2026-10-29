@@ -204,30 +204,19 @@ export function InscripcionesPremios({
             options={opcionesNombre}
             selected={filtroNombre}
             onChange={setFiltroNombre}
-            className="w-56"
+            className="w-48"
           />
           </>
         }
         acciones={
           <>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setGestionarOpen(true)}
-              disabled={!entregaId}
-              title="Gestionar entrega"
-              aria-label="Gestionar entrega"
-            >
-              <Settings2 className="h-4 w-4" />
+            <Button variant="outline" onClick={() => setGestionarOpen(true)} disabled={!entregaId}>
+              <Settings2 className="mr-1.5 h-4 w-4" />
+              Gestionar entrega
             </Button>
-            <Button
-              size="icon"
-              onClick={() => abrirNueva()}
-              disabled={!entregaId}
-              title="Nueva inscripción"
-              aria-label="Nueva inscripción"
-            >
-              <Plus className="h-4 w-4" />
+            <Button onClick={() => abrirNueva()} disabled={!entregaId}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Nueva inscripción
             </Button>
           </>
         }

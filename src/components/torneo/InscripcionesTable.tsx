@@ -350,44 +350,33 @@ export function InscripcionesTable({
             torneoId={torneoId}
             onSelect={seleccionarTorneo}
           />
-          <SearchSelectFilter
-            label="Nombre"
-            placeholder="Buscar alumno..."
-            options={opcionesNombre}
-            selected={filtroNombre}
-            onChange={setFiltroNombre}
-            className="w-56"
-          />
           <MultiSelectFilter
             label="Horario"
             placeholderTodos="Todos"
             options={opcionesHorario}
             selected={filtroHorario}
             onChange={setFiltroHorario}
-            className="w-56"
+            className="w-44"
           />
           <FiltroPagoSelect value={filtroPago} onChange={setFiltroPago} contadores={contadoresPago} />
+          <SearchSelectFilter
+            label="Nombre"
+            placeholder="Buscar alumno..."
+            options={opcionesNombre}
+            selected={filtroNombre}
+            onChange={setFiltroNombre}
+            className="w-48"
+          />
           <EstadoTorneoBadge torneo={torneoActual} />
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setGestionarOpen(true)}
-            disabled={!torneoId}
-            title="Gestionar torneo"
-            aria-label="Gestionar torneo"
-          >
-            <Settings2 className="h-4 w-4" />
+          <Button variant="outline" onClick={() => setGestionarOpen(true)} disabled={!torneoId}>
+            <Settings2 className="h-4 w-4 mr-1.5" />
+            Gestionar torneo
           </Button>
-          <Button
-            size="icon"
-            onClick={() => abrirNueva()}
-            disabled={!torneoId}
-            title="Nueva inscripción"
-            aria-label="Nueva inscripción"
-          >
-            <Plus className="h-4 w-4" />
+          <Button onClick={() => abrirNueva()} disabled={!torneoId}>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Nueva inscripción
           </Button>
         </div>
       </div>

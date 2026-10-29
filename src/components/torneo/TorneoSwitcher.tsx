@@ -19,7 +19,7 @@ export function TorneoSwitcher({
     <div>
       <label className="text-xs text-muted-foreground mb-1 block">Torneo</label>
       <Select value={torneoId} onValueChange={onSelect}>
-        <SelectTrigger className="w-56">
+        <SelectTrigger className="w-40">
           <SelectValue placeholder="Elegir torneo..." />
         </SelectTrigger>
         <SelectContent>

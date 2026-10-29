@@ -17,7 +17,7 @@ export function FiltroPagoSelect({
     <div>
       <label className="mb-1 block text-xs text-muted-foreground">Pago</label>
       <Select value={value} onValueChange={(v) => v && onChange(v as FiltroPago)}>
-        <SelectTrigger className="w-44">
+        <SelectTrigger className="w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

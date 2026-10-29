@@ -27,8 +27,8 @@ function EntregaSwitcher({ entregas, entregaId, onSelect }: Selector) {
     <div>
       <label className="mb-1 block text-xs text-muted-foreground">Año</label>
       <Select value={entregaId} onValueChange={(v) => v && onSelect(v)}>
-        <SelectTrigger className="w-56">
-          <SelectValue placeholder="Elegir año..." />
+        <SelectTrigger className="w-28">
+          <SelectValue placeholder="Año..." />
         </SelectTrigger>
         <SelectContent>
           {entregas.map((e) => (
@@ -117,11 +117,11 @@ export function EncabezadoPremios({
               <div>
                 <label className="mb-1 block text-xs text-muted-foreground">Turno</label>
                 <Select value={filtroTurno.value} onValueChange={(v) => v && filtroTurno.onChange(v)}>
-                  <SelectTrigger className="w-56">
+                  <SelectTrigger className="w-44">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos los turnos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {filtroTurno.turnos.map((t) => (
                       <SelectItem key={t.id} value={t.id}>
                         {t.hora}
